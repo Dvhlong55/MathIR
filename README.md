@@ -14,7 +14,8 @@ An empirical research project conducted for the **SC203: Scientific Method** cou
   * Trần Đức Toàn - ID: `25125091`
   * Phạm Trung Duy - ID: `25125010`
   * Nguyễn Nguyễn Gia Bảo - ID: `25125006`
-* **Instructor:** Dr. Dương Vũ
+* **Lecturer:** Assoc. Prof. Dr. Trần Minh Triết
+* **Teaching Assistant (TA):** Viết Thám
 
 ---
 
