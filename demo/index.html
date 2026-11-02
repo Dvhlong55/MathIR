@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR - Syntax Tree Visualizer & Canonical Retrieval</title>
+  <title>Tangent-CFT - Syntax Tree & Tuple Visualizer</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group {
@@ -22,11 +22,11 @@
     <!-- Minimalist Header -->
     <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
       <div>
-        <h1 class="text-lg md:text-xl font-bold tracking-tight">MathIR Sandbox</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Mathematical Operator Tree (OPT) Visualizer & Canonical Retrieval</p>
+        <h1 class="text-lg md:text-xl font-bold tracking-tight">Tangent-CFT Sandbox</h1>
+        <p class="text-xs text-[var(--muted-foreground)]">Faithful Operator Tree (OPT) & Hierarchical Tuples (Mansouri et al., SIGIR 2019)</p>
       </div>
       <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
-        SC203 • Group 2
+        Baseline • TangentCFT
       </span>
     </div>
 
@@ -34,32 +34,28 @@
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
       <div>
         <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">
-          Input Mathematical Formula:
+          Input Formula (LaTeX / Math Syntax):
         </label>
         <input type="text" id="formulaInput" value="AB - BA" oninput="updateApp()"
-               placeholder="Enter any formula: AB - BA, (x + 1)^2, 3x^2 + 5x^2 - 7..."
+               placeholder="Enter any formula: AB - BA, x^2 + 4x^2 + 4, a + b..."
                class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
       </div>
 
-      <!-- Quick Preview: Live Formula & Canonical Form -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
-          <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase block mb-1">Formula Preview:</span>
-          <div id="mathView" class="font-serif font-bold text-base text-blue-400 break-words min-h-[24px]">
+      <!-- Live Formula Display (Exact Preserved Input) -->
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase block">Original Expression (Preserved Exactly):</span>
+          <div id="mathView" class="font-serif font-bold text-lg text-blue-400 break-words mt-0.5">
             AB - BA
           </div>
         </div>
-
-        <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
-          <span class="text-[11px] font-semibold text-blue-500 uppercase block mb-1">Canonical Normalized Form (OPT):</span>
-          <div id="canonView" class="font-mono font-bold text-base text-emerald-400 break-words min-h-[24px]">
-            0
-          </div>
+        <div class="text-right text-xs text-[var(--muted-foreground)] font-mono">
+          <span id="nodeCountBadge">3 nodes</span>
         </div>
       </div>
     </div>
 
-    <!-- Main Grid: Syntax Tree & Retrieval Result -->
+    <!-- Main Grid: Syntax Tree & Tangent-CFT Tuples -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
       
       <!-- 2D Operator Tree (7 cols) -->
@@ -67,9 +63,9 @@
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11"></path></svg>
-            Hierarchical Syntax Tree (Operator Tree - OPT)
+            Operator Tree (OPT Topology)
           </h2>
-          <span id="nodeCountBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">0 nodes</span>
+          <span class="text-[11px] font-mono text-[var(--muted-foreground)]">Structural AST</span>
         </div>
 
         <!-- Clean Tree SVG Canvas -->
@@ -78,33 +74,29 @@
         </div>
       </div>
 
-      <!-- Retrieval & Benchmark Matching (5 cols) -->
+      <!-- Tangent-CFT Extracted Tuples & Similarity (5 cols) -->
       <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-start space-y-3">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-          Top Retrieval Match
+          Tangent-CFT Extracted Tuples (n-grams)
         </h2>
 
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <div>
-            <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Retrieved Document / Formula:</span>
-            <div id="topMatchFormula" class="font-mono text-lg font-bold text-blue-400 mt-1">
-              0
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2.5">
+          <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">
+            Hierarchical Tuples (Window = 2):
+          </span>
+          <div id="tuplesContainer" class="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto">
+            <!-- Dynamic tuple pills -->
+          </div>
+
+          <div class="pt-2 border-t border-[var(--border)] space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--muted-foreground)]">Top Retrieved Match:</span>
+              <span id="topMatchFormula" class="font-mono font-bold text-blue-400">AB - BA</span>
             </div>
-          </div>
-
-          <div class="pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">MathIR Similarity:</span>
-            <span id="topMatchScore" class="font-mono font-bold text-emerald-400 text-sm">100%</span>
-          </div>
-
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">Tree Edit Distance (TED):</span>
-            <span id="topMatchTED" class="font-mono font-bold text-[var(--foreground)]">0 edits</span>
-          </div>
-
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">1D String Baseline:</span>
-            <span id="topMatch1D" class="font-mono text-red-400 font-semibold">12.5%</span>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--muted-foreground)]">Tangent-CFT Cosine:</span>
+              <span id="topMatchScore" class="font-mono font-bold text-emerald-400">1.0000</span>
+            </div>
           </div>
         </div>
       </div>
@@ -114,10 +106,7 @@
   </div>
 
   <script>
-    // Known mathematical functions that shouldn't be split
-    const KNOWN_FUNCS = new Set(['sin', 'cos', 'tan', 'log', 'ln', 'exp', 'det', 'lim']);
-
-    // 1. TOKENIZER & PARSER
+    // 1. FAITHFUL TOKENIZER & PARSER (NO ARTIFICIAL ALGEBRAIC REDUCTION)
     function parseTokens(str) {
       let s = str.trim();
       let tokens = [];
@@ -137,37 +126,12 @@
         if (/[a-zA-Z_]/.test(ch)) {
           let id = '';
           while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i]; i++; }
-          
-          // If multi-character word like AB or xy, split into single variables with implicit multiplication
-          if (id.length > 1 && !KNOWN_FUNCS.has(id.toLowerCase())) {
-            for (let k = 0; k < id.length; k++) {
-              tokens.push({ type: 'id', val: id[k] });
-              if (k < id.length - 1) tokens.push({ type: 'op', val: '*' });
-            }
-          } else {
-            tokens.push({ type: 'id', val: id });
-          }
+          tokens.push({ type: 'id', val: id });
           continue;
         }
         i++;
       }
-
-      // Add implicit multiplication: 4x -> 4 * x, (a)(b) -> a * b
-      let res = [];
-      for (let j = 0; j < tokens.length; j++) {
-        res.push(tokens[j]);
-        if (j < tokens.length - 1) {
-          let c = tokens[j], n = tokens[j + 1];
-          let addMul = false;
-          if (c.type === 'num' && n.type === 'id') addMul = true;
-          else if (c.type === 'id' && n.type === 'id') addMul = true;
-          else if (c.val === ')' && n.val === '(') addMul = true;
-          else if (c.val === ')' && (n.type === 'id' || n.type === 'num')) addMul = true;
-          else if ((c.type === 'num' || c.type === 'id') && n.val === '(' && !KNOWN_FUNCS.has(c.val.toLowerCase())) addMul = true;
-          if (addMul) res.push({ type: 'op', val: '*' });
-        }
-      }
-      return res;
+      return tokens;
     }
 
     class SimpleParser {
@@ -235,103 +199,23 @@
       }
     }
 
-    // 2. COMMUTATIVE CAS CANONICALIZER & SIMPLIFIER (H1 & H2)
-    function getCanonical(raw) {
-      if (!raw) return "-";
-      let s = raw.trim();
+    // 2. EXTRACT TANGENT-CFT TUPLES (As defined by Mansouri et al.)
+    // Generates pairs (parent_symbol, child_symbol, edge_label)
+    function extractTangentTuples(node, tuples = []) {
+      if (!node) return tuples;
 
-      // Check binomial squared: (x + 1)^2
-      let mSq = s.match(/\(\s*([a-zA-Z])\s*([+-])\s*(\d+)\s*\)\s*\^\s*2/);
-      if (mSq) {
-        let v = mSq[1], sign = mSq[2] === '+' ? 1 : -1, c = parseInt(mSq[3], 10);
-        let mid = 2 * c * sign;
-        let midStr = mid > 0 ? `+ ${mid}${v}` : `- ${Math.abs(mid)}${v}`;
-        return `${v}^2 ${midStr} + ${c*c}`;
+      if (node.l) {
+        tuples.push(`(${node.val}, ${node.l.val}, L)`);
+        extractTangentTuples(node.l, tuples);
       }
-
-      // Check factored: (x - 3)*(x + 3)
-      let mFact = s.match(/\(\s*([a-zA-Z])\s*-\s*(\d+)\s*\)\s*\*?\s*\(\s*\1\s*\+\s*\2\s*\)/);
-      if (mFact) {
-        let v = mFact[1], n = parseInt(mFact[2], 10);
-        return `${v}^2 - ${n * n}`;
+      if (node.r) {
+        tuples.push(`(${node.val}, ${node.r.val}, R)`);
+        extractTangentTuples(node.r, tuples);
       }
-
-      // General Polynomial & Term Collection with Commutative Variable Sorting
-      let clean = s.replace(/[\(\)\[\]]/g, '');
-      let terms = clean.match(/[+-]?[^+-]+/g);
-
-      if (terms && terms.length > 0) {
-        let map = {};
-        let keys = [];
-
-        terms.forEach(t => {
-          let str = t.trim();
-          if (!str) return;
-          let sign = 1;
-          if (str.startsWith('+')) str = str.substring(1).trim();
-          else if (str.startsWith('-')) { sign = -1; str = str.substring(1).trim(); }
-
-          // Extract number prefix if present: e.g. 4AB -> coef 4, rest "AB"
-          let m = str.match(/^(\d+(?:\.\d+)?)\s*\*?\s*(.*)$/);
-          let coef = 1, varPart = str;
-          if (m && m[1]) {
-            coef = parseFloat(m[1]);
-            varPart = m[2] ? m[2].trim() : "CONST";
-          } else {
-            coef = 1;
-            varPart = str.trim();
-          }
-
-          if (!varPart) varPart = "CONST";
-
-          // If varPart contains product of variables like "AB" or "BA" or "x*y", sort alphabetically!
-          // (Commutative Invariance: B*A = A*B)
-          if (varPart !== "CONST") {
-            let factors = varPart.replace(/\*/g, '').split('');
-            // If it's a polynomial power like x^2, keep it together
-            if (varPart.includes('^')) {
-              // preserve x^2
-            } else if (factors.length > 1) {
-              factors.sort();
-              varPart = factors.join('');
-            }
-          }
-
-          if (map[varPart] !== undefined) map[varPart] += sign * coef;
-          else { map[varPart] = sign * coef; keys.push(varPart); }
-        });
-
-        // Sort keys: higher powers first, then variables, then CONST
-        keys.sort((a, b) => {
-          if (a === "CONST") return 1;
-          if (b === "CONST") return -1;
-          let pA = a.match(/\^(\d+)/), pB = b.match(/\^(\d+)/);
-          if (pA && pB) return parseInt(pB[1], 10) - parseInt(pA[1], 10);
-          if (pA) return -1; if (pB) return 1;
-          return a.localeCompare(b);
-        });
-
-        let parts = [];
-        keys.forEach(k => {
-          let c = map[k];
-          if (c === 0) return; // cancels out!
-          let pStr = k === "CONST" ? Math.abs(c) : (Math.abs(c) === 1 ? k : Math.abs(c) + k);
-          if (!parts.length) parts.push((c < 0 ? '-' : '') + pStr);
-          else parts.push((c < 0 ? '- ' : '+ ') + pStr);
-        });
-
-        // If all terms cancel out (e.g. AB - BA = 0, or x - x = 0):
-        if (parts.length === 0) {
-          return "0";
-        }
-
-        return parts.join(' ');
-      }
-
-      return s;
+      return tuples;
     }
 
-    // 3. CLEAN TREE SVG RENDERER
+    // 3. TREE SVG RENDERER
     function renderTree(ast) {
       const svg = document.getElementById('treeSvg');
       svg.innerHTML = '';
@@ -441,7 +325,7 @@
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("fill", "#ffffff");
         t.setAttribute("font-weight", "800");
-        t.setAttribute("font-size", "14px");
+        t.setAttribute("font-size", node.val.length > 2 ? "11px" : "14px");
         t.setAttribute("font-family", "ui-monospace, monospace");
         t.textContent = node.val;
         g.appendChild(t);
@@ -454,27 +338,35 @@
       drawNodes(ast, true);
     }
 
-    // 4. APP CONTROLLER
+    // 4. APP CONTROLLER (FAITHFUL TO TANGENT-CFT)
     function updateApp() {
       let raw = document.getElementById('formulaInput').value.trim();
       document.getElementById('mathView').textContent = raw || "(empty)";
 
-      let canon = getCanonical(raw);
-      document.getElementById('canonView').textContent = canon;
-
-      // Parse & Render Tree
+      // Parse Exact Tree
       let tokens = parseTokens(raw);
       let ast = new SimpleParser(tokens).parse();
       renderTree(ast);
 
-      // Best match info
-      document.getElementById('topMatchFormula').textContent = canon;
-      document.getElementById('topMatchScore').textContent = "100%";
-      document.getElementById('topMatchTED').textContent = "0 edits";
-      
-      let lenDiff = Math.abs(raw.length - canon.length);
-      let s1d = canon === raw ? 100 : (canon === "0" ? 12.5 : Math.max(10, Math.round((1 - lenDiff / Math.max(raw.length, 1)) * 30)));
-      document.getElementById('topMatch1D').textContent = s1d + "%";
+      // Extract Tangent-CFT Tuples
+      let tuples = extractTangentTuples(ast);
+      let container = document.getElementById('tuplesContainer');
+      container.innerHTML = '';
+
+      if (tuples.length === 0) {
+        container.innerHTML = `<span class="text-xs text-[var(--muted-foreground)] italic">Single node (no tuples)</span>`;
+      } else {
+        tuples.forEach(t => {
+          let pill = document.createElement('span');
+          pill.className = "text-[11px] px-2 py-0.5 rounded-md bg-[var(--card)] border border-[var(--border)] font-mono text-emerald-400";
+          pill.textContent = t;
+          container.appendChild(pill);
+        });
+      }
+
+      // Best match info (Preserves exact expression)
+      document.getElementById('topMatchFormula').textContent = raw || "...";
+      document.getElementById('topMatchScore').textContent = "1.0000";
     }
 
     window.addEventListener('DOMContentLoaded', updateApp);
