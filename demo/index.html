@@ -3,177 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR — Hybrid Engine Workbench</title>
+  <title>MathIR</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 </head>
-<body class="bg-zinc-950 text-zinc-200 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased selection:bg-zinc-700 selection:text-white">
+<body class="bg-zinc-950 text-zinc-200 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased">
 
-  <div class="w-full max-w-3xl space-y-6">
+  <div class="w-full max-w-2xl space-y-4">
 
-    <!-- Header Grayscale -->
-    <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+      <div class="flex items-center gap-2">
+        <h1 class="text-base font-bold text-white tracking-tight">MathIR Engine</h1>
+        <span class="text-[11px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono">Hybrid</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+        <span id="backendStatus">Ready</span>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="flex flex-wrap gap-1.5 text-xs">
+      <button onclick="loadPreset('a*b - b*a', '0')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition font-mono">
+        ab - ba
+      </button>
+      <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition font-mono">
+        cos² + sin²
+      </button>
+      <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition font-mono">
+        a³+b³+c³
+      </button>
+      <button onclick="loadPreset('sqrt(x^2)', 'x')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
+        √(x²) vs x
+      </button>
+      <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
+        1+2+...+n
+      </button>
+      <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
+        class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
+        ∑i vs ∑k
+      </button>
+    </div>
+
+    <!-- Inputs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-          MathIR Hybrid Workbench
-          <span class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-700 font-mono font-medium">PyTorch + SymPy</span>
-        </h1>
-        <p class="text-xs text-zinc-400 mt-1">So khớp công thức: CAS Chứng minh Đại số & MathBERT 768-dim Vector Dense</p>
-      </div>
-      <div class="flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-700">
-        <span class="w-2 h-2 rounded-full bg-zinc-400"></span>
-        <span id="backendStatus">Port 8000</span>
-      </div>
-    </div>
-
-    <!-- Quick Presets: Hàng nút bấm Grayscale -->
-    <div class="space-y-2">
-      <div class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Chọn nhanh ca kiểm thử:</div>
-      <div class="flex flex-wrap gap-2 text-xs">
-        <!-- Success Cases -->
-        <button onclick="loadPreset('a*b - b*a', '0')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
-          ab - ba = 0
-        </button>
-        <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
-          cos² + sin² = 1
-        </button>
-        <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
-          Hằng đẳng thức bậc 3
-        </button>
-
-        <!-- Bottleneck Cases -->
-        <button onclick="loadPreset('sqrt(x^2)', 'x')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
-          [Bế tắc 1] √(x²) vs x
-        </button>
-        <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
-          [Bế tắc 2] 1+2+...+n
-        </button>
-        <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
-          [Bế tắc 3] ∑i vs ∑k
-        </button>
-      </div>
-    </div>
-
-    <!-- Inputs: 2 ô nhập đơn sắc -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="space-y-1.5">
-        <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Công thức A (Query)</label>
+        <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula A</div>
         <input type="text" id="inputA" value="a*b - b*a" oninput="triggerEvaluation()"
-          placeholder="Nhập công thức A..."
-          class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-zinc-500 transition shadow-inner">
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
       </div>
-      <div class="space-y-1.5">
-        <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Công thức B (Target)</label>
+      <div>
+        <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula B</div>
         <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
-          placeholder="Nhập công thức B..."
-          class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-zinc-500 transition shadow-inner">
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
       </div>
     </div>
 
-    <!-- Kết quả chính (Hero Card) - Grayscale -->
-    <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 space-y-5 shadow-xl">
+    <!-- Results Card -->
+    <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-4">
       
-      <!-- Fused Score to, rõ, đơn sắc -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800">
-        <div>
-          <div class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Độ tương đồng Hybrid Fused:</div>
-          <div class="flex items-baseline gap-3 mt-1">
-            <span id="scoreText" class="font-mono text-4xl font-black text-white">100%</span>
-            <span id="matchType" class="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">
-              Đồng nhất đại số (CAS Proved)
-            </span>
-          </div>
+      <!-- Main Score -->
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+        <div class="flex items-baseline gap-3">
+          <span id="scoreText" class="font-mono text-3xl font-black text-white">100%</span>
+          <span id="matchType" class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono">Identity</span>
         </div>
-
-        <div class="w-full sm:w-48 bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-800 p-0.5">
-          <div id="scoreBar" class="bg-zinc-200 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+        <div class="w-32 bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800">
+          <div id="scoreBar" class="bg-zinc-200 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
         </div>
       </div>
 
-      <!-- 3 Kênh đánh giá: Grayscale -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        
-        <!-- Kênh 1: CAS -->
-        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-          <div class="text-zinc-400 font-medium flex items-center justify-between">
-            <span>1. CAS (SymPy)</span>
-            <span id="casStatusBadge" class="font-mono font-bold text-white">Δ = 0</span>
-          </div>
-          <div class="font-mono text-zinc-300 truncate" id="casDiffText">Hiệu số: 0</div>
+      <!-- 3 Channels -->
+      <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+        <div class="bg-zinc-950 border border-zinc-800/80 rounded-lg p-2.5">
+          <div class="text-zinc-500 text-[10px]">CAS</div>
+          <div id="casDiffText" class="font-bold text-zinc-200 truncate mt-0.5">Δ = 0</div>
         </div>
-
-        <!-- Kênh 2: Neural -->
-        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-          <div class="text-zinc-400 font-medium flex items-center justify-between">
-            <span>2. Neural (MathBERT)</span>
-            <span id="neuralPct" class="font-mono font-bold text-white">85.4%</span>
-          </div>
-          <div class="font-mono text-zinc-300 truncate" id="neuralSimText">Cosine: 0.8540</div>
+        <div class="bg-zinc-950 border border-zinc-800/80 rounded-lg p-2.5">
+          <div class="text-zinc-500 text-[10px]">Neural</div>
+          <div id="neuralSimText" class="font-bold text-zinc-200 truncate mt-0.5">85.4%</div>
         </div>
-
-        <!-- Kênh 3: AST -->
-        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
-          <div class="text-zinc-400 font-medium flex items-center justify-between">
-            <span>3. AST (Tangent-CFT)</span>
-            <span id="astOverlapBadge" class="font-mono font-bold text-white">0.0%</span>
-          </div>
-          <div class="font-mono text-zinc-300 truncate" id="astOverlapText">Trùng: 0 tuples</div>
+        <div class="bg-zinc-950 border border-zinc-800/80 rounded-lg p-2.5">
+          <div class="text-zinc-500 text-[10px]">AST</div>
+          <div id="astOverlapText" class="font-bold text-zinc-200 truncate mt-0.5">0.0%</div>
         </div>
-
       </div>
 
-      <!-- Khung cảnh báo bế tắc - Đơn sắc -->
-      <div id="bottleneckBanner" class="hidden rounded-xl p-4 text-xs space-y-2 border border-zinc-700 bg-zinc-950">
-        <div class="flex items-center gap-2 font-bold text-sm text-zinc-100" id="bottleneckTitle">
-          Điểm Bế Tắc Của Mô Hình
-        </div>
-        <p id="bottleneckDesc" class="text-zinc-300 leading-relaxed"></p>
-        <div class="pt-2 border-t border-zinc-800 text-zinc-400">
-          <strong class="text-zinc-200">Đề xuất giải pháp (NCKH):</strong>
-          <span id="bottleneckRec" class="text-zinc-300 ml-1"></span>
+      <!-- Bottleneck Alert -->
+      <div id="bottleneckBanner" class="hidden rounded-lg p-3 text-xs space-y-1 bg-zinc-950 border border-zinc-700">
+        <div class="font-bold text-zinc-200" id="bottleneckTitle"></div>
+        <div class="text-zinc-400 leading-normal" id="bottleneckDesc"></div>
+        <div class="text-zinc-400 text-[11px] pt-1 border-t border-zinc-800">
+          <span class="text-zinc-200 font-medium">Khắc phục:</span>
+          <span id="bottleneckRec"></span>
         </div>
       </div>
 
     </div>
 
-    <!-- Khối chi tiết cây cú pháp (Thu gọn mặc định) -->
-    <details class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 text-xs text-zinc-400 cursor-pointer transition">
-      <summary class="font-semibold text-zinc-300 hover:text-white select-none">
-        Xem chi tiết Cây Cú Pháp (AST) & Danh Sách Tuples (Click để mở)
-      </summary>
-      
-      <div class="mt-4 space-y-4 pt-4 border-t border-zinc-800">
-        <!-- 2 Cây AST Grayscale -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <span class="text-zinc-300 font-semibold uppercase text-[11px]">Cây AST Công Thức A:</span>
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
-              <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
-            </div>
+    <!-- AST Collapsible -->
+    <details class="text-xs text-zinc-500 cursor-pointer">
+      <summary class="hover:text-zinc-300 select-none py-1">AST & Tuples</summary>
+      <div class="mt-2 space-y-3 pt-3 border-t border-zinc-800">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">
+            <div class="text-[10px] text-zinc-500 mb-1">Tree A</div>
+            <svg id="treeSvgA" class="w-full h-[150px]" viewBox="0 0 320 180"></svg>
           </div>
-          <div class="space-y-1.5">
-            <span class="text-zinc-300 font-semibold uppercase text-[11px]">Cây AST Công Thức B:</span>
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
-              <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
-            </div>
+          <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-2">
+            <div class="text-[10px] text-zinc-500 mb-1">Tree B</div>
+            <svg id="treeSvgB" class="w-full h-[150px]" viewBox="0 0 320 180"></svg>
           </div>
         </div>
-
-        <!-- Danh sách Tuples Grayscale -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <div class="text-[11px] font-semibold text-zinc-400 mb-1">Tuples (A): <span id="tupleCountA" class="text-zinc-200 font-mono">0</span></div>
-            <div id="tuplesListA" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
-          </div>
-          <div>
-            <div class="text-[11px] font-semibold text-zinc-400 mb-1">Tuples (B): <span id="tupleCountB" class="text-zinc-200 font-mono">0</span></div>
-            <div id="tuplesListB" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
-          </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div id="tuplesListA" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2 flex flex-wrap gap-1 max-h-[90px] overflow-y-auto"></div>
+          <div id="tuplesListB" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2 flex flex-wrap gap-1 max-h-[90px] overflow-y-auto"></div>
         </div>
       </div>
     </details>
@@ -211,49 +160,40 @@
         renderResults(data);
       } catch (err) {
         document.getElementById('backendStatus').textContent = "Offline";
-        document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800";
       }
     }
 
     function renderResults(res) {
-      document.getElementById('backendStatus').textContent = "Online";
-      document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-700";
+      document.getElementById('backendStatus').textContent = "Ready";
 
-      // 1. Fused Score Grayscale
       const fused = res.fused_score;
       const pct = (fused * 100).toFixed(1) + "%";
-      const scoreElem = document.getElementById('scoreText');
-      const barElem = document.getElementById('scoreBar');
-      const matchElem = document.getElementById('matchType');
+      document.getElementById('scoreText').textContent = pct;
+      document.getElementById('scoreBar').style.width = pct;
+      
+      let shortMatch = res.match_type;
+      if (shortMatch.includes("Đồng Nhất") || shortMatch.includes("Identity")) shortMatch = "Identity (CAS)";
+      else if (shortMatch.includes("Cao") || shortMatch.includes("High")) shortMatch = "High (Neural)";
+      else if (shortMatch.includes("Trung Bình") || shortMatch.includes("Moderate")) shortMatch = "Moderate (Neural)";
+      else if (shortMatch.includes("Bế Tắc Cú Pháp")) shortMatch = "Syntax Crash";
+      else if (shortMatch.includes("Bế Tắc")) shortMatch = "Bottleneck";
+      else shortMatch = "Low";
+      document.getElementById('matchType').textContent = shortMatch;
 
-      scoreElem.textContent = pct;
-      barElem.style.width = pct;
-      matchElem.textContent = res.match_type;
-
-      // 2. Kênh CAS
-      const casBadge = document.getElementById('casStatusBadge');
+      // CAS
       if (res.is_symbolic_equivalent) {
-        casBadge.textContent = "Δ = 0";
-        document.getElementById('casDiffText').textContent = "Bằng nhau tuyệt đối";
+        document.getElementById('casDiffText').textContent = "Δ = 0";
       } else if (res.diff && res.diff.includes("Parse Error")) {
-        casBadge.textContent = "Lỗi cú pháp";
-        document.getElementById('casDiffText').textContent = "Không parse được '...'";
+        document.getElementById('casDiffText').textContent = "Syntax Error";
       } else {
-        casBadge.textContent = "Δ ≠ 0";
-        document.getElementById('casDiffText').textContent = "Δ: " + res.diff;
+        document.getElementById('casDiffText').textContent = "Δ = " + res.diff;
       }
 
-      // 3. Kênh Neural
-      const neuralPctVal = (res.neural_similarity * 100).toFixed(1) + "%";
-      document.getElementById('neuralPct').textContent = neuralPctVal;
-      document.getElementById('neuralSimText').textContent = "Cosine: " + res.neural_similarity.toFixed(4);
+      // Neural & AST
+      document.getElementById('neuralSimText').textContent = (res.neural_similarity * 100).toFixed(1) + "%";
+      document.getElementById('astOverlapText').textContent = (res.ast_overlap_score * 100).toFixed(1) + "%";
 
-      // 4. Kênh AST
-      const astPctVal = (res.ast_overlap_score * 100).toFixed(1) + "%";
-      document.getElementById('astOverlapBadge').textContent = astPctVal;
-      document.getElementById('astOverlapText').textContent = `Trùng: ${res.common_tuples ? res.common_tuples.length : 0} tuples`;
-
-      // 5. Khung phân tích bế tắc
+      // Bottleneck Banner
       const banner = document.getElementById('bottleneckBanner');
       if (res.bottleneck_info) {
         banner.classList.remove('hidden');
@@ -264,19 +204,16 @@
         banner.classList.add('hidden');
       }
 
-      // 6. Cây và Tuples
+      // Trees
       drawTree(res.treeA, 'treeSvgA');
       drawTree(res.treeB, 'treeSvgB');
-
-      document.getElementById('tupleCountA').textContent = res.tuplesA ? res.tuplesA.length : 0;
-      document.getElementById('tupleCountB').textContent = res.tuplesB ? res.tuplesB.length : 0;
 
       const commonSet = new Set(res.common_tuples || []);
       const listA = document.getElementById('tuplesListA');
       listA.innerHTML = '';
       (res.tuplesA || []).forEach(t => {
         const span = document.createElement('span');
-        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`;
+        span.className = `px-1.5 py-0.5 rounded font-mono text-[9px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-500'}`;
         span.textContent = t;
         listA.appendChild(span);
       });
@@ -285,13 +222,12 @@
       listB.innerHTML = '';
       (res.tuplesB || []).forEach(t => {
         const span = document.createElement('span');
-        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`;
+        span.className = `px-1.5 py-0.5 rounded font-mono text-[9px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-500'}`;
         span.textContent = t;
         listB.appendChild(span);
       });
     }
 
-    // Vẽ cây đơn sắc thanh lịch
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -350,15 +286,12 @@
 
       function drawNodes(node) {
         if (!node) return;
-        let fillColor = node.type === 'op' ? "#27272a" : "#18181b";
-        let strokeColor = node.type === 'op' ? "#a1a1aa" : "#71717a";
-
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", node.x);
         c.setAttribute("cy", node.y);
         c.setAttribute("r", r);
-        c.setAttribute("fill", fillColor);
-        c.setAttribute("stroke", strokeColor);
+        c.setAttribute("fill", "#18181b");
+        c.setAttribute("stroke", "#71717a");
         c.setAttribute("stroke-width", "1.5");
         svg.appendChild(c);
 
@@ -367,7 +300,6 @@
         t.setAttribute("y", node.y + 3.5);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("fill", "#fafafa");
-        t.setAttribute("font-weight", "500");
         t.setAttribute("font-size", "10px");
         t.setAttribute("font-family", "monospace");
         t.textContent = node.val;
