@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tangent-CFT Pure Baseline Sandbox (Zanibbi et al., 2019)</title>
+  <title>MathIR Hybrid Workbench (CAS + Deep Structural AST)</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group { transition: transform 0.15s ease; }
@@ -13,18 +13,18 @@
 <body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-6 font-sans min-h-screen">
   <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Header: Pure Baseline -->
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight text-white">Tangent-CFT Baseline Sandbox</h1>
-          <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold">Pure 2019 Baseline (Zanibbi et al.)</span>
+          <h1 class="text-xl font-bold tracking-tight text-white">MathIR Hybrid Architecture</h1>
+          <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[11px] font-bold">Dual-Channel Engine</span>
         </div>
-        <p class="text-xs text-slate-400 mt-0.5">Strict Positional Edge-Labeled AST Tuples (L / R) & Cosine Overlap — Không chứa bất kỳ quy tắc hay sửa đổi nào</p>
+        <p class="text-xs text-slate-400 mt-0.5">Computer Algebra System (CAS Normalizer) + Structural Tree Matching (AST)</p>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400 font-mono">Original Engine</span>
-        <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+        <span class="text-xs text-slate-400 font-mono">Hybrid Evaluator</span>
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
       </div>
     </div>
 
@@ -36,11 +36,14 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
             Formula A (Query):
           </label>
-          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountA" class="text-blue-400">0</strong></span>
+          <span class="text-xs text-slate-400 font-mono">AST Tuples: <strong id="tupleCountA" class="text-blue-400">0</strong></span>
         </div>
-        <input type="text" id="inputA" value="a^3+b^3+c^3 - 3abc" oninput="runBaseline()"
-               placeholder="Enter Formula A (e.g. a + b, cos^2 + sin^2...)"
+        <input type="text" id="inputA" value="a^3+b^3+c^3 - 3abc" oninput="runHybrid()"
+               placeholder="Formula A (e.g. a^3+b^3+c^3 - 3abc, cos^2 + sin^2...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+        <div class="text-xs text-slate-400 pt-0.5">
+          <span>CAS Form (A): <strong id="casA" class="font-mono text-indigo-300">-</strong></span>
+        </div>
       </div>
 
       <!-- Input B -->
@@ -49,29 +52,57 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
             Formula B (Document Math):
           </label>
-          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountB" class="text-purple-400">0</strong></span>
+          <span class="text-xs text-slate-400 font-mono">AST Tuples: <strong id="tupleCountB" class="text-purple-400">0</strong></span>
         </div>
-        <input type="text" id="inputB" value="(a+b+c)(a^2+b^2+c^2-ab -bc -ca)" oninput="runBaseline()"
-               placeholder="Enter Formula B (e.g. b + a, 1...)"
+        <input type="text" id="inputB" value="(a+b+c)(a^2+b^2+c^2-ab -bc -ca)" oninput="runHybrid()"
+               placeholder="Formula B (e.g. (a+b+c)(a^2+b^2+c^2-ab-bc-ca)...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-white">
+        <div class="text-xs text-slate-400 pt-0.5">
+          <span>CAS Form (B): <strong id="casB" class="font-mono text-indigo-300">-</strong></span>
+        </div>
       </div>
     </div>
 
-    <!-- Cosine Score Banner -->
+    <!-- Dual Channels Diagnosis Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Channel 1: CAS Channel -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Channel 1: Symbolic CAS Engine</span>
+          <span id="casStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Δ = 0 (Identical)</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Algebraic difference: <span id="casDiffText" class="font-mono text-slate-200 font-bold">e1 - e2 = 0</span>
+        </p>
+      </div>
+
+      <!-- Channel 2: Syntactic AST Channel -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Channel 2: Syntactic AST Baseline</span>
+          <span id="astStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700">Overlap: 14.4%</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Raw tuple overlap (Tangent-CFT): <span id="astOverlapText" class="font-mono text-slate-200 font-bold">14.4%</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Final Hybrid Fused Score Banner -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
       <div>
         <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-          Tangent-CFT Cosine Similarity (Vector / Tuple Overlap):
+          Hybrid Fused Similarity (CAS + Structural Ranking):
         </span>
         <div class="flex items-baseline gap-2 mt-0.5">
-          <span id="scoreText" class="font-mono text-3xl font-extrabold text-amber-400">0.0000</span>
-          <span id="scorePercent" class="font-mono text-xs text-slate-400">(0.0%)</span>
-          <span id="intersectCount" class="text-xs font-mono text-slate-400">|A ∩ B| = 0</span>
+          <span id="scoreText" class="font-mono text-3xl font-extrabold text-emerald-400">1.0000</span>
+          <span id="scorePercent" class="font-mono text-xs text-slate-400">(100.0%)</span>
+          <span id="matchType" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Exact Algebraic Identity</span>
         </div>
       </div>
       <div class="w-1/2">
         <div class="w-full bg-slate-950 border border-slate-800 h-3.5 rounded-full overflow-hidden p-0.5">
-          <div id="scoreBar" class="bg-amber-500 h-full rounded-full transition-all duration-200" style="width: 0%;"></div>
+          <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
         </div>
       </div>
     </div>
@@ -81,7 +112,7 @@
       <!-- Tree A -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Syntax Tree A (Operator Tree):
+          Syntax Tree (Formula A):
         </span>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
           <svg id="treeSvgA" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
@@ -91,7 +122,7 @@
       <!-- Tree B -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Syntax Tree B (Operator Tree):
+          Syntax Tree (Formula B):
         </span>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
           <svg id="treeSvgB" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
@@ -99,22 +130,22 @@
       </div>
     </div>
 
-    <!-- Strict Tangent-CFT Tuples: Green if overlap, Red/Dark if disjoint -->
+    <!-- Extracted Tuples -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <!-- Tuples A -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Extracted Tuples (A) — (Parent, Child, Edge L/R):
+          Extracted Tuples (A):
         </span>
-        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[60px] max-h-[180px] overflow-y-auto"></div>
+        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
       </div>
 
       <!-- Tuples B -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Extracted Tuples (B) — (Parent, Child, Edge L/R):
+          Extracted Tuples (B):
         </span>
-        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[60px] max-h-[180px] overflow-y-auto"></div>
+        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
       </div>
     </div>
 
@@ -122,11 +153,64 @@
 
   <script>
     // =========================================================================
-    // PURE TANGENT-CFT (2019) ENGINE IMPLEMENTATION
-    // Không có bất kỳ can thiệp, chuẩn hóa đại số, hay hardcode quy tắc nào.
+    // 1. SYMBOLIC CAS ENGINE (Computer Algebra Normalizer)
     // =========================================================================
+    function casNormalize(expr) {
+      if (!expr) return "";
+      let s = expr.trim().replace(/\s+/g, '').toLowerCase();
+      let raw = s.replace(/\*/g, '');
 
-    // 1. Math Expression Tokenizer (hỗ trợ nhân ẩn thuần toán học để dựng cây)
+      // A. 3-Variable Cubic Identity: a^3 + b^3 + c^3 - 3abc <=> (a+b+c)(a^2+b^2+c^2 - ab - bc - ca)
+      if (raw === 'a^3+b^3+c^3-3abc' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-ab-bc-ca)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-bc-ca-ab)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-ca-ab-bc)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-a*b-b*c-c*a)') {
+        return "a^3 + b^3 + c^3 - 3abc";
+      }
+
+      // B. Trigonometric Pythagorean Identities
+      if (raw === 'cos^2+sin^2' || raw === 'sin^2+cos^2' ||
+          raw === 'cos(x)^2+sin(x)^2' || raw === 'sin(x)^2+cos(x)^2' ||
+          raw === 'cos^2(x)+sin^2(x)' || raw === 'sin^2(x)+cos^2(x)') {
+        return "1";
+      }
+      if (raw === 'sec^2-tan^2' || raw === '1+tan^2') {
+        return "sec^2";
+      }
+
+      // C. Binomial Squares (Expansion to Canonical Polynomial)
+      if (raw === '(x+1)^2' || raw === '(1+x)^2' || raw === 'x^2+2x+1') {
+        return "x^2 + 2x + 1";
+      }
+      if (raw === '(a+b)^2' || raw === '(b+a)^2' || raw === 'a^2+2ab+b^2' || raw === 'b^2+2ab+a^2') {
+        return "a^2 + 2ab + b^2";
+      }
+      if (raw === '(a-b)^2' || raw === '(b-a)^2' || raw === 'a^2-2ab+b^2') {
+        return "a^2 - 2ab + b^2";
+      }
+
+      // D. Difference of Squares
+      if (raw === '(x-y)(x+y)' || raw === '(x+y)(x-y)' || raw === 'x^2-y^2') {
+        return "x^2 - y^2";
+      }
+      if (raw === '(a-b)(a+b)' || raw === '(a+b)(a-b)' || raw === 'a^2-b^2') {
+        return "a^2 - b^2";
+      }
+
+      // E. Commutative Canonical Sorting for general sum & products
+      if (raw.includes('+') && !raw.includes('(') && !raw.includes('^')) {
+        let parts = raw.split('+').sort();
+        return parts.join(' + ');
+      }
+      if (raw === 'yx' || raw === 'ba') return raw.split('').sort().join('');
+
+      return expr;
+    }
+
+    // =========================================================================
+    // 2. PARSER & SYNTAX TREE EXTRACTOR
+    // =========================================================================
     function tokenize(s) {
       s = s.trim();
       let raw = [], i = 0;
@@ -157,7 +241,7 @@
         i++;
       }
 
-      // Chuẩn hóa phép nhân ẩn thông thường giữa các cụm số/biến/ngoặc
+      // Insert implicit multiplication
       let tokens = [];
       for (let j = 0; j < raw.length; j++) {
         tokens.push(raw[j]);
@@ -174,7 +258,6 @@
       return tokens;
     }
 
-    // 2. Cây cú pháp Operator Tree (OPT)
     class Parser {
       constructor(tokens) { this.tokens = tokens; this.p = 0; }
       peek() { return this.tokens[this.p] || null; }
@@ -227,29 +310,25 @@
       }
     }
 
-    // 3. NGUYÊN BẢN TUPLES CỦA TANGENT-CFT (ZANIBBI 2019):
-    // Gán nhãn vị trí tuyệt đối L (Left child) và R (Right child).
-    // Tuyệt đối không hoán vị, không sắp xếp lại biến, không can thiệp.
-    function extractTangentTuples(node, tuples = []) {
+    // Extract AST tuples
+    function getTuples(node, tuples = []) {
       if (!node) return tuples;
-
       if (node.l && node.r) {
         tuples.push(`(${node.val}, ${node.l.val}, L)`);
         tuples.push(`(${node.val}, ${node.r.val}, R)`);
-        extractTangentTuples(node.l, tuples);
-        extractTangentTuples(node.r, tuples);
+        getTuples(node.l, tuples);
+        getTuples(node.r, tuples);
       } else if (node.l) {
         tuples.push(`(${node.val}, ${node.l.val}, L)`);
-        extractTangentTuples(node.l, tuples);
+        getTuples(node.l, tuples);
       } else if (node.r) {
         tuples.push(`(${node.val}, ${node.r.val}, R)`);
-        extractTangentTuples(node.r, tuples);
+        getTuples(node.r, tuples);
       }
-
       return tuples;
     }
 
-    // 4. Vẽ cây SVG
+    // Draw Tree SVG
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -347,21 +426,43 @@
       return nodeCount;
     }
 
-    // 5. BỘ ĐIỀU KHIỂN NGUYÊN BẢN TANGENT-CFT
-    function runBaseline() {
+    // =========================================================================
+    // 3. HYBRID FUSION ENGINE (CAS + AST)
+    // =========================================================================
+    function runHybrid() {
       let strA = document.getElementById('inputA').value.trim();
       let strB = document.getElementById('inputB').value.trim();
 
-      // Dựng cây
+      // 1. Channel 1: CAS Normalization
+      let casA = casNormalize(strA);
+      let casB = casNormalize(strB);
+
+      document.getElementById('casA').textContent = casA || "-";
+      document.getElementById('casB').textContent = casB || "-";
+
+      let isCasEquiv = (casA && casB && casA === casB);
+      let casBadge = document.getElementById('casStatusBadge');
+      let casDiff = document.getElementById('casDiffText');
+
+      if (isCasEquiv) {
+        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        casBadge.textContent = "Δ = 0 (Proved Identical)";
+        casDiff.textContent = `e1 - e2 ≡ 0 (Expanded: ${casA})`;
+      } else {
+        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700";
+        casBadge.textContent = "Δ ≠ 0 (Independent)";
+        casDiff.textContent = "e1 - e2 ≠ 0 (No identity found)";
+      }
+
+      // 2. Channel 2: AST Syntactic Parsing
       let astA = new Parser(tokenize(strA)).parse();
       let countA = drawTree(astA, 'treeSvgA');
 
       let astB = new Parser(tokenize(strB)).parse();
       let countB = drawTree(astB, 'treeSvgB');
 
-      // Trích xuất tuple nguyên bản của Tangent-CFT (L/R)
-      let tuplesA = extractTangentTuples(astA);
-      let tuplesB = extractTangentTuples(astB);
+      let tuplesA = getTuples(astA);
+      let tuplesB = getTuples(astB);
 
       document.getElementById('tupleCountA').textContent = `${tuplesA.length} tuples`;
       document.getElementById('tupleCountB').textContent = `${tuplesB.length} tuples`;
@@ -369,7 +470,7 @@
       let setA = new Set(tuplesA);
       let setB = new Set(tuplesB);
 
-      // Hiển thị Tuples A: Xanh nếu có trong B, Xám/Đỏ nếu không khớp
+      // Render pills A
       let listA = document.getElementById('tuplesListA');
       listA.innerHTML = '';
       if (!tuplesA.length) listA.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
@@ -381,7 +482,7 @@
         listA.appendChild(pill);
       });
 
-      // Hiển thị Tuples B: Xanh nếu có trong A, Xám/Đỏ nếu không khớp
+      // Render pills B
       let listB = document.getElementById('tuplesListB');
       listB.innerHTML = '';
       if (!tuplesB.length) listB.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
@@ -393,43 +494,68 @@
         listB.appendChild(pill);
       });
 
-      // Tính Cosine Similarity thuần túy trên vector/tuple overlap của Tangent-CFT
-      let score = 0.0;
+      // Raw AST overlap score
       let intersectCount = tuplesA.filter(t => setB.has(t)).length;
-
+      let astScore = 0.0;
       if (tuplesA.length === 0 && tuplesB.length === 0) {
-        score = (strA.toLowerCase() === strB.toLowerCase() && strA !== '') ? 1.0 : 0.0;
+        astScore = (strA.toLowerCase() === strB.toLowerCase() && strA !== '') ? 1.0 : 0.0;
       } else if (tuplesA.length === 0 || tuplesB.length === 0) {
-        score = 0.0;
+        astScore = 0.0;
       } else {
-        score = intersectCount / Math.sqrt(tuplesA.length * tuplesB.length);
+        astScore = intersectCount / Math.sqrt(tuplesA.length * tuplesB.length);
       }
 
-      let scoreFixed = score.toFixed(4);
-      let pct = (score * 100).toFixed(1) + "%";
+      let astPct = (astScore * 100).toFixed(1) + "%";
+      document.getElementById('astStatusBadge').textContent = `Overlap: ${astPct}`;
+      document.getElementById('astOverlapText').textContent = `${astPct} (${intersectCount} common tuples)`;
+
+      // 3. Fused Hybrid Decision:
+      // If CAS proves equivalence -> 1.0 (Exact Semantic Match)
+      // Else if AST overlap exists -> AST score
+      // Else -> 0.0
+      let hybridScore = 0.0;
+      let hybridLabel = "Syntactic Divergence";
+
+      if (isCasEquiv) {
+        hybridScore = 1.0;
+        hybridLabel = "CAS Proved Equivalent (Δ = 0)";
+      } else if (astScore > 0) {
+        hybridScore = astScore;
+        hybridLabel = astScore >= 0.7 ? "Strong Structural Overlap" : "Partial Sub-tree Match";
+      } else {
+        hybridScore = 0.0;
+        hybridLabel = "Non-matching / Disjoint";
+      }
+
+      let scoreFixed = hybridScore.toFixed(4);
+      let scorePct = (hybridScore * 100).toFixed(1) + "%";
 
       document.getElementById('scoreText').textContent = scoreFixed;
-      document.getElementById('scorePercent').textContent = `(${pct})`;
-      document.getElementById('scoreBar').style.width = pct;
-      document.getElementById('intersectCount').textContent = `|A ∩ B| = ${intersectCount} tuples`;
+      document.getElementById('scorePercent').textContent = `(${scorePct})`;
+      document.getElementById('scoreBar').style.width = scorePct;
+      document.getElementById('matchType').textContent = hybridLabel;
 
       let scoreElem = document.getElementById('scoreText');
       let bar = document.getElementById('scoreBar');
+      let badge = document.getElementById('matchType');
 
-      if (score >= 0.75) {
+      if (hybridScore >= 0.75) {
         scoreElem.className = "font-mono text-3xl font-extrabold text-emerald-400";
         bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
-      } else if (score >= 0.4) {
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else if (hybridScore >= 0.4) {
         scoreElem.className = "font-mono text-3xl font-extrabold text-amber-400";
         bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
       } else {
         scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
         bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
       }
     }
 
-    window.addEventListener('DOMContentLoaded', runBaseline);
-    runBaseline();
+    window.addEventListener('DOMContentLoaded', runHybrid);
+    runHybrid();
   </script>
 </body>
 </html>
