@@ -94,16 +94,6 @@
         </div>
       </div>
 
-      <!-- Bottleneck Alert -->
-      <div id="bottleneckBanner" class="hidden rounded-lg p-3 text-xs space-y-1 bg-zinc-950 border border-zinc-700">
-        <div class="font-bold text-zinc-200" id="bottleneckTitle"></div>
-        <div class="text-zinc-400 leading-normal" id="bottleneckDesc"></div>
-        <div class="text-zinc-400 text-[11px] pt-1 border-t border-zinc-800">
-          <span class="text-zinc-200 font-medium">Khắc phục:</span>
-          <span id="bottleneckRec"></span>
-        </div>
-      </div>
-
     </div>
 
     <!-- AST Collapsible -->
@@ -192,17 +182,6 @@
       // Neural & AST
       document.getElementById('neuralSimText').textContent = (res.neural_similarity * 100).toFixed(1) + "%";
       document.getElementById('astOverlapText').textContent = (res.ast_overlap_score * 100).toFixed(1) + "%";
-
-      // Bottleneck Banner
-      const banner = document.getElementById('bottleneckBanner');
-      if (res.bottleneck_info) {
-        banner.classList.remove('hidden');
-        document.getElementById('bottleneckTitle').textContent = res.bottleneck_info.title;
-        document.getElementById('bottleneckDesc').textContent = res.bottleneck_info.description;
-        document.getElementById('bottleneckRec').textContent = res.bottleneck_info.recommendation;
-      } else {
-        banner.classList.add('hidden');
-      }
 
       // Trees
       drawTree(res.treeA, 'treeSvgA');
