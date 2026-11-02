@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Full Hybrid MathIR Engine (CAS + Deep Learning)
-- Channel 1: SymPy 1.13.1 Computer Algebra System (Symbolic Proof & Canonicalization)
-- Channel 2: PyTorch 2.6.0 Neural Dense Formula Encoder (Bi-directional Dense Vector Embedding)
-- Fusion: Exact Symbolic Resolution with Continuous Neural Ranking
+Full Hybrid MathIR Engine (Pre-trained MathBERT + SymPy CAS)
+- Channel 1: SymPy 1.13.1 Computer Algebra System (Exact Symbolic Proof & Expansion)
+- Channel 2: Pre-trained MathBERT (110M params, 768-dim Transformer embeddings)
+- Baseline: Tangent-CFT 2019 Syntactic AST Tuples
 """
 import sys
 import os
@@ -11,8 +11,8 @@ import json
 import re
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from transformers import AutoTokenizer, AutoModel
 import sympy as sp
 from sympy.parsing.sympy_parser import (
     parse_expr,
@@ -24,45 +24,31 @@ from sympy.parsing.sympy_parser import (
 TRANSFORMATIONS = standard_transformations + (implicit_multiplication_application, convert_xor)
 
 # ---------------------------------------------------------------------------
-# 1. PyTorch Deep Neural Dense Formula Encoder
+# 1. Load Pre-trained MathBERT (110M parameters, 768-dim dense embeddings)
 # ---------------------------------------------------------------------------
-class DeepFormulaNeuralEncoder(nn.Module):
-    def __init__(self, vocab_size=2048, embed_dim=128, hidden_dim=256):
-        super().__init__()
-        # Deterministic seed for reproducible evaluation
-        torch.manual_seed(42)
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
-        self.proj = nn.Sequential(
-            nn.Linear(hidden_dim * 2, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim)
-        )
+MATHBERT_PATH = r"D:\Dev\APCS\NonCS\SC203\Code\Baselines\MathBERT"
+print(f"Loading official pre-trained MathBERT model from: {MATHBERT_PATH}...", flush=True)
 
-    def forward(self, token_ids):
-        # token_ids: tensor of shape (1, seq_len)
-        embeds = self.embedding(token_ids)
-        lstm_out, _ = self.lstm(embeds)
-        # Mean pooling across token representations
-        pooled = torch.mean(lstm_out, dim=1)
-        dense_vec = F.normalize(self.proj(pooled), p=2, dim=-1)
-        return dense_vec
+try:
+    mathbert_tokenizer = AutoTokenizer.from_pretrained(MATHBERT_PATH)
+    mathbert_model = AutoModel.from_pretrained(MATHBERT_PATH)
+    mathbert_model.eval()
+    print("Pre-trained MathBERT loaded successfully!", flush=True)
+except Exception as e:
+    print(f"Error loading MathBERT: {e}", flush=True)
+    mathbert_tokenizer = None
+    mathbert_model = None
 
-# Initialize PyTorch neural model
-neural_encoder = DeepFormulaNeuralEncoder()
-neural_encoder.eval()
-
-def formula_to_tensor_ids(formula_str):
-    """Encodes LaTeX/formula tokens into deterministic vocabulary IDs for PyTorch."""
-    tokens = re.findall(r'[a-zA-Z_]+|\d+|[\+\-\*\/\^\(\)\=\,\.\_]', formula_str)
-    if not tokens:
-        tokens = ['0']
-    ids = []
-    for t in tokens:
-        # Deterministic hashing into 2048 vocab space
-        h = abs(hash(t)) % 2000 + 10
-        ids.append(h)
-    return torch.tensor([ids], dtype=torch.long), tokens
+def get_mathbert_embedding(formula_str):
+    if not mathbert_model or not mathbert_tokenizer:
+        return torch.zeros((1, 768))
+    inputs = mathbert_tokenizer(formula_str, return_tensors='pt', truncation=True, max_length=128)
+    with torch.no_grad():
+        out = mathbert_model(**inputs)
+        # Use [CLS] token embedding as sentence/formula representation
+        cls_vec = out.last_hidden_state[:, 0, :]
+        norm_vec = F.normalize(cls_vec, p=2, dim=-1)
+    return norm_vec
 
 # ---------------------------------------------------------------------------
 # 2. SymPy Symbolic CAS Helper
@@ -151,18 +137,13 @@ def evaluate_hybrid(strA, strB):
     exp1 = str(sp.expand(e1))
     exp2 = str(sp.expand(e2))
 
-    # Channel 2: PyTorch Neural Dense Forward Pass
-    tensorA, tokensA = formula_to_tensor_ids(strA)
-    tensorB, tokensB = formula_to_tensor_ids(strB)
+    # Channel 2: Pre-trained MathBERT Dense Forward Pass (768 dimensions)
+    vecA = get_mathbert_embedding(strA)
+    vecB = get_mathbert_embedding(strB)
+    mathbert_cos = F.cosine_similarity(vecA, vecB).item()
+    mathbert_sim = max(0.0, float(mathbert_cos))
 
-    with torch.no_grad():
-        vecA = neural_encoder(tensorA)
-        vecB = neural_encoder(tensorB)
-        neural_cos = F.cosine_similarity(vecA, vecB).item()
-        # Scale to [0, 1] for IR ranking
-        neural_sim = max(0.0, float(neural_cos))
-
-    # AST Tuple Overlap (Baseline benchmark)
+    # Channel 3: AST Tuple Overlap (Tangent-CFT Baseline)
     setA = set(tuplesA)
     setB = set(tuplesB)
     intersect = [t for t in tuplesA if t in setB]
@@ -175,24 +156,24 @@ def evaluate_hybrid(strA, strB):
     else:
         ast_score = intersect_count / ((len(tuplesA) * len(tuplesB)) ** 0.5)
 
-    # 3. Hybrid Fusion:
-    # If CAS proves equivalence -> 1.0 (Exact Proof)
-    # Else -> Weighted fusion of Neural Embedding (70%) + Structural Tree Overlap (30%)
+    # 4. Hybrid Decision:
+    # If CAS proves equivalence -> 1.0 (Exact Algebraic Identity)
+    # Else -> Use MathBERT continuous dense semantic similarity
     if is_equiv:
         fused_score = 1.0
         match_type = "Exact Algebraic Identity (Proved by SymPy CAS)"
     else:
-        fused_score = round(0.7 * neural_sim + 0.3 * ast_score, 4)
-        if fused_score >= 0.7:
-            match_type = "High Neural Semantic Match (PyTorch)"
-        elif fused_score >= 0.4:
-            match_type = "Partial Structural & Neural Overlap"
+        fused_score = round(mathbert_sim, 4)
+        if fused_score >= 0.8:
+            match_type = "High Semantic Match (MathBERT 768-dim)"
+        elif fused_score >= 0.5:
+            match_type = "Moderate Semantic Relatedness (MathBERT)"
         else:
-            match_type = "Disjoint / Low Neural Proximity"
+            match_type = "Low Semantic Proximity (MathBERT)"
 
     return {
         "status": "success",
-        "engine": "Full Hybrid: PyTorch 2.6 Neural + SymPy 1.13.1 CAS",
+        "engine": "Full Hybrid: Pre-trained MathBERT (110M) + SymPy 1.13.1 CAS",
         "formulaA": strA,
         "formulaB": strB,
         "sympy_reprA": str(e1),
@@ -201,11 +182,12 @@ def evaluate_hybrid(strA, strB):
         "expandedB": exp2,
         "diff": str(diff),
         "is_symbolic_equivalent": bool(is_equiv),
-        "neural_similarity": round(neural_sim, 4),
+        "neural_similarity": round(mathbert_sim, 4),
         "ast_overlap_score": round(ast_score, 4),
         "fused_score": fused_score,
         "match_type": match_type,
-        "neural_vector_dim": vecA.shape[1],
+        "neural_model": "MathBERT (tbs17/MathBERT)",
+        "neural_vector_dim": 768,
         "treeA": treeA,
         "treeB": treeB,
         "tuplesA": tuplesA,
@@ -252,7 +234,7 @@ def run_server(port=8000):
     os.chdir(web_dir)
     server_address = ('', port)
     httpd = HTTPServer(server_address, MathIRHandler)
-    print(f"Full Hybrid Engine (PyTorch + SymPy) listening on port {port}...", flush=True)
+    print(f"Full Hybrid Server (Pre-trained MathBERT + SymPy) listening on port {port}...", flush=True)
     httpd.serve_forever()
 
 if __name__ == '__main__':
