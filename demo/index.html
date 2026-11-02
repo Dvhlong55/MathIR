@@ -1,241 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Full Hybrid MathIR Engine (PyTorch 2.6 + SymPy 1.13.1)</title>
+  <title>MathIR — Hybrid Engine Workbench</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
-  <style>
-    .node-group { transition: transform 0.15s ease; }
-    .node-group:hover { transform: scale(1.1); transform-origin: center; }
-  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-6 font-sans min-h-screen">
-  <div class="max-w-4xl mx-auto space-y-4">
-    
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+  <div class="w-full max-w-3xl space-y-6">
+
+    <!-- Header tối giản -->
+    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
       <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight text-white">Full Hybrid MathIR Engine</h1>
-          <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[11px] font-bold">PyTorch 2.6 + SymPy 1.13.1</span>
-        </div>
-        <p class="text-xs text-slate-400 mt-0.5">Mô hình Hybrid thực thụ: Mạng nơ-ron nhúng vector dense (PyTorch) + Nhân đại số biểu tượng (SymPy CAS)</p>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          MathIR Hybrid Workbench
+          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono font-medium">PyTorch + SymPy</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">So khớp công thức: CAS Chứng minh Đại số & MathBERT 768-dim Vector Dense</p>
       </div>
-      <div class="flex items-center gap-2">
-        <span id="backendStatus" class="text-xs text-emerald-400 font-mono">Backend: 127.0.0.1:8000</span>
-        <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-      </div>
-    </div>
-
-    <!-- Dual Inputs: Formula A & Formula B -->
-    <!-- Test Scenarios & Bottleneck Presets -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2.5">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-          Kịch bản Thực nghiệm & Khảo sát Điểm Bế Tắc (Benchmark & Bottlenecks)
-        </span>
-        <span class="text-[11px] text-slate-500">Nhấp vào nút để kiểm thử trực tiếp trên PyTorch & SymPy</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
-        <!-- Cột 1: CAS Cứu Nguy (Success Cases) -->
-        <div class="bg-slate-950 border border-emerald-900/40 rounded-xl p-2.5 space-y-1.5">
-          <div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>✅ CAS Cứu Nguy (AST Thất Bại):</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
-              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
-              Hằng đẳng thức bậc 3
-            </button>
-            <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
-              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
-              Lượng giác: cos²+sin²
-            </button>
-            <button onclick="loadPreset('a*b - b*a', '0')"
-              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
-              Giao hoán: ab - ba
-            </button>
-          </div>
-        </div>
-
-        <!-- Cột 2: Các Điểm Bế Tắc (Bottleneck Cases) -->
-        <div class="bg-slate-950 border border-amber-900/40 rounded-xl p-2.5 space-y-1.5">
-          <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>⚠️ Điểm Bế Tắc Hệ Thống (Bottlenecks):</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <button onclick="loadPreset('sqrt(x^2)', 'x')"
-              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
-              1. Căn thức: √(x²) vs x
-            </button>
-            <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
-              class="px-2 py-1 rounded bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 transition text-[11px] font-mono">
-              2. Dãy số: 1+2+...+n
-            </button>
-            <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
-              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
-              3. Biến câm: ∑i vs ∑k
-            </button>
-            <button onclick="loadPreset('sin(x)/x', '1')"
-              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
-              4. Giới hạn: sin(x)/x
-            </button>
-          </div>
-        </div>
+      <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="backendStatus">Port 8000</span>
       </div>
     </div>
 
-    <!-- Bottleneck Analysis Banner -->
-    <div id="bottleneckBanner" class="hidden bg-slate-900 border rounded-2xl p-4 shadow-sm space-y-2">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span id="bottleneckIcon" class="text-base">⚠️</span>
-          <span id="bottleneckTitle" class="text-xs font-bold uppercase tracking-wider text-amber-400">Phân Tích Bế Tắc</span>
-        </div>
-        <span id="bottleneckBadge" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">BOTTLENECK</span>
-      </div>
-      <p id="bottleneckDesc" class="text-xs text-slate-300 leading-relaxed"></p>
-      <div class="pt-1 border-t border-slate-800/80 flex items-start gap-1.5 text-xs text-slate-400">
-        <strong class="text-blue-400 shrink-0">Đề xuất giải pháp (NCKH):</strong>
-        <span id="bottleneckRec" class="text-slate-300"></span>
+    <!-- Quick Presets: 1 hàng nút bấm gọn gàng -->
+    <div class="space-y-2">
+      <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Chọn nhanh ca kiểm thử:</div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <!-- Success Cases -->
+        <button onclick="loadPreset('a*b - b*a', '0')"
+          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
+          ✅ Giao hoán: ab - ba
+        </button>
+        <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
+          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
+          ✅ Lượng giác: cos²+sin²
+        </button>
+        <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
+          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
+          ✅ Hằng đẳng thức bậc 3
+        </button>
+
+        <!-- Bottleneck Cases -->
+        <button onclick="loadPreset('sqrt(x^2)', 'x')"
+          class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition font-mono">
+          ⚠️ 1. Căn thức: √(x²) vs x
+        </button>
+        <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
+          class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 transition font-mono">
+          🚨 2. Ba chấm: 1+2+...+n
+        </button>
+        <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
+          class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition font-mono">
+          ⚠️ 3. Biến câm: ∑i vs ∑k
+        </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <!-- Input A -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
-            Formula A (Query):
-          </label>
-          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountA" class="text-blue-400">0</strong></span>
-        </div>
-        <input type="text" id="inputA" value="AB - BA" oninput="triggerEvaluation()"
-               placeholder="Formula A (e.g. AB - BA, a^3+b^3+c^3 - 3abc...)"
-               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-        <div class="text-xs text-slate-400 pt-0.5 space-y-0.5">
-          <div>SymPy Parsed: <strong id="parsedA" class="font-mono text-blue-300">-</strong></div>
-          <div>Expanded: <strong id="expandedA" class="font-mono text-emerald-300">-</strong></div>
-        </div>
+    <!-- Inputs: 2 thanh nhập công thức thoáng đãng -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="space-y-1.5">
+        <label class="text-xs font-semibold text-blue-400 uppercase tracking-wide">Công thức A (Query)</label>
+        <input type="text" id="inputA" value="a*b - b*a" oninput="triggerEvaluation()"
+          placeholder="Nhập công thức A..."
+          class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-blue-500 transition shadow-inner">
       </div>
-
-      <!-- Input B -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
-            Formula B (Document Math):
-          </label>
-          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountB" class="text-purple-400">0</strong></span>
-        </div>
+      <div class="space-y-1.5">
+        <label class="text-xs font-semibold text-purple-400 uppercase tracking-wide">Công thức B (Target)</label>
         <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
-               placeholder="Formula B (e.g. 0, b + a, 1...)"
-               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-white">
-        <div class="text-xs text-slate-400 pt-0.5 space-y-0.5">
-          <div>SymPy Parsed: <strong id="parsedB" class="font-mono text-purple-300">-</strong></div>
-          <div>Expanded: <strong id="expandedB" class="font-mono text-emerald-300">-</strong></div>
-        </div>
+          placeholder="Nhập công thức B..."
+          class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-purple-500 transition shadow-inner">
       </div>
     </div>
 
-    <!-- Triple Diagnosis Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <!-- Channel 1: SymPy CAS Engine -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">1. Symbolic CAS (SymPy)</span>
-          <span id="casStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Computing...</span>
+    <!-- Kết quả chính (Hero Card) -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
+      
+      <!-- Fused Score to, rõ, dễ nhìn -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-medium">Độ tương đồng Hybrid Fused:</div>
+          <div class="flex items-baseline gap-3 mt-1">
+            <span id="scoreText" class="font-mono text-4xl font-black text-emerald-400">100%</span>
+            <span id="matchType" class="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+              Đồng nhất đại số (CAS Proved)
+            </span>
+          </div>
         </div>
-        <p class="text-xs text-slate-400">
-          Diff (e1 - e2): <span id="casDiffText" class="font-mono text-slate-200 font-bold">-</span>
-        </p>
+
+        <div class="w-full sm:w-48 bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5">
+          <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+        </div>
       </div>
 
-      <!-- Channel 2: PyTorch Deep Neural Dense Encoder -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-purple-400">2. Neural Dense (PyTorch)</span>
-          <span id="neuralStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold text-purple-300 bg-purple-500/20 border border-purple-500/30">256-dim</span>
+      <!-- 3 Kênh đánh giá: Rõ ràng, không rối mắt -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        
+        <!-- Kênh 1: CAS -->
+        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
+          <div class="text-slate-400 font-medium flex items-center justify-between">
+            <span>1. CAS (SymPy)</span>
+            <span id="casStatusBadge" class="font-mono font-bold text-emerald-400">Δ = 0</span>
+          </div>
+          <div class="font-mono text-slate-200 truncate" id="casDiffText">Hiệu số: 0</div>
         </div>
-        <p class="text-xs text-slate-400">
-          Neural Cosine: <span id="neuralSimText" class="font-mono text-slate-200 font-bold">-</span>
-        </p>
+
+        <!-- Kênh 2: Neural -->
+        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
+          <div class="text-slate-400 font-medium flex items-center justify-between">
+            <span>2. Neural (MathBERT)</span>
+            <span id="neuralPct" class="font-mono font-bold text-purple-400">85.4%</span>
+          </div>
+          <div class="font-mono text-slate-200 truncate" id="neuralSimText">Cosine: 0.8540</div>
+        </div>
+
+        <!-- Kênh 3: AST -->
+        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
+          <div class="text-slate-400 font-medium flex items-center justify-between">
+            <span>3. AST (Tangent-CFT)</span>
+            <span id="astOverlapBadge" class="font-mono font-bold text-amber-400">0.0%</span>
+          </div>
+          <div class="font-mono text-slate-200 truncate" id="astOverlapText">Trùng: 0 tuples</div>
+        </div>
+
       </div>
 
-      <!-- Channel 3: Syntactic AST Baseline (Tangent-CFT 2019) -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Baseline (Tangent-CFT)</span>
-          <span id="astStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700">Overlap: 0.0%</span>
+      <!-- Khung cảnh báo bế tắc (chỉ hiện khi có bế tắc) -->
+      <div id="bottleneckBanner" class="hidden rounded-xl p-4 text-xs space-y-2 border">
+        <div class="flex items-center gap-2 font-bold text-sm" id="bottleneckTitle">
+          ⚠️ Điểm Bế Tắc Của Mô Hình
         </div>
-        <p class="text-xs text-slate-400">
-          Tuple Overlap: <span id="astOverlapText" class="font-mono text-slate-200 font-bold">-</span>
-        </p>
+        <p id="bottleneckDesc" class="text-slate-300 leading-relaxed"></p>
+        <div class="pt-2 border-t border-slate-700/50 text-slate-400">
+          <strong class="text-blue-400">Đề xuất giải pháp (NCKH):</strong>
+          <span id="bottleneckRec" class="text-slate-300 ml-1"></span>
+        </div>
       </div>
+
     </div>
 
-    <!-- Final Hybrid Fused Score Banner -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
-      <div>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-          Full Hybrid Fused Similarity (CAS Proof + PyTorch Continuous Dense Ranking):
-        </span>
-        <div class="flex items-baseline gap-2 mt-0.5">
-          <span id="scoreText" class="font-mono text-3xl font-extrabold text-emerald-400">1.0000</span>
-          <span id="scorePercent" class="font-mono text-xs text-slate-400">(100.0%)</span>
-          <span id="matchType" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Exact Algebraic Identity</span>
+    <!-- Khối chi tiết cây cú pháp (Thu gọn mặc định, không làm rối mắt) -->
+    <details class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 text-xs text-slate-400 cursor-pointer transition">
+      <summary class="font-semibold text-slate-300 hover:text-white select-none">
+        🔍 Xem chi tiết Cây Cú Pháp (AST) & Danh Sách Tuples (Click để mở)
+      </summary>
+      
+      <div class="mt-4 space-y-4 pt-4 border-t border-slate-800">
+        <!-- 2 Cây AST -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <span class="text-blue-400 font-semibold uppercase text-[11px]">Cây AST Công Thức A:</span>
+            <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
+              <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
+            </div>
+          </div>
+          <div class="space-y-1.5">
+            <span class="text-purple-400 font-semibold uppercase text-[11px]">Cây AST Công Thức B:</span>
+            <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
+              <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danh sách Tuples -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 mb-1">Tuples (A): <span id="tupleCountA" class="text-blue-400 font-mono">0</span></div>
+            <div id="tuplesListA" class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 mb-1">Tuples (B): <span id="tupleCountB" class="text-purple-400 font-mono">0</span></div>
+            <div id="tuplesListB" class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
+          </div>
         </div>
       </div>
-      <div class="w-1/2">
-        <div class="w-full bg-slate-950 border border-slate-800 h-3.5 rounded-full overflow-hidden p-0.5">
-          <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dual Syntax Trees Side-by-Side -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <!-- Tree A -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Syntax Tree (Formula A) — from SymPy:
-        </span>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
-          <svg id="treeSvgA" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
-        </div>
-      </div>
-
-      <!-- Tree B -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Syntax Tree (Formula B) — from SymPy:
-        </span>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
-          <svg id="treeSvgB" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Extracted Tuples -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <!-- Tuples A -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Extracted Tuples (A):
-        </span>
-        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
-      </div>
-
-      <!-- Tuples B -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Extracted Tuples (B):
-        </span>
-        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
-      </div>
-    </div>
+    </details>
 
   </div>
 
@@ -251,7 +192,7 @@
 
     function triggerEvaluation() {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(callPythonBackend, 180);
+      debounceTimer = setTimeout(callPythonBackend, 150);
     }
 
     async function callPythonBackend() {
@@ -265,153 +206,117 @@
           body: JSON.stringify({ formulaA, formulaB })
         });
 
-        if (!resp.ok) throw new Error(`HTTP error ${resp.status}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-
-        if (data.status === 'error') {
-          document.getElementById('casStatusBadge').textContent = "Syntax Error";
-          document.getElementById('casStatusBadge').className = "text-[11px] px-2 py-0.5 rounded font-mono bg-rose-500/20 text-rose-400 border border-rose-500/30";
-          document.getElementById('casDiffText').textContent = data.message;
-          return;
-        }
-
-        renderPythonResults(data);
+        renderResults(data);
       } catch (err) {
-        document.getElementById('backendStatus').textContent = "Offline (start server.py)";
-        document.getElementById('backendStatus').className = "text-xs text-rose-400 font-mono";
-        document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+        document.getElementById('backendStatus').textContent = "Offline";
+        document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-full border border-rose-500/20";
       }
     }
 
-    function renderPythonResults(res) {
-      document.getElementById('backendStatus').textContent = "Connected to PyTorch + SymPy";
-      document.getElementById('backendStatus').className = "text-xs text-emerald-400 font-mono";
-      document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+    function renderResults(res) {
+      document.getElementById('backendStatus').textContent = "Online";
+      document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20";
 
-      // 1. Parsed & Expanded
-      document.getElementById('parsedA').textContent = res.sympy_reprA;
-      document.getElementById('parsedB').textContent = res.sympy_reprB;
-      document.getElementById('expandedA').textContent = res.expandedA;
-      document.getElementById('expandedB').textContent = res.expandedB;
+      // 1. Fused Score
+      const fused = res.fused_score;
+      const pct = (fused * 100).toFixed(1) + "%";
+      const scoreElem = document.getElementById('scoreText');
+      const barElem = document.getElementById('scoreBar');
+      const matchElem = document.getElementById('matchType');
 
-      // 2. Channel 1: SymPy CAS
+      scoreElem.textContent = pct;
+      barElem.style.width = pct;
+      matchElem.textContent = res.match_type;
+
+      if (fused >= 0.8) {
+        scoreElem.className = "font-mono text-4xl font-black text-emerald-400";
+        barElem.className = "bg-emerald-500 h-full rounded-full transition-all duration-300";
+        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
+      } else if (fused >= 0.4) {
+        scoreElem.className = "font-mono text-4xl font-black text-amber-400";
+        barElem.className = "bg-amber-500 h-full rounded-full transition-all duration-300";
+        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20";
+      } else {
+        scoreElem.className = "font-mono text-4xl font-black text-rose-400";
+        barElem.className = "bg-rose-500 h-full rounded-full transition-all duration-300";
+        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20";
+      }
+
+      // 2. Kênh CAS
       const casBadge = document.getElementById('casStatusBadge');
       if (res.is_symbolic_equivalent) {
-        casBadge.textContent = "Δ = 0 (Proved Identical)";
-        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        casBadge.textContent = "Δ = 0";
+        casBadge.className = "font-mono font-bold text-emerald-400";
+        document.getElementById('casDiffText').textContent = "Bằng nhau tuyệt đối";
       } else if (res.diff && res.diff.includes("Parse Error")) {
-        casBadge.textContent = "Syntax Error";
-        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        casBadge.textContent = "Lỗi cú pháp";
+        casBadge.className = "font-mono font-bold text-rose-400";
+        document.getElementById('casDiffText').textContent = "Không parse được '...'";
       } else {
-        casBadge.textContent = "Δ ≠ 0 (Independent)";
-        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700";
-      }
-      document.getElementById('casDiffText').textContent = res.diff;
-
-      // 3. Channel 2: PyTorch Neural Embedding
-      const neuralPct = (res.neural_similarity * 100).toFixed(1) + "%";
-      document.getElementById('neuralSimText').textContent = `${neuralPct} (${res.neural_similarity.toFixed(4)})`;
-
-      // 4. Channel 3: AST Baseline
-      const astPct = (res.ast_overlap_score * 100).toFixed(1) + "%";
-      document.getElementById('astStatusBadge').textContent = `Overlap: ${astPct}`;
-      document.getElementById('astOverlapText').textContent = `${astPct} (${res.common_tuples.length} common tuples)`;
-
-      // 5. Final Hybrid Fused Score
-      const fused = res.fused_score;
-      const fusedFixed = fused.toFixed(4);
-      const fusedPct = (fused * 100).toFixed(1) + "%";
-
-      document.getElementById('scoreText').textContent = fusedFixed;
-      document.getElementById('scorePercent').textContent = `(${fusedPct})`;
-      document.getElementById('scoreBar').style.width = fusedPct;
-      document.getElementById('matchType').textContent = res.match_type;
-
-      const scoreElem = document.getElementById('scoreText');
-      const bar = document.getElementById('scoreBar');
-      const badge = document.getElementById('matchType');
-
-      if (fused >= 0.75) {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-emerald-400";
-        bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-      } else if (fused >= 0.4) {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-amber-400";
-        bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
-      } else {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
-        bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        casBadge.textContent = "Δ ≠ 0";
+        casBadge.className = "font-mono font-bold text-slate-400";
+        document.getElementById('casDiffText').textContent = "Δ: " + res.diff;
       }
 
-      // Bottleneck Banner Handling
+      // 3. Kênh Neural
+      const neuralPctVal = (res.neural_similarity * 100).toFixed(1) + "%";
+      document.getElementById('neuralPct').textContent = neuralPctVal;
+      document.getElementById('neuralSimText').textContent = "Cosine: " + res.neural_similarity.toFixed(4);
+
+      // 4. Kênh AST
+      const astPctVal = (res.ast_overlap_score * 100).toFixed(1) + "%";
+      document.getElementById('astOverlapBadge').textContent = astPctVal;
+      document.getElementById('astOverlapText').textContent = `Trùng: ${res.common_tuples ? res.common_tuples.length : 0} tuples`;
+
+      // 5. Khung phân tích bế tắc
       const banner = document.getElementById('bottleneckBanner');
       if (res.bottleneck_info) {
         banner.classList.remove('hidden');
         document.getElementById('bottleneckTitle').textContent = res.bottleneck_info.title;
         document.getElementById('bottleneckDesc').textContent = res.bottleneck_info.description;
         document.getElementById('bottleneckRec').textContent = res.bottleneck_info.recommendation;
-        
-        const bIcon = document.getElementById('bottleneckIcon');
-        const bBadge = document.getElementById('bottleneckBadge');
+
         if (res.bottleneck_info.type === 'SUCCESS_CAS_IDENTITY') {
-          banner.className = "bg-emerald-950/20 border border-emerald-700/50 rounded-2xl p-4 shadow-sm space-y-2";
-          bIcon.textContent = "✅";
-          bBadge.textContent = "CAS SUCCESS";
-          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-emerald-400";
+          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-emerald-950/30 border-emerald-800/40 text-emerald-300";
         } else if (res.bottleneck_info.severity === 'critical') {
-          banner.className = "bg-rose-950/30 border border-rose-800/60 rounded-2xl p-4 shadow-sm space-y-2";
-          bIcon.textContent = "🚨";
-          bBadge.textContent = "CRITICAL BOTTLENECK";
-          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30";
-          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-rose-400";
+          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-rose-950/30 border-rose-800/50 text-rose-300";
         } else {
-          banner.className = "bg-amber-950/25 border border-amber-800/50 rounded-2xl p-4 shadow-sm space-y-2";
-          bIcon.textContent = "⚠️";
-          bBadge.textContent = "BOTTLENECK DETECTED";
-          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30";
-          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-amber-400";
+          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-amber-950/30 border-amber-800/50 text-amber-300";
         }
       } else {
         banner.classList.add('hidden');
       }
 
-      // 6. Trees
+      // 6. Cây và Tuples
       drawTree(res.treeA, 'treeSvgA');
       drawTree(res.treeB, 'treeSvgB');
 
-      // 7. Tuples
-      document.getElementById('tupleCountA').textContent = `${res.tuplesA.length} tuples`;
-      document.getElementById('tupleCountB').textContent = `${res.tuplesB.length} tuples`;
+      document.getElementById('tupleCountA').textContent = res.tuplesA ? res.tuplesA.length : 0;
+      document.getElementById('tupleCountB').textContent = res.tuplesB ? res.tuplesB.length : 0;
 
-      const commonSet = new Set(res.common_tuples);
-
+      const commonSet = new Set(res.common_tuples || []);
       const listA = document.getElementById('tuplesListA');
       listA.innerHTML = '';
-      if (!res.tuplesA.length) listA.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
-      res.tuplesA.forEach(t => {
-        const isMatch = commonSet.has(t);
-        const pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
-        pill.textContent = t;
-        listA.appendChild(pill);
+      (res.tuplesA || []).forEach(t => {
+        const span = document.createElement('span');
+        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-slate-800 text-slate-400'}`;
+        span.textContent = t;
+        listA.appendChild(span);
       });
 
       const listB = document.getElementById('tuplesListB');
       listB.innerHTML = '';
-      if (!res.tuplesB.length) listB.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
-      res.tuplesB.forEach(t => {
-        const isMatch = commonSet.has(t);
-        const pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
-        pill.textContent = t;
-        listB.appendChild(pill);
+      (res.tuplesB || []).forEach(t => {
+        const span = document.createElement('span');
+        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-slate-800 text-slate-400'}`;
+        span.textContent = t;
+        listB.appendChild(span);
       });
     }
 
-    // SVG Drawing function
+    // Vẽ cây tối giản gọn gàng
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -435,10 +340,10 @@
       walk(ast, 0);
 
       let totalLeaves = Math.max(1, leafIndex);
-      let W = 320, H = 210;
+      let W = 320, H = 180;
       let padX = 24, padY = 24;
       let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
-      let stepY = maxDepth > 0 ? Math.min(38, (H - padY * 2) / maxDepth) : 36;
+      let stepY = maxDepth > 0 ? Math.min(36, (H - padY * 2) / maxDepth) : 34;
 
       function setCoords(node) {
         if (!node) return;
@@ -449,60 +354,51 @@
       }
       setCoords(ast);
 
-      const r = 13;
+      const r = 12;
 
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
           if (!child) return;
-          let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          let startY = node.y + r;
-          let endY = child.y - r;
-          let midY = (startY + endY) / 2;
-          let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
-          path.setAttribute("d", d);
-          path.setAttribute("fill", "none");
-          path.setAttribute("stroke", "#475569");
-          path.setAttribute("stroke-width", "1.6");
-          path.setAttribute("stroke-opacity", "0.7");
-          svg.appendChild(path);
+          let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", node.x);
+          line.setAttribute("y1", node.y);
+          line.setAttribute("x2", child.x);
+          line.setAttribute("y2", child.y);
+          line.setAttribute("stroke", "#475569");
+          line.setAttribute("stroke-width", "1.5");
+          svg.appendChild(line);
           drawLines(child);
         });
       }
       drawLines(ast);
 
-      function drawNodes(node, isRoot = false) {
+      function drawNodes(node) {
         if (!node) return;
-        let color = isRoot ? "#2563eb" : (node.type === 'op' ? "#059669" : (node.type === 'var' ? "#d97706" : "#7c3aed"));
-
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", "node-group cursor-pointer");
+        let color = node.type === 'op' ? "#10b981" : (node.type === 'var' ? "#f59e0b" : "#6366f1");
 
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", node.x);
         c.setAttribute("cy", node.y);
         c.setAttribute("r", r);
         c.setAttribute("fill", color);
-        c.setAttribute("stroke", "#1e293b");
-        c.setAttribute("stroke-width", "1.5");
-        g.appendChild(c);
+        svg.appendChild(c);
 
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", node.x);
-        t.setAttribute("y", node.y + 4);
+        t.setAttribute("y", node.y + 3.5);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("fill", "#ffffff");
         t.setAttribute("font-weight", "bold");
-        t.setAttribute("font-size", node.val.length > 2 ? "9px" : "11px");
-        t.setAttribute("font-family", "ui-monospace, monospace");
+        t.setAttribute("font-size", "10px");
+        t.setAttribute("font-family", "monospace");
         t.textContent = node.val;
-        g.appendChild(t);
+        svg.appendChild(t);
 
-        svg.appendChild(g);
-        if (node.l) drawNodes(node.l, false);
-        if (node.r) drawNodes(node.r, false);
+        if (node.l) drawNodes(node.l);
+        if (node.r) drawNodes(node.r);
       }
-      drawNodes(ast, true);
+      drawNodes(ast);
     }
 
     window.addEventListener('DOMContentLoaded', triggerEvaluation);
