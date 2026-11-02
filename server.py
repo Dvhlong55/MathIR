@@ -14,6 +14,11 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 import sympy as sp
+try:
+    from sympy.parsing.latex import parse_latex
+except Exception as e:
+    parse_latex = None
+
 from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
@@ -62,6 +67,19 @@ def normalize_math_str(s):
     s = re.sub(r'cos\^2', r'cos(x)**2', s)
     s = re.sub(r'sin\^2', r'sin(x)**2', s)
     return s
+
+def parse_any_formula(s):
+    if not s:
+        return sp.Integer(0)
+    s = s.strip()
+    # If contains LaTeX backslash, try parse_latex
+    if '\\' in s and parse_latex is not None:
+        try:
+            return parse_latex(s)
+        except Exception:
+            pass
+    norm = normalize_math_str(s)
+    return parse_expr(norm, transformations=TRANSFORMATIONS)
 
 def extract_sympy_tree(expr):
     if not hasattr(expr, 'args') or len(expr.args) == 0:
@@ -120,14 +138,14 @@ def evaluate_hybrid(strA, strB):
 
     # Channel 1: SymPy CAS Processing
     try:
-        e1 = parse_expr(normA, transformations=TRANSFORMATIONS)
+        e1 = parse_any_formula(strA)
         treeA = extract_sympy_tree(e1)
         tuplesA = get_tuples_from_tree(treeA)
     except Exception as ex:
         cas_errorA = str(ex)
 
     try:
-        e2 = parse_expr(normB, transformations=TRANSFORMATIONS)
+        e2 = parse_any_formula(strB)
         treeB = extract_sympy_tree(e2)
         tuplesB = get_tuples_from_tree(treeB)
     except Exception as ex:

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MathIR</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 </head>
 <body class="bg-zinc-950 text-zinc-200 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased">
 
@@ -40,11 +42,11 @@
         class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
         √(x²) vs x
       </button>
-      <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
+      <button onclick="loadPreset('1 + 2 + \\ldots + n', '\\frac{n(n+1)}{2}')"
         class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
         1+2+...+n
       </button>
-      <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
+      <button onclick="loadPreset('\\sum_{i=1}^n i', '\\sum_{k=1}^m k')"
         class="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition font-mono">
         ∑i vs ∑k
       </button>
@@ -56,11 +58,13 @@
         <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula A</div>
         <input type="text" id="inputA" value="a*b - b*a" oninput="triggerEvaluation()"
           class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
+        <div id="previewA" class="min-h-[24px] text-xs text-zinc-300 mt-1 flex items-center overflow-x-auto"></div>
       </div>
       <div>
         <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula B</div>
         <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
           class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
+        <div id="previewB" class="min-h-[24px] text-xs text-zinc-300 mt-1 flex items-center overflow-x-auto"></div>
       </div>
     </div>
 
@@ -130,8 +134,26 @@
     }
 
     function triggerEvaluation() {
+      const formulaA = document.getElementById('inputA').value.trim();
+      const formulaB = document.getElementById('inputB').value.trim();
+      renderKatex(formulaA, 'previewA');
+      renderKatex(formulaB, 'previewB');
+
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(callPythonBackend, 150);
+    }
+
+    function renderKatex(text, elemId) {
+      const elem = document.getElementById(elemId);
+      if (!elem) return;
+      if (!text) { elem.innerHTML = ''; return; }
+      if (window.katex) {
+        try {
+          katex.render(text, elem, { throwOnError: false, displayMode: false });
+        } catch (e) {
+          elem.textContent = text;
+        }
+      }
     }
 
     async function callPythonBackend() {
