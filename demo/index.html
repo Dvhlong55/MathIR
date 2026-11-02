@@ -10,9 +10,9 @@
       transition: transform 0.2s ease, filter 0.2s ease;
     }
     .node-group:hover {
-      transform: scale(1.1);
+      transform: scale(1.12);
       transform-origin: center;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
     }
   </style>
 </head>
@@ -37,7 +37,7 @@
           Nhập công thức toán học:
         </label>
         <input type="text" id="formulaInput" value="(x^2 + 4x^2 + 4)" oninput="updateApp()"
-               placeholder="Ví dụ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
+               placeholder="Gõ biểu thức bất kỳ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
                class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
       </div>
 
@@ -72,70 +72,41 @@
           <span id="nodeCountBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">0 nodes</span>
         </div>
 
-        <!-- Khung vẽ cây với nền rõ ràng, thoáng đãng -->
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[260px]">
-          <svg id="treeSvg" class="w-full h-[250px]" viewBox="0 0 480 250"></svg>
-        </div>
-
-        <div class="flex items-center justify-center gap-4 mt-2.5 text-[10px] text-[var(--muted-foreground)]">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block shadow-sm"></span> Gốc (Root)</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-sm"></span> Toán tử (Op)</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block shadow-sm"></span> Biến số (Var)</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block shadow-sm"></span> Hằng số (Num)</span>
+        <!-- Khung vẽ cây cực sạch, không nhãn chữ thừa -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[240px]">
+          <svg id="treeSvg" class="w-full h-[230px]" viewBox="0 0 480 230"></svg>
         </div>
       </div>
 
       <!-- Kết quả truy xuất & So khớp (5 cols) -->
-      <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3">
-        <div>
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-3">
-            Kết Quả Khớp Tốt Nhất (Top Match)
-          </h2>
+      <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-start space-y-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+          Kết Quả Khớp Tốt Nhất (Top Match)
+        </h2>
 
-          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2.5">
-            <div>
-              <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Công thức tìm thấy:</span>
-              <div id="topMatchFormula" class="font-mono text-base font-bold text-blue-400 mt-0.5">
-                5x^2 + 4
-              </div>
-            </div>
-
-            <div class="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
-              <span class="text-[var(--muted-foreground)]">Độ tương đồng MathIR:</span>
-              <span id="topMatchScore" class="font-mono font-bold text-emerald-400 text-sm">98.5%</span>
-            </div>
-
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-[var(--muted-foreground)]">Khoảng cách cây (TED):</span>
-              <span id="topMatchTED" class="font-mono font-bold text-[var(--foreground)]">0 edits</span>
-            </div>
-
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-[var(--muted-foreground)]">So khớp chuỗi 1D (Baseline):</span>
-              <span id="topMatch1D" class="font-mono text-red-400 font-semibold">14.2%</span>
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <div>
+            <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Công thức tìm thấy:</span>
+            <div id="topMatchFormula" class="font-mono text-lg font-bold text-blue-400 mt-1">
+              5x^2 + 4
             </div>
           </div>
-        </div>
 
-        <!-- Gợi ý nhanh vài công thức để bấm thử -->
-        <div>
-          <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1.5">Gợi ý thử nhanh:</span>
-          <div class="flex flex-wrap gap-1.5">
-            <button onclick="applyFormula('3x^2 + 5x^2 - 7')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
-              3x^2 + 5x^2 - 7
-            </button>
-            <button onclick="applyFormula('(x + 1)^2')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
-              (x + 1)^2
-            </button>
-            <button onclick="applyFormula('2a + 3b + 4a')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
-              2a + 3b + 4a
-            </button>
-            <button onclick="applyFormula('(x - 3)*(x + 3)')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
-              (x - 3)*(x + 3)
-            </button>
+          <div class="pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs">
+            <span class="text-[var(--muted-foreground)]">Độ tương đồng MathIR:</span>
+            <span id="topMatchScore" class="font-mono font-bold text-emerald-400 text-sm">98.5%</span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[var(--muted-foreground)]">Khoảng cách cây (TED):</span>
+            <span id="topMatchTED" class="font-mono font-bold text-[var(--foreground)]">0 edits</span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-[var(--muted-foreground)]">So khớp chuỗi 1D (Baseline):</span>
+            <span id="topMatch1D" class="font-mono text-red-400 font-semibold">14.2%</span>
           </div>
         </div>
-
       </div>
 
     </div>
@@ -321,7 +292,7 @@
       return s;
     }
 
-    // 3. CLEAN, CRYSTAL-CLEAR TREE SVG RENDERER (NO OVERLAPPING LINES)
+    // 3. CLEAN & MINIMALIST TREE SVG RENDERER (NO EXTRA TEXT LABELS)
     function renderTree(ast) {
       const svg = document.getElementById('treeSvg');
       svg.innerHTML = '';
@@ -348,8 +319,8 @@
       walk(ast, 0);
 
       let totalLeaves = Math.max(1, leafIndex);
-      let W = 480, H = 250;
-      let padX = 40, padY = 32;
+      let W = 480, H = 230;
+      let padX = 40, padY = 35;
       let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
       let stepY = maxDepth > 0 ? Math.min(65, (H - padY * 2) / maxDepth) : 55;
 
@@ -365,19 +336,17 @@
       setCoords(ast);
       document.getElementById('nodeCountBadge').textContent = `${totalNodes} nodes`;
 
-      const nodeRadius = 18;
+      const nodeRadius = 19;
 
-      // STEP 1: DRAW SMOOTH CONNECTION PATHS (LINES NEVER OVERLAP NODES)
+      // DRAW SMOOTH CONNECTION PATHS
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
           if (!child) return;
 
-          // Start from bottom edge of parent, end at top edge of child
           let startY = node.y + nodeRadius;
           let endY = child.y - nodeRadius;
 
-          // Elegant smooth cubic bezier curve
           let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           let midY = (startY + endY) / 2;
           let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
@@ -394,51 +363,39 @@
       }
       drawLines(ast);
 
-      // STEP 2: DRAW SOLID HIGH-CONTRAST NODES (DRAWN OVER EDGES)
+      // DRAW CLEAN SOLID NODES (NO TEXT LABELS UNDERNEATH)
       function drawNodes(node, isRoot = false) {
         if (!node) return;
 
-        // Vivid high-contrast palette
-        let bgColor = "#2563eb"; // Blue
-        let labelText = "Root";
-
-        if (isRoot) {
-          bgColor = "#2563eb"; // Root Op
-          labelText = "Gốc";
-        } else if (node.type === 'op' || node.type === 'fn') {
-          bgColor = "#059669"; // Green Op
-          labelText = "Toán tử";
-        } else if (node.type === 'var') {
-          bgColor = "#d97706"; // Amber Var
-          labelText = "Biến";
-        } else if (node.type === 'num') {
-          bgColor = "#7c3aed"; // Purple Num
-          labelText = "Số";
-        }
+        let bgColor = "#2563eb";
+        if (isRoot) bgColor = "#2563eb";
+        else if (node.type === 'op' || node.type === 'fn') bgColor = "#059669";
+        else if (node.type === 'var') bgColor = "#d97706";
+        else if (node.type === 'num') bgColor = "#7c3aed";
 
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("class", "node-group cursor-pointer");
 
-        // Outer white ring for sharp separation
+        // Outer glow/contrast ring
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         ring.setAttribute("cx", node.x);
         ring.setAttribute("cy", node.y);
-        ring.setAttribute("r", nodeRadius + 2);
+        ring.setAttribute("r", nodeRadius + 2.5);
         ring.setAttribute("fill", "white");
-        ring.setAttribute("fill-opacity", "0.15");
+        ring.setAttribute("fill-opacity", "0.2");
         g.appendChild(ring);
 
-        // Solid colored circle
+        // Main solid circle
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", node.x);
         c.setAttribute("cy", node.y);
         c.setAttribute("r", nodeRadius);
         c.setAttribute("fill", bgColor);
         c.setAttribute("stroke", "#ffffff");
-        c.setAttribute("stroke-width", "2");
+        c.setAttribute("stroke-width", "2.2");
         g.appendChild(c);
 
-        // Value text (crystal clear white, bold, perfectly centered)
+        // Value text
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", node.x);
         t.setAttribute("y", node.y + 5);
@@ -449,17 +406,6 @@
         t.setAttribute("font-family", "ui-monospace, monospace");
         t.textContent = node.val;
         g.appendChild(t);
-
-        // Small role label below node
-        const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        sub.setAttribute("x", node.x);
-        sub.setAttribute("y", node.y + nodeRadius + 11);
-        sub.setAttribute("text-anchor", "middle");
-        sub.setAttribute("fill", "#94a3b8");
-        sub.setAttribute("font-size", "9px");
-        sub.setAttribute("font-weight", "500");
-        sub.textContent = labelText;
-        g.appendChild(sub);
 
         svg.appendChild(g);
 
@@ -485,16 +431,11 @@
       // Best match info
       document.getElementById('topMatchFormula').textContent = canon;
       document.getElementById('topMatchScore').textContent = (canon !== raw ? "98.5%" : "100%");
-      document.getElementById('topMatchTED').textContent = (canon !== raw ? "0 edits" : "0 edits");
+      document.getElementById('topMatchTED').textContent = "0 edits";
       
       let lenDiff = Math.abs(raw.length - canon.length);
       let s1d = canon === raw ? 100 : Math.max(10, Math.round((1 - lenDiff / Math.max(raw.length, 1)) * 30));
       document.getElementById('topMatch1D').textContent = s1d + "%";
-    }
-
-    function applyFormula(expr) {
-      document.getElementById('formulaInput').value = expr;
-      updateApp();
     }
 
     window.addEventListener('DOMContentLoaded', updateApp);
