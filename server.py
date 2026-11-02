@@ -79,31 +79,56 @@ def parse_any_formula(s):
         return sp.Integer(0)
     s = s.strip()
 
+    # Normalize \(...\) and \[...\] delimiters to $...$
+    s = re.sub(r'\\\[([\s\S]*?)\\\]', r'$\1$', s)
+    s = re.sub(r'\\\(([\s\S]*?)\\\)', r'$\1$', s)
+
     # If text contains $...$, extract inline math formulas
     formulas = re.findall(r'\$([^$]+)\$', s)
     if formulas:
+        parsed_candidates = []
         for candidate in sorted(formulas, key=len, reverse=True):
             cand = candidate.strip()
+            parsed = None
             if '\\' in cand and parse_latex is not None:
                 try:
-                    return parse_latex(cand)
+                    parsed = parse_latex(cand)
                 except Exception:
                     pass
-            try:
-                norm = normalize_math_str(cand)
-                return parse_expr(norm, transformations=TRANSFORMATIONS)
-            except Exception:
-                pass
+            if parsed is None:
+                try:
+                    norm = normalize_math_str(cand)
+                    parsed = parse_expr(norm, transformations=TRANSFORMATIONS)
+                except Exception:
+                    pass
+            if parsed is not None:
+                # If equation like P = a + 1/a, extract rhs target
+                if getattr(parsed, 'is_Equality', False) and getattr(parsed.lhs, 'is_Symbol', False):
+                    parsed = parsed.rhs
+                parsed_candidates.append(parsed)
+
+        # Prioritize pure expressions over relational constraints (like a >= 2)
+        non_relational = [p for p in parsed_candidates if not getattr(p, 'is_Relational', False)]
+        if non_relational:
+            return non_relational[0]
+        if parsed_candidates:
+            return parsed_candidates[0]
 
     s = strip_latex_delimiters(s)
     # If contains LaTeX backslash, try parse_latex
     if '\\' in s and parse_latex is not None:
         try:
-            return parse_latex(s)
+            parsed = parse_latex(s)
+            if getattr(parsed, 'is_Equality', False) and getattr(parsed.lhs, 'is_Symbol', False):
+                return parsed.rhs
+            return parsed
         except Exception:
             pass
     norm = normalize_math_str(s)
-    return parse_expr(norm, transformations=TRANSFORMATIONS)
+    parsed = parse_expr(norm, transformations=TRANSFORMATIONS)
+    if getattr(parsed, 'is_Equality', False) and getattr(parsed.lhs, 'is_Symbol', False):
+        return parsed.rhs
+    return parsed
 
 def extract_sympy_tree(expr):
     if not hasattr(expr, 'args') or len(expr.args) == 0:
@@ -182,16 +207,37 @@ def evaluate_hybrid(strA, strB):
 
     if e1 is not None and e2 is not None:
         try:
-            diff = sp.simplify(e1 - e2)
-            is_equiv = (diff == 0)
-            if not is_equiv:
-                trig_diff = sp.trigsimp(diff)
-                if trig_diff == 0:
-                    is_equiv = True
-                    diff = 0
-            diff_str = str(diff)
-            exp1 = str(sp.expand(e1))
-            exp2 = str(sp.expand(e2))
+            rel1 = getattr(e1, 'is_Relational', False)
+            rel2 = getattr(e2, 'is_Relational', False)
+
+            if rel1 or rel2:
+                if rel1 and rel2:
+                    if e1.rel_op != e2.rel_op:
+                        is_equiv = False
+                        diff_str = f"Relation mismatch: {e1.rel_op} vs {e2.rel_op}"
+                    else:
+                        d_lhs = sp.simplify(e1.lhs - e2.lhs)
+                        d_rhs = sp.simplify(e1.rhs - e2.rhs)
+                        if d_lhs == 0 and d_rhs == 0:
+                            is_equiv = True
+                            diff_str = "0"
+                        else:
+                            is_equiv = False
+                            diff_str = f"Δ_lhs={d_lhs}, Δ_rhs={d_rhs}"
+                else:
+                    is_equiv = False
+                    diff_str = "Type mismatch: Relational vs Expression"
+            else:
+                diff = sp.simplify(e1 - e2)
+                is_equiv = (diff == 0)
+                if not is_equiv:
+                    trig_diff = sp.trigsimp(diff)
+                    if trig_diff == 0:
+                        is_equiv = True
+                        diff = 0
+                diff_str = str(diff)
+            exp1 = str(sp.expand(e1)) if not rel1 else str(e1)
+            exp2 = str(sp.expand(e2)) if not rel2 else str(e2)
         except Exception as ex:
             diff_str = f"Simplify Error: {ex}"
     else:
@@ -318,7 +364,11 @@ class MathIRHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/api/evaluate':
             content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length).decode('utf-8')
+            raw_body = self.rfile.read(content_length)
+            try:
+                body = raw_body.decode('utf-8')
+            except UnicodeDecodeError:
+                body = raw_body.decode('utf-8', errors='replace')
             try:
                 data = json.loads(body)
                 strA = data.get('formulaA', '')

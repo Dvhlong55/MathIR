@@ -150,9 +150,14 @@
       if (!elem) return;
       if (!text) { elem.innerHTML = ''; return; }
 
+      // Normalize \(...\) and \[...\] delimiters to $...$
+      const normalized = text
+        .replace(/\\\[([\s\S]*?)\\\]/g, '$$$1$$')
+        .replace(/\\\(([\s\S]*?)\\\)/g, '$$$1$');
+
       // If text contains $...$, render mixed text and LaTeX
-      if (text.includes('$')) {
-        const parts = text.split(/(\$[^$]+\$)/g);
+      if (normalized.includes('$')) {
+        const parts = normalized.split(/(\$[^$]+\$)/g);
         let html = '';
         for (const part of parts) {
           if (part.startsWith('$') && part.endsWith('$') && part.length > 2) {

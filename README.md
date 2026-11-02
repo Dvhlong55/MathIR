@@ -52,7 +52,13 @@ cd MathIR
 pip install -r requirements.txt
 ```
 
-### 2. Running Evaluation Tests
+### 2. Running Empirical Benchmark Suite
 ```bash
-python -m unittest discover -s tests
+python tests/test_bottlenecks.py
+```
+
+### 3. Launching Interactive Benchmark Engine
+```bash
+python server.py 8000
+# Open http://127.0.0.1:8000 in your browser
 ```
