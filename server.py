@@ -68,10 +68,16 @@ def normalize_math_str(s):
     s = re.sub(r'sin\^2', r'sin(x)**2', s)
     return s
 
+def strip_latex_delimiters(s):
+    if not s:
+        return ""
+    s = s.strip()
+    return re.sub(r'^\$+|\$+$', '', s).strip()
+
 def parse_any_formula(s):
     if not s:
         return sp.Integer(0)
-    s = s.strip()
+    s = strip_latex_delimiters(s)
     # If contains LaTeX backslash, try parse_latex
     if '\\' in s and parse_latex is not None:
         try:
@@ -131,8 +137,8 @@ def evaluate_hybrid(strA, strB):
 
     bottleneck_info = None
     e1, e2 = None, None
-    treeA = {'val': strA, 'type': 'raw'}
-    treeB = {'val': strB, 'type': 'raw'}
+    treeA = None
+    treeB = None
     tuplesA, tuplesB = [], []
     cas_errorA, cas_errorB = None, None
 
