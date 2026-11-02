@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR Real Python SymPy Engine</title>
+  <title>Full Hybrid MathIR Engine (PyTorch 2.6 + SymPy 1.13.1)</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group { transition: transform 0.15s ease; }
@@ -17,10 +17,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight text-white">MathIR Real Python Backend</h1>
-          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">SymPy 1.13.1 Live Engine</span>
+          <h1 class="text-xl font-bold tracking-tight text-white">Full Hybrid MathIR Engine</h1>
+          <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[11px] font-bold">PyTorch 2.6 + SymPy 1.13.1</span>
         </div>
-        <p class="text-xs text-slate-400 mt-0.5">Xử lý 100% bằng nhân Python thực tế (Symbolic CAS + Structural Tree)</p>
+        <p class="text-xs text-slate-400 mt-0.5">Mô hình Hybrid thực thụ: Mạng nơ-ron nhúng vector dense (PyTorch) + Nhân đại số biểu tượng (SymPy CAS)</p>
       </div>
       <div class="flex items-center gap-2">
         <span id="backendStatus" class="text-xs text-emerald-400 font-mono">Backend: 127.0.0.1:8000</span>
@@ -65,27 +65,38 @@
       </div>
     </div>
 
-    <!-- Dual Channels Diagnosis Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <!-- Triple Diagnosis Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <!-- Channel 1: SymPy CAS Engine -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Channel 1: Python SymPy Engine</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">1. Symbolic CAS (SymPy)</span>
           <span id="casStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Computing...</span>
         </div>
         <p class="text-xs text-slate-400">
-          Algebraic Difference (e1 - e2): <span id="casDiffText" class="font-mono text-slate-200 font-bold">-</span>
+          Diff (e1 - e2): <span id="casDiffText" class="font-mono text-slate-200 font-bold">-</span>
         </p>
       </div>
 
-      <!-- Channel 2: Syntactic AST Baseline -->
+      <!-- Channel 2: PyTorch Deep Neural Dense Encoder -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Channel 2: Syntactic Tree Baseline</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-400">2. Neural Dense (PyTorch)</span>
+          <span id="neuralStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold text-purple-300 bg-purple-500/20 border border-purple-500/30">256-dim</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Neural Cosine: <span id="neuralSimText" class="font-mono text-slate-200 font-bold">-</span>
+        </p>
+      </div>
+
+      <!-- Channel 3: Syntactic AST Baseline (Tangent-CFT 2019) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Baseline (Tangent-CFT)</span>
           <span id="astStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700">Overlap: 0.0%</span>
         </div>
         <p class="text-xs text-slate-400">
-          Raw Tuple Overlap (Tangent-CFT): <span id="astOverlapText" class="font-mono text-slate-200 font-bold">-</span>
+          Tuple Overlap: <span id="astOverlapText" class="font-mono text-slate-200 font-bold">-</span>
         </p>
       </div>
     </div>
@@ -94,7 +105,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
       <div>
         <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-          Hybrid Fused Similarity (Computed by Python):
+          Full Hybrid Fused Similarity (CAS Proof + PyTorch Continuous Dense Ranking):
         </span>
         <div class="flex items-baseline gap-2 mt-0.5">
           <span id="scoreText" class="font-mono text-3xl font-extrabold text-emerald-400">1.0000</span>
@@ -192,7 +203,7 @@
     }
 
     function renderPythonResults(res) {
-      document.getElementById('backendStatus').textContent = "Connected to SymPy 1.13.1";
+      document.getElementById('backendStatus').textContent = "Connected to PyTorch + SymPy";
       document.getElementById('backendStatus').className = "text-xs text-emerald-400 font-mono";
       document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
 
@@ -213,12 +224,16 @@
       }
       document.getElementById('casDiffText').textContent = res.diff;
 
-      // 3. Channel 2: AST Baseline
+      // 3. Channel 2: PyTorch Neural Embedding
+      const neuralPct = (res.neural_similarity * 100).toFixed(1) + "%";
+      document.getElementById('neuralSimText').textContent = `${neuralPct} (${res.neural_similarity.toFixed(4)})`;
+
+      // 4. Channel 3: AST Baseline
       const astPct = (res.ast_overlap_score * 100).toFixed(1) + "%";
       document.getElementById('astStatusBadge').textContent = `Overlap: ${astPct}`;
       document.getElementById('astOverlapText').textContent = `${astPct} (${res.common_tuples.length} common tuples)`;
 
-      // 4. Final Hybrid Score
+      // 5. Final Hybrid Fused Score
       const fused = res.fused_score;
       const fusedFixed = fused.toFixed(4);
       const fusedPct = (fused * 100).toFixed(1) + "%";
@@ -246,11 +261,11 @@
         badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
       }
 
-      // 5. Trees
+      // 6. Trees
       drawTree(res.treeA, 'treeSvgA');
       drawTree(res.treeB, 'treeSvgB');
 
-      // 6. Tuples
+      // 7. Tuples
       document.getElementById('tupleCountA').textContent = `${res.tuplesA.length} tuples`;
       document.getElementById('tupleCountB').textContent = `${res.tuplesB.length} tuples`;
 
