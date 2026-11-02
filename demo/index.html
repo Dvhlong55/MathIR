@@ -56,15 +56,17 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
         <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula A</div>
-        <input type="text" id="inputA" value="a*b - b*a" oninput="triggerEvaluation()"
-          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
-        <div id="previewA" class="min-h-[24px] text-xs text-zinc-300 mt-1 flex items-center overflow-x-auto"></div>
+        <textarea id="inputA" rows="3" oninput="triggerEvaluation()"
+          placeholder="Nhập công thức hoặc văn bản có chứa $TeX$..."
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition resize-y">a*b - b*a</textarea>
+        <div id="previewA" class="min-h-[26px] text-xs text-zinc-300 mt-1.5 p-2 bg-zinc-900/40 rounded-lg border border-zinc-850 overflow-x-auto leading-relaxed"></div>
       </div>
       <div>
         <div class="text-[11px] font-mono text-zinc-500 mb-1">Formula B</div>
-        <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
-          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition">
-        <div id="previewB" class="min-h-[24px] text-xs text-zinc-300 mt-1 flex items-center overflow-x-auto"></div>
+        <textarea id="inputB" rows="3" oninput="triggerEvaluation()"
+          placeholder="Nhập công thức hoặc văn bản có chứa $TeX$..."
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-white font-mono text-sm focus:outline-none focus:border-zinc-600 transition resize-y">0</textarea>
+        <div id="previewB" class="min-h-[26px] text-xs text-zinc-300 mt-1.5 p-2 bg-zinc-900/40 rounded-lg border border-zinc-850 overflow-x-auto leading-relaxed"></div>
       </div>
     </div>
 
@@ -147,10 +149,38 @@
       const elem = document.getElementById(elemId);
       if (!elem) return;
       if (!text) { elem.innerHTML = ''; return; }
-      if (window.katex) {
-        try {
-          katex.render(text, elem, { throwOnError: false, displayMode: false });
-        } catch (e) {
+
+      // If text contains $...$, render mixed text and LaTeX
+      if (text.includes('$')) {
+        const parts = text.split(/(\$[^$]+\$)/g);
+        let html = '';
+        for (const part of parts) {
+          if (part.startsWith('$') && part.endsWith('$') && part.length > 2) {
+            const math = part.slice(1, -1);
+            if (window.katex) {
+              try {
+                html += katex.renderToString(math, { throwOnError: false, displayMode: false });
+              } catch (e) {
+                html += part;
+              }
+            } else {
+              html += part;
+            }
+          } else {
+            const escaped = part.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+            html += escaped;
+          }
+        }
+        elem.innerHTML = html;
+      } else {
+        // Pure math
+        if (window.katex) {
+          try {
+            katex.render(text, elem, { throwOnError: false, displayMode: false });
+          } catch (e) {
+            elem.textContent = text;
+          }
+        } else {
           elem.textContent = text;
         }
       }

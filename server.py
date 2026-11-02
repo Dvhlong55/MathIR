@@ -77,6 +77,24 @@ def strip_latex_delimiters(s):
 def parse_any_formula(s):
     if not s:
         return sp.Integer(0)
+    s = s.strip()
+
+    # If text contains $...$, extract inline math formulas
+    formulas = re.findall(r'\$([^$]+)\$', s)
+    if formulas:
+        for candidate in sorted(formulas, key=len, reverse=True):
+            cand = candidate.strip()
+            if '\\' in cand and parse_latex is not None:
+                try:
+                    return parse_latex(cand)
+                except Exception:
+                    pass
+            try:
+                norm = normalize_math_str(cand)
+                return parse_expr(norm, transformations=TRANSFORMATIONS)
+            except Exception:
+                pass
+
     s = strip_latex_delimiters(s)
     # If contains LaTeX backslash, try parse_latex
     if '\\' in s and parse_latex is not None:
