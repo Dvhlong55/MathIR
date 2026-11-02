@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR Hybrid Workbench (CAS + Deep Structural AST)</title>
+  <title>MathIR Real Python SymPy Engine</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group { transition: transform 0.15s ease; }
@@ -17,14 +17,14 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight text-white">MathIR Hybrid Architecture</h1>
-          <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[11px] font-bold">Dual-Channel Engine</span>
+          <h1 class="text-xl font-bold tracking-tight text-white">MathIR Real Python Backend</h1>
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">SymPy 1.13.1 Live Engine</span>
         </div>
-        <p class="text-xs text-slate-400 mt-0.5">Computer Algebra System (CAS Normalizer) + Structural Tree Matching (AST)</p>
+        <p class="text-xs text-slate-400 mt-0.5">Xử lý 100% bằng nhân Python thực tế (Symbolic CAS + Structural Tree)</p>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400 font-mono">Hybrid Evaluator</span>
-        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+        <span id="backendStatus" class="text-xs text-emerald-400 font-mono">Backend: 127.0.0.1:8000</span>
+        <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
       </div>
     </div>
 
@@ -36,13 +36,14 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
             Formula A (Query):
           </label>
-          <span class="text-xs text-slate-400 font-mono">AST Tuples: <strong id="tupleCountA" class="text-blue-400">0</strong></span>
+          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountA" class="text-blue-400">0</strong></span>
         </div>
-        <input type="text" id="inputA" value="a^3+b^3+c^3 - 3abc" oninput="runHybrid()"
-               placeholder="Formula A (e.g. a^3+b^3+c^3 - 3abc, cos^2 + sin^2...)"
+        <input type="text" id="inputA" value="AB - BA" oninput="triggerEvaluation()"
+               placeholder="Formula A (e.g. AB - BA, a^3+b^3+c^3 - 3abc...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-        <div class="text-xs text-slate-400 pt-0.5">
-          <span>CAS Form (A): <strong id="casA" class="font-mono text-indigo-300">-</strong></span>
+        <div class="text-xs text-slate-400 pt-0.5 space-y-0.5">
+          <div>SymPy Parsed: <strong id="parsedA" class="font-mono text-blue-300">-</strong></div>
+          <div>Expanded: <strong id="expandedA" class="font-mono text-emerald-300">-</strong></div>
         </div>
       </div>
 
@@ -52,38 +53,39 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
             Formula B (Document Math):
           </label>
-          <span class="text-xs text-slate-400 font-mono">AST Tuples: <strong id="tupleCountB" class="text-purple-400">0</strong></span>
+          <span class="text-xs text-slate-400 font-mono">Tuples: <strong id="tupleCountB" class="text-purple-400">0</strong></span>
         </div>
-        <input type="text" id="inputB" value="(a+b+c)(a^2+b^2+c^2-ab -bc -ca)" oninput="runHybrid()"
-               placeholder="Formula B (e.g. (a+b+c)(a^2+b^2+c^2-ab-bc-ca)...)"
+        <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
+               placeholder="Formula B (e.g. 0, b + a, 1...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-white">
-        <div class="text-xs text-slate-400 pt-0.5">
-          <span>CAS Form (B): <strong id="casB" class="font-mono text-indigo-300">-</strong></span>
+        <div class="text-xs text-slate-400 pt-0.5 space-y-0.5">
+          <div>SymPy Parsed: <strong id="parsedB" class="font-mono text-purple-300">-</strong></div>
+          <div>Expanded: <strong id="expandedB" class="font-mono text-emerald-300">-</strong></div>
         </div>
       </div>
     </div>
 
     <!-- Dual Channels Diagnosis Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <!-- Channel 1: CAS Channel -->
+      <!-- Channel 1: SymPy CAS Engine -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Channel 1: Symbolic CAS Engine</span>
-          <span id="casStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Δ = 0 (Identical)</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Channel 1: Python SymPy Engine</span>
+          <span id="casStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Computing...</span>
         </div>
         <p class="text-xs text-slate-400">
-          Algebraic difference: <span id="casDiffText" class="font-mono text-slate-200 font-bold">e1 - e2 = 0</span>
+          Algebraic Difference (e1 - e2): <span id="casDiffText" class="font-mono text-slate-200 font-bold">-</span>
         </p>
       </div>
 
-      <!-- Channel 2: Syntactic AST Channel -->
+      <!-- Channel 2: Syntactic AST Baseline -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Channel 2: Syntactic AST Baseline</span>
-          <span id="astStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700">Overlap: 14.4%</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Channel 2: Syntactic Tree Baseline</span>
+          <span id="astStatusBadge" class="text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700">Overlap: 0.0%</span>
         </div>
         <p class="text-xs text-slate-400">
-          Raw tuple overlap (Tangent-CFT): <span id="astOverlapText" class="font-mono text-slate-200 font-bold">14.4%</span>
+          Raw Tuple Overlap (Tangent-CFT): <span id="astOverlapText" class="font-mono text-slate-200 font-bold">-</span>
         </p>
       </div>
     </div>
@@ -92,7 +94,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
       <div>
         <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-          Hybrid Fused Similarity (CAS + Structural Ranking):
+          Hybrid Fused Similarity (Computed by Python):
         </span>
         <div class="flex items-baseline gap-2 mt-0.5">
           <span id="scoreText" class="font-mono text-3xl font-extrabold text-emerald-400">1.0000</span>
@@ -112,7 +114,7 @@
       <!-- Tree A -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Syntax Tree (Formula A):
+          Syntax Tree (Formula A) — from SymPy:
         </span>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
           <svg id="treeSvgA" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
@@ -122,7 +124,7 @@
       <!-- Tree B -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Syntax Tree (Formula B):
+          Syntax Tree (Formula B) — from SymPy:
         </span>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
           <svg id="treeSvgB" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
@@ -152,187 +154,136 @@
   </div>
 
   <script>
-    // =========================================================================
-    // 1. SYMBOLIC CAS ENGINE (Computer Algebra Normalizer)
-    // =========================================================================
-    function casNormalize(expr) {
-      if (!expr) return "";
-      let s = expr.trim().replace(/\s+/g, '').toLowerCase();
-      let raw = s.replace(/\*/g, '');
+    const BACKEND_URL = 'http://127.0.0.1:8000/api/evaluate';
+    let debounceTimer = null;
 
-      // A. 3-Variable Cubic Identity: a^3 + b^3 + c^3 - 3abc <=> (a+b+c)(a^2+b^2+c^2 - ab - bc - ca)
-      if (raw === 'a^3+b^3+c^3-3abc' ||
-          raw === '(a+b+c)(a^2+b^2+c^2-ab-bc-ca)' ||
-          raw === '(a+b+c)(a^2+b^2+c^2-bc-ca-ab)' ||
-          raw === '(a+b+c)(a^2+b^2+c^2-ca-ab-bc)' ||
-          raw === '(a+b+c)(a^2+b^2+c^2-a*b-b*c-c*a)') {
-        return "a^3 + b^3 + c^3 - 3abc";
-      }
-
-      // B. Trigonometric Pythagorean Identities
-      if (raw === 'cos^2+sin^2' || raw === 'sin^2+cos^2' ||
-          raw === 'cos(x)^2+sin(x)^2' || raw === 'sin(x)^2+cos(x)^2' ||
-          raw === 'cos^2(x)+sin^2(x)' || raw === 'sin^2(x)+cos^2(x)') {
-        return "1";
-      }
-      if (raw === 'sec^2-tan^2' || raw === '1+tan^2') {
-        return "sec^2";
-      }
-
-      // C. Binomial Squares (Expansion to Canonical Polynomial)
-      if (raw === '(x+1)^2' || raw === '(1+x)^2' || raw === 'x^2+2x+1') {
-        return "x^2 + 2x + 1";
-      }
-      if (raw === '(a+b)^2' || raw === '(b+a)^2' || raw === 'a^2+2ab+b^2' || raw === 'b^2+2ab+a^2') {
-        return "a^2 + 2ab + b^2";
-      }
-      if (raw === '(a-b)^2' || raw === '(b-a)^2' || raw === 'a^2-2ab+b^2') {
-        return "a^2 - 2ab + b^2";
-      }
-
-      // D. Difference of Squares
-      if (raw === '(x-y)(x+y)' || raw === '(x+y)(x-y)' || raw === 'x^2-y^2') {
-        return "x^2 - y^2";
-      }
-      if (raw === '(a-b)(a+b)' || raw === '(a+b)(a-b)' || raw === 'a^2-b^2') {
-        return "a^2 - b^2";
-      }
-
-      // E. Commutative Canonical Sorting for general sum & products
-      if (raw.includes('+') && !raw.includes('(') && !raw.includes('^')) {
-        let parts = raw.split('+').sort();
-        return parts.join(' + ');
-      }
-      if (raw === 'yx' || raw === 'ba') return raw.split('').sort().join('');
-
-      return expr;
+    function triggerEvaluation() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(callPythonBackend, 180);
     }
 
-    // =========================================================================
-    // 2. PARSER & SYNTAX TREE EXTRACTOR
-    // =========================================================================
-    function tokenize(s) {
-      s = s.trim();
-      let raw = [], i = 0;
-      while (i < s.length) {
-        let ch = s[i];
-        if (/\s/.test(ch)) { i++; continue; }
-        if (['(', ')', '[', ']'].includes(ch)) { raw.push({ type: 'paren', val: ch }); i++; continue; }
-        if (['+', '-', '*', '/', '^', '='].includes(ch)) { raw.push({ type: 'op', val: ch }); i++; continue; }
-        if (/\d/.test(ch)) {
-          let num = '';
-          while (i < s.length && /[\d\.]/.test(s[i])) { num += s[i]; i++; }
-          raw.push({ type: 'num', val: num });
-          continue;
-        }
-        if (/[a-zA-Z_]/.test(ch)) {
-          let id = '';
-          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i]; i++; }
-          if (['sin', 'cos', 'tan', 'exp', 'log'].includes(id.toLowerCase())) {
-            raw.push({ type: 'fn', val: id.toLowerCase() });
-          } else {
-            for (let c = 0; c < id.length; c++) {
-              if (c > 0) raw.push({ type: 'op', val: '*' });
-              raw.push({ type: 'id', val: id[c] });
-            }
-          }
-          continue;
-        }
-        i++;
-      }
+    async function callPythonBackend() {
+      const formulaA = document.getElementById('inputA').value.trim();
+      const formulaB = document.getElementById('inputB').value.trim();
 
-      // Insert implicit multiplication
-      let tokens = [];
-      for (let j = 0; j < raw.length; j++) {
-        tokens.push(raw[j]);
-        if (j < raw.length - 1) {
-          let curr = raw[j];
-          let next = raw[j + 1];
-          let currIsTerm = (curr.type === 'num' || curr.type === 'id' || curr.val === ')' || curr.val === ']');
-          let nextIsTerm = (next.type === 'id' || next.type === 'fn' || next.type === 'num' || next.val === '(' || next.val === '[');
-          if (currIsTerm && nextIsTerm) {
-            tokens.push({ type: 'op', val: '*' });
-          }
-        }
-      }
-      return tokens;
-    }
+      try {
+        const resp = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ formulaA, formulaB })
+        });
 
-    class Parser {
-      constructor(tokens) { this.tokens = tokens; this.p = 0; }
-      peek() { return this.tokens[this.p] || null; }
-      consume() { return this.tokens[this.p++]; }
+        if (!resp.ok) throw new Error(`HTTP error ${resp.status}`);
+        const data = await resp.json();
 
-      parse() {
-        if (!this.tokens.length) return null;
-        return this.parseEq();
-      }
-      parseEq() {
-        let l = this.parseAdd();
-        if (this.peek()?.val === '=') { this.consume(); return { val: '=', l, r: this.parseAdd(), type: 'op' }; }
-        return l;
-      }
-      parseAdd() {
-        let l = this.parseMul();
-        while (this.peek() && ['+', '-'].includes(this.peek().val)) {
-          let op = this.consume().val;
-          l = { val: op, l, r: this.parseMul(), type: 'op' };
+        if (data.status === 'error') {
+          document.getElementById('casStatusBadge').textContent = "Syntax Error";
+          document.getElementById('casStatusBadge').className = "text-[11px] px-2 py-0.5 rounded font-mono bg-rose-500/20 text-rose-400 border border-rose-500/30";
+          document.getElementById('casDiffText').textContent = data.message;
+          return;
         }
-        return l;
-      }
-      parseMul() {
-        let l = this.parsePow();
-        while (this.peek() && ['*', '/'].includes(this.peek().val)) {
-          let op = this.consume().val;
-          l = { val: op, l, r: this.parsePow(), type: 'op' };
-        }
-        return l;
-      }
-      parsePow() {
-        let l = this.parsePrimary();
-        if (this.peek()?.val === '^') {
-          this.consume();
-          return { val: '^', l, r: this.parsePow(), type: 'op' };
-        }
-        return l;
-      }
-      parsePrimary() {
-        let t = this.consume();
-        if (!t) return null;
-        if (t.val === '(' || t.val === '[') {
-          let inner = this.parseEq();
-          if (this.peek()?.val === ')' || this.peek()?.val === ']') this.consume();
-          return inner;
-        }
-        if (t.type === 'num') return { val: t.val, type: 'num' };
-        if (t.type === 'id' || t.type === 'fn') return { val: t.val, type: 'var' };
-        return null;
+
+        renderPythonResults(data);
+      } catch (err) {
+        document.getElementById('backendStatus').textContent = "Offline (start server.py)";
+        document.getElementById('backendStatus').className = "text-xs text-rose-400 font-mono";
+        document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-rose-500";
       }
     }
 
-    // Extract AST tuples
-    function getTuples(node, tuples = []) {
-      if (!node) return tuples;
-      if (node.l && node.r) {
-        tuples.push(`(${node.val}, ${node.l.val}, L)`);
-        tuples.push(`(${node.val}, ${node.r.val}, R)`);
-        getTuples(node.l, tuples);
-        getTuples(node.r, tuples);
-      } else if (node.l) {
-        tuples.push(`(${node.val}, ${node.l.val}, L)`);
-        getTuples(node.l, tuples);
-      } else if (node.r) {
-        tuples.push(`(${node.val}, ${node.r.val}, R)`);
-        getTuples(node.r, tuples);
+    function renderPythonResults(res) {
+      document.getElementById('backendStatus').textContent = "Connected to SymPy 1.13.1";
+      document.getElementById('backendStatus').className = "text-xs text-emerald-400 font-mono";
+      document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+
+      // 1. Parsed & Expanded
+      document.getElementById('parsedA').textContent = res.sympy_reprA;
+      document.getElementById('parsedB').textContent = res.sympy_reprB;
+      document.getElementById('expandedA').textContent = res.expandedA;
+      document.getElementById('expandedB').textContent = res.expandedB;
+
+      // 2. Channel 1: SymPy CAS
+      const casBadge = document.getElementById('casStatusBadge');
+      if (res.is_symbolic_equivalent) {
+        casBadge.textContent = "Δ = 0 (Proved Identical)";
+        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else {
+        casBadge.textContent = "Δ ≠ 0 (Independent)";
+        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700";
       }
-      return tuples;
+      document.getElementById('casDiffText').textContent = res.diff;
+
+      // 3. Channel 2: AST Baseline
+      const astPct = (res.ast_overlap_score * 100).toFixed(1) + "%";
+      document.getElementById('astStatusBadge').textContent = `Overlap: ${astPct}`;
+      document.getElementById('astOverlapText').textContent = `${astPct} (${res.common_tuples.length} common tuples)`;
+
+      // 4. Final Hybrid Score
+      const fused = res.fused_score;
+      const fusedFixed = fused.toFixed(4);
+      const fusedPct = (fused * 100).toFixed(1) + "%";
+
+      document.getElementById('scoreText').textContent = fusedFixed;
+      document.getElementById('scorePercent').textContent = `(${fusedPct})`;
+      document.getElementById('scoreBar').style.width = fusedPct;
+      document.getElementById('matchType').textContent = res.match_type;
+
+      const scoreElem = document.getElementById('scoreText');
+      const bar = document.getElementById('scoreBar');
+      const badge = document.getElementById('matchType');
+
+      if (fused >= 0.75) {
+        scoreElem.className = "font-mono text-3xl font-extrabold text-emerald-400";
+        bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else if (fused >= 0.4) {
+        scoreElem.className = "font-mono text-3xl font-extrabold text-amber-400";
+        bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
+      } else {
+        scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
+        bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
+      }
+
+      // 5. Trees
+      drawTree(res.treeA, 'treeSvgA');
+      drawTree(res.treeB, 'treeSvgB');
+
+      // 6. Tuples
+      document.getElementById('tupleCountA').textContent = `${res.tuplesA.length} tuples`;
+      document.getElementById('tupleCountB').textContent = `${res.tuplesB.length} tuples`;
+
+      const commonSet = new Set(res.common_tuples);
+
+      const listA = document.getElementById('tuplesListA');
+      listA.innerHTML = '';
+      if (!res.tuplesA.length) listA.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
+      res.tuplesA.forEach(t => {
+        const isMatch = commonSet.has(t);
+        const pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
+        pill.textContent = t;
+        listA.appendChild(pill);
+      });
+
+      const listB = document.getElementById('tuplesListB');
+      listB.innerHTML = '';
+      if (!res.tuplesB.length) listB.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
+      res.tuplesB.forEach(t => {
+        const isMatch = commonSet.has(t);
+        const pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
+        pill.textContent = t;
+        listB.appendChild(pill);
+      });
     }
 
-    // Draw Tree SVG
+    // SVG Drawing function
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
-      if (!ast) return 0;
+      if (!ast) return;
 
       let leafIndex = 0, maxDepth = 0;
       function walk(node, depth) {
@@ -357,10 +308,8 @@
       let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
       let stepY = maxDepth > 0 ? Math.min(38, (H - padY * 2) / maxDepth) : 36;
 
-      let nodeCount = 0;
       function setCoords(node) {
         if (!node) return;
-        nodeCount++;
         node.x = padX + node.col * stepX;
         node.y = padY + node.depth * stepY;
         if (node.l) setCoords(node.l);
@@ -422,140 +371,9 @@
         if (node.r) drawNodes(node.r, false);
       }
       drawNodes(ast, true);
-
-      return nodeCount;
     }
 
-    // =========================================================================
-    // 3. HYBRID FUSION ENGINE (CAS + AST)
-    // =========================================================================
-    function runHybrid() {
-      let strA = document.getElementById('inputA').value.trim();
-      let strB = document.getElementById('inputB').value.trim();
-
-      // 1. Channel 1: CAS Normalization
-      let casA = casNormalize(strA);
-      let casB = casNormalize(strB);
-
-      document.getElementById('casA').textContent = casA || "-";
-      document.getElementById('casB').textContent = casB || "-";
-
-      let isCasEquiv = (casA && casB && casA === casB);
-      let casBadge = document.getElementById('casStatusBadge');
-      let casDiff = document.getElementById('casDiffText');
-
-      if (isCasEquiv) {
-        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-        casBadge.textContent = "Δ = 0 (Proved Identical)";
-        casDiff.textContent = `e1 - e2 ≡ 0 (Expanded: ${casA})`;
-      } else {
-        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700";
-        casBadge.textContent = "Δ ≠ 0 (Independent)";
-        casDiff.textContent = "e1 - e2 ≠ 0 (No identity found)";
-      }
-
-      // 2. Channel 2: AST Syntactic Parsing
-      let astA = new Parser(tokenize(strA)).parse();
-      let countA = drawTree(astA, 'treeSvgA');
-
-      let astB = new Parser(tokenize(strB)).parse();
-      let countB = drawTree(astB, 'treeSvgB');
-
-      let tuplesA = getTuples(astA);
-      let tuplesB = getTuples(astB);
-
-      document.getElementById('tupleCountA').textContent = `${tuplesA.length} tuples`;
-      document.getElementById('tupleCountB').textContent = `${tuplesB.length} tuples`;
-
-      let setA = new Set(tuplesA);
-      let setB = new Set(tuplesB);
-
-      // Render pills A
-      let listA = document.getElementById('tuplesListA');
-      listA.innerHTML = '';
-      if (!tuplesA.length) listA.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
-      tuplesA.forEach(t => {
-        let isMatch = setB.has(t);
-        let pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
-        pill.textContent = t;
-        listA.appendChild(pill);
-      });
-
-      // Render pills B
-      let listB = document.getElementById('tuplesListB');
-      listB.innerHTML = '';
-      if (!tuplesB.length) listB.innerHTML = '<span class="text-xs text-slate-500 italic">Single node / No tuples</span>';
-      tuplesB.forEach(t => {
-        let isMatch = setA.has(t);
-        let pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
-        pill.textContent = t;
-        listB.appendChild(pill);
-      });
-
-      // Raw AST overlap score
-      let intersectCount = tuplesA.filter(t => setB.has(t)).length;
-      let astScore = 0.0;
-      if (tuplesA.length === 0 && tuplesB.length === 0) {
-        astScore = (strA.toLowerCase() === strB.toLowerCase() && strA !== '') ? 1.0 : 0.0;
-      } else if (tuplesA.length === 0 || tuplesB.length === 0) {
-        astScore = 0.0;
-      } else {
-        astScore = intersectCount / Math.sqrt(tuplesA.length * tuplesB.length);
-      }
-
-      let astPct = (astScore * 100).toFixed(1) + "%";
-      document.getElementById('astStatusBadge').textContent = `Overlap: ${astPct}`;
-      document.getElementById('astOverlapText').textContent = `${astPct} (${intersectCount} common tuples)`;
-
-      // 3. Fused Hybrid Decision:
-      // If CAS proves equivalence -> 1.0 (Exact Semantic Match)
-      // Else if AST overlap exists -> AST score
-      // Else -> 0.0
-      let hybridScore = 0.0;
-      let hybridLabel = "Syntactic Divergence";
-
-      if (isCasEquiv) {
-        hybridScore = 1.0;
-        hybridLabel = "CAS Proved Equivalent (Δ = 0)";
-      } else if (astScore > 0) {
-        hybridScore = astScore;
-        hybridLabel = astScore >= 0.7 ? "Strong Structural Overlap" : "Partial Sub-tree Match";
-      } else {
-        hybridScore = 0.0;
-        hybridLabel = "Non-matching / Disjoint";
-      }
-
-      let scoreFixed = hybridScore.toFixed(4);
-      let scorePct = (hybridScore * 100).toFixed(1) + "%";
-
-      document.getElementById('scoreText').textContent = scoreFixed;
-      document.getElementById('scorePercent').textContent = `(${scorePct})`;
-      document.getElementById('scoreBar').style.width = scorePct;
-      document.getElementById('matchType').textContent = hybridLabel;
-
-      let scoreElem = document.getElementById('scoreText');
-      let bar = document.getElementById('scoreBar');
-      let badge = document.getElementById('matchType');
-
-      if (hybridScore >= 0.75) {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-emerald-400";
-        bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-      } else if (hybridScore >= 0.4) {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-amber-400";
-        bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
-      } else {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
-        bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
-        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', runHybrid);
-    runHybrid();
+    window.addEventListener('DOMContentLoaded', triggerEvaluation);
   </script>
 </body>
 </html>
