@@ -1,0 +1,213 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{vietnam}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
+
+% Strict Monochrome / Black and White Formatting
+\urlstyle{same}
+\setlist{nosep}
+
+\begin{document}
+
+\renewcommand{\contentsname}{Table of Contents}
+\renewcommand{\abstractname}{Abstract}
+\renewcommand{\refname}{References}
+
+% =========================================================================
+% FIRST PAGE: COURSE, STUDENTS, HCMUS, APCS, TABLE OF CONTENTS
+% =========================================================================
+\begin{center}
+    {\large \textbf{VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY (VNU-HCM)}}\\[0.2em]
+    {\large \textbf{UNIVERSITY OF SCIENCE (HCMUS)}}\\[0.5em]
+    {\large \textbf{FACULTY OF INFORMATION TECHNOLOGY}}\\[0.5em]
+    {\large \textbf{ADVANCED PROGRAM IN COMPUTER SCIENCE (APCS)}}\\[1.5em]
+
+    {\LARGE \textbf{SC203 -- SCIENTIFIC METHOD}}\\[5.6em]
+    {\Large \textbf{Assignment 2: Research Proposal \& Dataset Identification}}\\[7.5em]
+
+    \textbf{\large Student Research Team}\\[0.8em]
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Student ID} & \textbf{Full Name} & \textbf{Program} \\
+        \midrule
+        25125024 & Đỗ Viết Hoàng Long   & 25A01 \\
+        25125091 & Trần Đức Toàn        & 25A01 \\
+        25125010 & Phạm Trung Duy       & 25A01 \\
+        25125006 & Nguyễn Nguyễn Gia Bảo & 25A01 \\
+        \bottomrule
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\vspace{1.5em}
+\hrule
+\vspace{1.5em}
+
+\tableofcontents
+
+\newpage
+
+% =========================================================================
+% SECTION 1: IDEA 1 - MATHEMATICAL INFORMATION RETRIEVAL (MATH IR)
+% =========================================================================
+\section{Idea 1: Mathematical Information Retrieval System Based on Semantic Structure}
+
+\subsection{Topic \& General Information}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Course:} Scientific Research Methodology (SC203 / Scientific Method)
+    \item \textbf{Topic:} Building a Mathematical Information Retrieval (MathIR) system based on syntax tree structures and formula semantics (\LaTeX{}/MathML).
+\end{itemize}
+
+\subsection{Topic Summary and Testable Hypotheses}
+\begin{itemize}[leftmargin=1.5em]
+    \item $\mathbf{H_1}$ \textbf{(Semantic Canonicalization and Variable Renaming):} Mathematical expressions that are algebraically equivalent or differ only in variable notation (e.g., $a, b$ vs. $x, y$) are often missed when using one-dimensional (1D) text string matching methods. However, they will be accurately retrieved when represented as canonicalized Semantic Trees.
+    \item $\mathbf{H_2}$ \textbf{(Hierarchical Structure and Algebraic Properties):} Mathematical expressions possess a non-linear tree structure with operator precedence and algebraic properties (such as commutativity: $a + b$ is equivalent to $b + a$). Applying Tree Edit Distance or graph/tree vector embeddings will achieve superior search performance (Precision/Recall) compared to sequential string matching methods.
+    \item $\mathbf{H_3}$ \textbf{(Combining Context and Formulas):} Combining the embedding vectors of descriptive text context with the structural representation of mathematical formulas enhances the ability to retrieve the original problem, even when the user's query contains only a partial formula or has discrepancies in keywords.
+\end{itemize}
+
+\subsection{Target Datasets}
+
+\noindent\textbf{Primary Dataset 1: ARQMath Benchmark (CLEF Lab and DPRL Lab)}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Provider:} Document and Pattern Recognition Laboratory (DPRL -- Rochester Institute of Technology) and the CLEF international evaluation lab.
+    \item \textbf{Nature and Scale:}
+    \begin{itemize}[leftmargin=1.2em]
+        \item Mathematical question-answering data from Math Stack Exchange (over 1.4 million posts, answers, vote scores, tags).
+        \item Tens of millions of mathematical formulas extracted into \LaTeX{} accompanied by Visual Layout Trees (VLT) and Semantic Operator Trees (OPT) in MathML standard.
+        \item Ground-truth duplicate question pairs used as benchmarks for search results.
+    \end{itemize}
+    \item \textbf{Benchmark Tasks:} Task 1 (Answer Retrieval -- finding answers/problems from mixed text + formula questions) and Task 2 (Formula Retrieval -- finding isolated formulas based on structure).
+    \item \textbf{Access Method:} Publicly open for academic research in the repositories of CLEF ARQMath and DPRL RIT.
+\end{itemize}
+
+\vspace{0.8em}
+\noindent\textbf{Primary Dataset 2: NTCIR MathIR Benchmark (NTCIR-11 and NTCIR-12)}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Provider:} National Institute of Informatics (NII), Japan.
+    \item \textbf{Nature and Scale:}
+    \begin{itemize}[leftmargin=1.2em]
+        \item \textit{arXiv Math Corpus:} Millions of excerpts and mathematical papers from the arXiv preprint repository.
+        \item \textit{Wikipedia Math Corpus:} Tens of thousands of mathematical problems, theorems, and definitions extracted from English Wikipedia.
+    \end{itemize}
+    \item \textbf{Data Format:} Source \LaTeX{} accompanied by sample queries (Evaluation Topics) with relevance judgments evaluated by mathematics experts.
+    \item \textbf{Access Method:} NTCIR Math Task academic portal.
+\end{itemize}
+
+\vspace{0.8em}
+\noindent\textbf{Auxiliary Dataset: Stack Exchange Data Dump}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Provider:} Open archive at the Internet Archive (\url{archive.org}).
+    \item \textbf{Nature and Format:} Raw XML data containing all posts, revision history, and question links on Math Stack Exchange.
+    \item \textbf{Application:} Training mathematical formula vector embedding models (similar to the TangentCFT architecture).
+\end{itemize}
+
+\subsection{Feasibility Evaluation and Risk Management}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Data Volume and Computational Reduction:} Raw data repositories (ARQMath, MSE Dump) have large sizes ranging from several GB to dozens of GB. The team will sample a subset of approximately 50,000--100,000 representative mathematical expressions and queries for indexing and experimentation, ensuring compatibility with personal computer resources.
+    \item \textbf{Formula Preprocessing:} \LaTeX{} syntax variations are standardized through specialized AST conversion libraries (such as SymPy, KaTeX AST Parser, MathML Converter).
+    \item \textbf{Fallback Plan:} In case of resource bottlenecks when processing large-scale tree data, the team will directly use formula embedding vectors preprocessed from the MIRB benchmark and the TangentCFT open-source codebase to verify the hypotheses.
+\end{itemize}
+
+\subsection{References}
+\begin{enumerate}[leftmargin=1.5em]
+    \item Mansouri, B., Rohatgi, S., Oard, D. W., Wu, J., Giles, C. L., \& Zanibbi, R. (2024). Tangent-CFT \& Tangent-CFTED: Combining Vector and Tree-Edit Distance Embeddings for Math Information Retrieval. \textit{arXiv preprint arXiv:2408.11646}.
+    \item Zanibbi, R., Mansouri, B., et al. (2020). Overview of ARQMath 2020: CLEF Lab on Answer Retrieval for Questions with Math. \textit{International Conference of the CLEF Association}, LNCS 12260, 299--322.
+    \item Davila, K., \& Zanibbi, R. (2017). Layout and Semantics: Visual Layout Trees for Mathematical Formula Retrieval. \textit{SIGIR '17}.
+    \item Mansouri, B., et al. (2025). MIRB: A Benchmark for Mathematical Information Retrieval. \textit{arXiv preprint arXiv:2505.15585}.
+\end{enumerate}
+
+\newpage
+
+% =========================================================================
+% SECTION 2: IDEA 2 - CONTEXT-AWARE SMART PARKING PRIORITIZATION
+% =========================================================================
+\section{Idea 2: Context-Aware Smart Parking Prioritization for Multi-Campus Clusters}
+
+\subsection{Topic \& Problem Statement}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Course:} Scientific Research Methodology (SC203 / Scientific Method)
+    \item \textbf{Topic:} Formulating an empirical decision-support model for multi-facility parking prioritization across adjacent campus lots (HCMUS internal lot, HCMUE lot, and Le Hong Phong lot) under spatio-temporal congestion and tropical weather conditions.
+    \item \textbf{Research Challenge:} Determining the optimal real-time priority ranking among the three candidate parking facilities ($P_{\text{US}}$, $P_{\text{HCMUE}}$, $P_{\text{LHP}}$) based on class arrival shifts, ambient temperature, and active precipitation, without requiring proprietary on-campus sensor deployments.
+\end{itemize}
+
+\subsection{Testable Hypotheses}
+Based on discrete choice theory and commuter utility maximization, we formalize five testable behavioral hypotheses:
+\begin{itemize}[leftmargin=1.5em]
+    \item $\mathbf{H_1}$ \textbf{(Lead-Time Urgency Priority):} When remaining lead time before class commencement is $< 10$ minutes, the priority ranking of $P_{\text{HCMUE}}$ and $P_{\text{LHP}}$ supersedes $P_{\text{US}}$ to minimize gate-queuing variance.
+    \item $\mathbf{H_2}$ \textbf{(Peak Saturation Heuristic):} During peak saturation windows (13:00--14:00 and 15:30--16:00), the predicted occupancy penalty of $P_{\text{US}}$ outweighs its proximity benefit, shifting top recommendation rank to $P_{\text{HCMUE}}$.
+    \item $\mathbf{H_3}$ \textbf{(Dismissal Expediency Heuristic Post-17:00):} For commuters with departure deadlines within 30 minutes of dismissal, $P_{\text{HCMUE}}$ and $P_{\text{LHP}}$ dominate $P_{\text{US}}$ due to lower egress checkout friction.
+    \item $\mathbf{H_4}$ \textbf{(Thermal Protection for Electric Fleet):} For electric two-wheelers (E2Ws) under ambient temperatures $> 34^\circ\text{C}$, the utility weighting of shade cover outweighs walking distance penalties by a factor of at least $1.5\times$.
+    \item $\mathbf{H_5}$ \textbf{(Rain Friction Dominance):} Under active precipitation, pedestrian walking penalties increase non-linearly, positioning $P_{\text{US}}$ as the top rank unless lot capacity is strictly zero.
+\end{itemize}
+
+\subsection{Target Datasets \& Candidate Evaluation Tools}
+
+\noindent\textbf{Primary Benchmark Datasets:}
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{PKLot Dataset (v2):}
+    \begin{itemize}[leftmargin=1.2em]
+        \item \textit{Provider \& Origin:} Federal University of Paraná (UFPR) and Pontifical Catholic University of Paraná (PUC-PR).
+        \item \textit{Scale \& Modalities:} Contains $12,417$ high-resolution surveillance images and $695,899$ segmented parking slot instances captured across three outdoor parking lots under diverse weather regimes (\textbf{Sunny}, \textbf{Cloudy}, and \textbf{Rainy}), incorporating intense solar glare and puddle reflections.
+        \item \textit{Access:} Openly available for research via UFPR vision repository and Kaggle.
+    \end{itemize}
+
+    \item \textbf{CNRPark-EXT Dataset:}
+    \begin{itemize}[leftmargin=1.2em]
+        \item \textit{Provider \& Origin:} Institute of Information Science and Technologies (ISTI), National Research Council (CNR), Pisa, Italy.
+        \item \textit{Scale \& Modalities:} Over $150,000$ labeled parking space patches captured across 9 smart surveillance cameras in variable daylight and weather conditions, featuring severe perspective distortion, partial tree occlusions, and vehicle shadow interference.
+        \item \textit{Access:} Publicly accessible via the CNR-ISTI smart campus research portal.
+    \end{itemize}
+
+    \item \textbf{Auxiliary Contextual Datasets:}
+    \begin{itemize}[leftmargin=1.2em]
+        \item \textit{Campus Timetable Proxy:} HCMUS academic course schedules to estimate aggregate arrival and departure traffic density across study shifts.
+        \item \textit{Open-Meteo API:} Hourly meteorological history for Ho Chi Minh City (ambient temperature, direct solar radiation, rainfall precipitation).
+    \end{itemize}
+\end{enumerate}
+
+\vspace{0.8em}
+\noindent\textbf{Dataset Search Methodology \& Audit Trail:}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Search Keywords Explored:} \texttt{"PKLot parking dataset benchmark"}, \texttt{"CNRPark-EXT surveillance dataset"}, \texttt{"university campus parking choice dataset"}, \texttt{"Open-Meteo historical API Ho Chi Minh City"}.
+    \item \textbf{Platforms Consulted:} Google Scholar, Kaggle, Papers With Code, Roboflow Universe, IEEE DataPort.
+    \item \textbf{Audit of Infeasible Exploration Alternatives (Negative Results):}
+    \begin{enumerate}[leftmargin=1.2em]
+        \item \textit{On-Campus Physical Sensor / CCTV Deployment:} Installing ultrasonic/infrared IoT sensors or tapping into HCMUS security CCTV feeds is legally and administratively prohibited for undergraduate coursework.
+        \item \textit{Mobile GPS Tracking of Students:} Logging student location traces introduces severe ethical and privacy risks and lacks per-slot ground-truth occupancy annotations.
+    \end{enumerate}
+    \item \textbf{Methodological Conclusion:} Utilizing established public vision benchmarks (\textbf{PKLot} and \textbf{CNRPark-EXT}) ensures high scientific rigor, reproducibility, and zero legal/privacy barrier.
+\end{itemize}
+
+\vspace{0.8em}
+\noindent\textbf{Baseline Tools \& Quantitative Metrics:}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Detector / Classifier Baselines:} YOLOv8 and YOLOv7-tiny for slot localization; MobileNetV3-Small, ResNet-50, and ViT-B/16 for patch occupancy classification; Multinomial Logit (MNL) and XGBoost for multi-criteria facility ranking.
+    \item \textbf{Evaluation Metrics:} Accuracy, F1-Score, $\text{mAP@0.5}$, $\text{mAP@0.5:0.95}$, and Inference Latency (ms/frame, FPS).
+\end{itemize}
+
+\subsection{Feasibility Assessment \& Risk Management}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Computational Feasibility:} The benchmark datasets (PKLot and CNRPark-EXT) are pre-segmented into patch-level images, permitting fast feature extraction on standard student laptops. Lightweight models like MobileNetV3 and YOLOv8-tiny train within $1$--$2$ hours on consumer GPUs (or Google Colab free tier).
+    \item \textbf{Risk Mitigation \& Fallback Plan:} If full image-level object detection causes local VRAM exhaustion, the pipeline will fallback strictly to patch-based classification on cropped slot bounding boxes, reducing model parameter footprint from $40+$ MB to $< 10$ MB.
+\end{itemize}
+
+\subsection{References}
+\begin{enumerate}[leftmargin=1.5em]
+    \item Wang, C.-Y., Bochkovskiy, A., \& Liao, H.-Y. M. (2023). YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors. \textit{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, 7464--7475.
+    \item Dosovitskiy, A., Beyer, L., Kolesnikov, A., et al. (2021). An image is worth 16x16 words: Transformers for image recognition at scale. \textit{International Conference on Learning Representations (ICLR)}.
+    \item Al-Turjman, F., \& Malekloo, A. (2021). Smart parking systems: Comprehensive review based on IoT and environmental context. \textit{IEEE Transactions on Intelligent Transportation Systems}, 22(4), 2053--2065.
+    \item Yuldashev, A., Lee, S., \& Kim, J. (2024). Parking lot occupancy detection with improved MobileNetV3 on benchmark datasets. \textit{Sensors}, 24(16), Article 5236.
+    \item Rotaris, L., \& Danielis, R. (2022). University campus parking demand management: A case study of stated choice and congestion mitigation. \textit{Sustainability}, 14(6), Article 3427.
+    \item Zhang, Y., Liu, T., \& Sun, H. (2023). Research on parking recommendation methods considering travelers' decision behaviors and psychological characteristics. \textit{Sustainability}, 15(8), Article 6808.
+\end{enumerate}
+
+\end{document}

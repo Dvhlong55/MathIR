@@ -1,0 +1,18 @@
+# Core scientific & math manipulation
+numpy>=1.24.0
+scipy>=1.10.0
+sympy>=1.12
+
+# Tree representation & distance
+zss>=1.2.0
+lxml>=4.9.0
+beautifulsoup4>=4.12.0
+
+# Vector embeddings & search
+gensim>=4.3.0
+scikit-learn>=1.3.0
+
+# Evaluation & benchmarking
+pandas>=2.0.0
+matplotlib>=3.7.0
+tqdm>=4.65.0

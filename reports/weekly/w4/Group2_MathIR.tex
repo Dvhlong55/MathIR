@@ -1,0 +1,176 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Core Geometry and Encoding (pdfLaTeX & Vietnamese Support) ---
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese,english]{babel}
+\usepackage[T5,T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[top=2cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% --- Math, Tables and Technical Packages ---
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue!80!black,
+	citecolor=blue!80!black,
+	urlcolor=blue!70!black
+}
+
+\setlist[itemize]{leftmargin=1.5em, itemsep=2pt, topsep=3pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt, topsep=3pt}
+
+\begin{document}
+	
+	% ==================== HEADER: INSTITUTION & COURSE (TOP) ====================
+	\begin{center}
+		{\fontsize{10}{12}\selectfont \textbf{VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY (VNU-HCM)}} \\
+		{\fontsize{10}{12}\selectfont \textbf{UNIVERSITY OF SCIENCE (HCMUS)}} \\
+		{\fontsize{9.5}{11.5}\selectfont FACULTY OF INFORMATION TECHNOLOGY} \\
+		{\fontsize{9.5}{11.5}\selectfont ADVANCED PROGRAM IN COMPUTER SCIENCE (APCS)} \\[0.4em]
+		{\fontsize{11}{13}\selectfont \textbf{COURSE: SC203 -- SCIENTIFIC METHOD}} \\[0.2em]
+		\rule{\textwidth}{0.8pt}
+	\end{center}
+	
+	\vspace{0.5em}
+	
+	% ==================== TITLE ====================
+	\begin{center}
+		{\Large \textbf{Research Proposal: Mathematical Information Retrieval (MathIR) System Based on Syntax Tree Structures and Formula Semantics}} \\[0.4em]
+		{\normalsize \textit{Topic: Semantic-aware Formula and Problem Search with AST and Dense Tree Embeddings}}
+	\end{center}
+	
+	\vspace{0.5em}
+	
+	% ==================== STUDENT RESEARCH TEAM ====================
+	\begin{center}
+		\textbf{\large Student Team} \\[0.4em]
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Student ID} & \textbf{Full Name} \\
+			\midrule
+			25125024 & \foreignlanguage{vietnamese}{Đỗ Viết Hoàng Long} \\
+			25125091 & \foreignlanguage{vietnamese}{Trần Đức Toàn}    \\
+			25125010 & \foreignlanguage{vietnamese}{Phạm Trung Duy}   \\
+			25125006 & \foreignlanguage{vietnamese}{Nguyễn Nguyễn Gia Bảo} \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	
+	\vspace{0.8em}
+	\hrule
+	\vspace{1em}
+	
+% ==================== SECTION 1: TITLE & HYPOTHESES ====================
+\section{Title \& Testable Hypotheses}
+\textbf{Proposal Title:} \textit{Building a Mathematical Information Retrieval (MathIR) System Based on Syntax Tree Structures and Formula Semantics (\LaTeX/MathML).}
+
+\begin{itemize}
+	\item \textbf{$H_1$ (Semantic Canonicalization \& Variable Renaming Invariance):} Mathematical expressions that are algebraically equivalent or differ merely in variable identifiers (e.g., $f(a,b) = a^2 - b^2$ vs. $f(x,y) = (x-y)(x+y)$) suffer from near-zero recall under sequential 1D text matching, but achieve high retrieval precision when normalized into canonical Operator Trees (OPT).
+	\item \textbf{$H_2$ (Hierarchical 2D Layout \& Commutative Invariance):} Mathematical formulas inherently follow a hierarchical, non-linear tree structure with commutative symmetry ($a + b \equiv b + a$). Evaluating expressions via Tree Edit Distance (TED) and tree-based dense vector embeddings yields statistically superior Mean Average Precision (mAP) and Precision@$K$ over sequential n-gram string matching.
+	\item \textbf{$H_3$ (Multi-Modal Context-Formula Interdependence):} Fusing the embedding vectors of accompanying textual descriptions with formula structural representations retrieves the original problem document significantly better than formula-only or text-only retrieval, especially under partial or imprecise user queries.
+	
+	Querying partial formulas produces severe noise across unrelated domains, whereas text-only queries miss structural specifics; fusing contextual text embeddings with formula tree embeddings constrains both topic relevance and algebraic topology to retrieve the target problem.
+\end{itemize}
+
+% ==================== SECTION 2: CHOSEN PROBLEM & FEASIBILITY ====================
+\section{Chosen Problem \& Computational Feasibility}
+\begin{itemize}
+	\item \textbf{Real-World Observation \& Motivation:} In STEM education and academic forums (Math Stack Exchange, arXiv), users routinely search for formulas and problem solutions. Standard commercial and lexical search engines treat expressions as flat 1D strings, failing to recognize operator precedence, 2D visual layouts (fractions, matrices, exponents), and variable substitution.
+	\item \textbf{Compliance with Course Resource Constraints:}
+	\begin{itemize}
+		\item \textit{Personal Hardware Scope:} Complying strictly with the instructor's directive to avoid unfeasible multi-billion parameter model pre-training, experiments will run entirely on personal computers and Google Colab environments.
+		\item \textit{Controlled Benchmark Sampling:} The team will extract a representative experimental subset of \textbf{50,000--100,000 formula pairs} from the open repositories for indexation and evaluation.
+		\item \textit{AI/LLM as an Assistive Tool:} Pre-trained models and symbolic parsing libraries (SymPy, KaTeX AST) will be utilized solely for syntactic canonicalization and query translation into MathML trees.
+		
+		While LLMs interpret text well, their 1D subword tokenizers fracture 2D mathematical hierarchies and positional encodings penalize commutative equivalence ($a+b \equiv b+a$), making direct vector retrieval inaccurate and pairwise LLM inference computationally intractable at scale.
+		
+		KaTeX parses raw \LaTeX{} to eliminate non-semantic syntax noise, while SymPy deterministically simplifies and expands expressions into a unique canonical polynomial form (e.g., mapping $(x+1)^2$ and $1+2x+x^2$ to $x^2+2x+1$) to ensure identical embedding representations.
+			
+	\end{itemize}
+\end{itemize}
+
+% ==================== SECTION 3: BASELINE SCIENTIFIC PAPERS ====================
+\section{Baseline Scientific Papers}
+Our research benchmarks directly against established literature in Mathematical Information Retrieval:
+\begin{enumerate}
+	\item \textbf{Mansouri et al. (2024):} \textit{Tangent-CFT \& Tangent-CFTED: Combining Vector and Tree-Edit Distance Embeddings for Math Information Retrieval} (arXiv:2408.11646). Serves as our primary algorithmic baseline for formula tuple embeddings and Tree Edit Distance (TED) re-ranking.
+	\item \textbf{Zanibbi et al. (2020):} \textit{Overview of ARQMath 2020: CLEF Lab on Answer Retrieval for Questions with Math} (CLEF 2020, LNCS 12260). Formulates the benchmark tasks, duplicate-question ground truth, and evaluation metrics (NDCG', MAP', P@10).
+	\item \textbf{Davila \& Zanibbi (2017):} \textit{Layout and Semantics: Visual Layout Trees for Mathematical Formula Retrieval} (ACM SIGIR '17). Defines structural transformation rules between Visual Layout Trees (VLT) and Operator Trees (OPT).
+	\item \textbf{Mansouri et al. (2025):} \textit{MIRB: A Benchmark for Mathematical Information Retrieval} \footnote{arXiv:2505.15585}. Supplies the unified benchmark framework and standard evaluation baselines.
+\end{enumerate}
+
+% ==================== SECTION 4: TARGET DATASETS ====================
+\section{Target Datasets}
+Per course guidelines, the study exclusively exploits open, pre-existing scientific benchmarks:
+\begin{itemize}
+	\item \textbf{Primary Dataset 1: ARQMath Benchmark (CLEF Lab \& DPRL -- RIT):}
+	\begin{itemize}
+		\item \textit{Source \& Scale:} Extracted from Math Stack Exchange (>1.4 million posts, answers, vote scores, and user accepted tags).
+		\item \textit{Modalities:} Millions of mathematical expressions annotated in \LaTeX{} and converted into XML-based Visual Layout Trees (VLT) and Semantic Operator Trees (OPT) under the MathML standard.
+		\item \textit{Tasks:} Task 1 (Answer Retrieval for mixed text-formula questions) and Task 2 (Isolated Formula Retrieval).
+		\item \textit{Access:} Publicly downloadable from the CLEF ARQMath and DPRL RIT repositories.
+	\end{itemize}
+	\item \textbf{Primary Dataset 2: NTCIR MathIR Benchmark (NTCIR-11 \& NTCIR-12 Math Task):}
+	\begin{itemize}
+		\item \textit{Source \& Scale:} National Institute of Informatics (NII), Japan. Comprises the arXiv Math Corpus (millions of preprint excerpts) and the English Wikipedia Math Corpus.
+		\item \textit{Access:} Open academic portal with curated evaluation topics and expert relevance judgements.
+	\end{itemize}
+	\item \textbf{Auxiliary Dataset: Stack Exchange Data Dump (Mathematics):} Hosted by Internet Archive (archive.org); provides raw XML posts for offline metadata verification.
+\end{itemize}
+
+% ==================== SECTION 5: BASELINE CODE & METHOD ====================
+\section{Baseline Method \& Source Code Implementation}
+\begin{itemize}
+	\item \textbf{Open-Source Foundation:} The project builds upon the official public repository \textbf{TangentCFT / Tangent-S} developed by Behrooz Mansouri and Richard Zanibbi\\ (\url{https://github.com/BehroozMansouri/TangentCFT}).
+	\item \textbf{Pipeline Modules:}
+	\begin{enumerate}
+		\item FastXML/MathML parsers that decompose formulas into symbol pairs with spatial and hierarchy paths.
+		\item Subtree vector embedding models based on modified FastText architectures.
+		\item Exact and approximate Tree Edit Distance calculators (\texttt{Tangent-CFTED}).
+	\end{enumerate}
+	\item \textbf{Experimental Protocol:} Baseline retrieval performance will be evaluated against standard 1D BM25 lexical search and our hybrid AST + Context-embedding architecture.
+\end{itemize}
+
+% ==================== SECTION 6: SCIENTIFIC VARIABLES & METHODOLOGICAL VALIDITY ====================
+\section{Scientific Variables, Measurements, \& Validity}
+
+\begin{itemize}
+	\item \textbf{Independent Variables:} Formula representation format (1D \LaTeX{} string vs. 2D MathML OPT vs. Dense Tree Embeddings); Query mode (Formula-only vs. Text-only vs. Multi-modal hybrid).
+	\item \textbf{Dependent Variables:} Retrieval effectiveness metrics: NDCG', Mean Average Precision (mAP'), and Precision@10 (P@10).
+	\item \textbf{Controlled Variables:} Fixed corpus sample size (50,000 documents), fixed hardware configurations, and standardized query sets.
+	\item \textbf{Validity Assurance:}
+	\begin{itemize}
+		\item \textit{Construct Validity:} Employing expert relevance judgments from ARQMath to ensure metrics reflect true mathematical relevance rather than coincidental keyword hits.
+		\item \textit{Internal \& Statistical Validity:} Paired t-tests and Wilcoxon signed-rank tests ($p < 0.05$) to verify that performance gains over BM25 are statistically significant.
+	\end{itemize}
+\end{itemize}
+
+% ==================== SECTION 7: PERSONALIZED CRITICAL INSIGHTS ====================
+\section{Personalized Critical Insights \& Technical Trade-offs}
+\begin{enumerate}
+	\item \textbf{Failure of Pure LLMs on 1D Formula Serialization:} Standard language models operate over linear subword tokens. Tokenizing raw \LaTeX{} macros fractures operator precedence and tree depth. An explicit intermediate syntax tree (AST/MathML) is essential to preserve mathematical hierarchy.
+	\item \textbf{Computational Complexity Dilemma of Tree Edit Distance:} Exact TED exhibits cubic time complexity ($O(n^3)$). Running pairwise TED across large collections is computationally prohibitive. We propose a \textbf{Two-Stage Retrieval Architecture}:
+	\begin{itemize}
+		\item \textit{Stage 1 (Coarse Retrieval):} Fast vector search scans the indexed database in sub-second latency to yield the Top-100 candidate formulas.
+		\item \textit{Stage 2 (Fine-Grained Re-ranking):} Constrained Tree Edit Distance and subtree isomorphism algorithms are executed exclusively on the Top-100 slice.
+	\end{itemize}
+	\item \textbf{Deterministic Canonicalization Over Permutation Training:} Rather than training oversized models to learn every commutative variation, symbolic algebra engines (SymPy, KaTeX AST) deterministically normalize expressions into canonical form prior to indexing.
+	\item \textbf{Risk Management Fallback:} In case of local compute constraints during large-scale tree generation, the team will directly utilize pre-extracted formula embeddings from the open MIRB benchmark to test the core hypotheses without disruption.
+\end{enumerate}
+
+% ==================== REFERENCES ====================
+\begin{thebibliography}{9}
+	\bibitem{mansouri2024} B. Mansouri, S. Rohatgi, D. W. Oard, J. Wu, C. L. Giles, and R. Zanibbi, ``Tangent-CFT \& Tangent-CFTED: Combining Vector and Tree-Edit Distance Embeddings for Math Information Retrieval,'' \textit{arXiv preprint arXiv:2408.11646}, 2024.
+	\bibitem{zanibbi2020} R. Zanibbi et al., ``Overview of ARQMath 2020: CLEF Lab on Answer Retrieval for Questions with Math,'' in \textit{CLEF 2020, LNCS 12260}, pp. 299--322, 2020.
+	\bibitem{davila2017} K. Davila and R. Zanibbi, ``Layout and Semantics: Visual Layout Trees for Mathematical Formula Retrieval,'' in \textit{Proc. ACM SIGIR '17}, 2017.
+	\bibitem{mansouri2025mirb} B. Mansouri et al., ``MIRB: A Benchmark for Mathematical Information Retrieval,'' \textit{arXiv preprint arXiv:2505.15585}, 2025.
+	\bibitem{tangentcft_repo} B. Mansouri and R. Zanibbi, ``Tangent-S / TangentCFT: An Embedding-based Search Engine for Mathematical Expressions,'' GitHub Repository, \url{https://github.com/BehroozMansouri/TangentCFT}.
+\end{thebibliography}
+	
+\end{document}

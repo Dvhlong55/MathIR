@@ -218,3 +218,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# LaTeX build artifacts (keep .tex and .pdf)
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# Large datasets & Model Weights
+data/raw/*
+!data/raw/.gitkeep
+models/weights/*
+!models/weights/.gitkeep
+*.npy
+*.pt
+*.bin
