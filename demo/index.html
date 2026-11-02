@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tangent-CFT - Syntax Tree & Tuple Visualizer</title>
+  <title>Tangent-CFT - Pairwise Formula Comparator</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group {
@@ -19,86 +19,125 @@
 <body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
   <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Minimalist Header -->
+    <!-- Header -->
     <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
       <div>
-        <h1 class="text-lg md:text-xl font-bold tracking-tight">Tangent-CFT Sandbox</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Faithful Operator Tree (OPT) & Hierarchical Tuples (Mansouri et al., SIGIR 2019)</p>
+        <h1 class="text-lg md:text-xl font-bold tracking-tight">Tangent-CFT Pairwise Comparator</h1>
+        <p class="text-xs text-[var(--muted-foreground)]">Compare Two Formulas Directly via Tangent-CFT Tuples (Mansouri et al., SIGIR 2019)</p>
       </div>
       <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
-        Baseline • TangentCFT
+        Baseline Evaluation
       </span>
     </div>
 
-    <!-- Main Expression Input Card -->
+    <!-- Dual Input Card: Formula A vs Formula B -->
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">
-          Input Formula (LaTeX / Math Syntax):
-        </label>
-        <input type="text" id="formulaInput" value="AB - BA" oninput="updateApp()"
-               placeholder="Enter any formula: AB - BA, x^2 + 4x^2 + 4, a + b..."
-               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
-      </div>
-
-      <!-- Live Formula Display (Exact Preserved Input) -->
-      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex items-center justify-between">
-        <div>
-          <span class="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase block">Original Expression (Preserved Exactly):</span>
-          <div id="mathView" class="font-serif font-bold text-lg text-blue-400 break-words mt-0.5">
-            AB - BA
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Formula A -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-blue-400">
+            Formula A (Query):
+          </label>
+          <input type="text" id="inputA" value="a - b" oninput="compareFormulas()"
+                 placeholder="e.g. a - b, xy, (x + 1)^2..."
+                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-2 flex justify-between items-center text-xs">
+            <span class="text-[var(--muted-foreground)]">Tuples generated:</span>
+            <span id="tuplesCountA" class="font-mono font-bold text-blue-400">2 tuples</span>
           </div>
         </div>
-        <div class="text-right text-xs text-[var(--muted-foreground)] font-mono">
-          <span id="nodeCountBadge">3 nodes</span>
+
+        <!-- Formula B -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400">
+            Formula B (Candidate to compare):
+          </label>
+          <input type="text" id="inputB" value="b - a" oninput="compareFormulas()"
+                 placeholder="e.g. b - a, yx, x^2 + 2x + 1..."
+                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-[var(--foreground)]">
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-2 flex justify-between items-center text-xs">
+            <span class="text-[var(--muted-foreground)]">Tuples generated:</span>
+            <span id="tuplesCountB" class="font-mono font-bold text-purple-400">2 tuples</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Quick presets to test -->
+      <div class="flex items-center gap-2 pt-1 flex-wrap text-xs">
+        <span class="text-[11px] text-[var(--muted-foreground)] uppercase font-semibold">Quick tests:</span>
+        <button onclick="setPair('a - b', 'b - a')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
+          a - b vs b - a
+        </button>
+        <button onclick="setPair('xy', 'yx')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
+          xy vs yx
+        </button>
+        <button onclick="setPair('a + b', 'b + a')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
+          a + b vs b + a
+        </button>
+        <button onclick="setPair('(x + 1)^2', 'x^2 + 2x + 1')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
+          (x + 1)^2 vs x^2 + 2x + 1
+        </button>
       </div>
     </div>
 
-    <!-- Main Grid: Syntax Tree & Tangent-CFT Tuples -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-      
-      <!-- 2D Operator Tree (7 cols) -->
-      <div class="md:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11"></path></svg>
-            Operator Tree (OPT Topology)
+    <!-- Comparison Results Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+        <div>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-[var(--foreground)]">
+            Tangent-CFT Comparison Results
           </h2>
-          <span class="text-[11px] font-mono text-[var(--muted-foreground)]">Structural AST</span>
+          <p class="text-xs text-[var(--muted-foreground)]">Measuring tuple n-gram overlap between Formula A and Formula B</p>
         </div>
-
-        <!-- Clean Tree SVG Canvas -->
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[240px]">
-          <svg id="treeSvg" class="w-full h-[230px]" viewBox="0 0 480 230"></svg>
+        <div class="text-right">
+          <span class="text-[11px] uppercase font-semibold text-[var(--muted-foreground)] block">Cosine Similarity:</span>
+          <span id="cosineScore" class="font-mono text-xl font-extrabold text-red-400">0.0000</span>
         </div>
       </div>
 
-      <!-- Tangent-CFT Extracted Tuples & Similarity (5 cols) -->
-      <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-start space-y-3">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-          Tangent-CFT Extracted Tuples (n-grams)
-        </h2>
+      <!-- Progress bar -->
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-[var(--muted-foreground)]">Similarity Bar:</span>
+          <span id="cosinePercent" class="font-mono font-bold text-red-400">0.0%</span>
+        </div>
+        <div class="w-full bg-[var(--background)] border border-[var(--border)] h-3 rounded-full overflow-hidden p-0.5">
+          <div id="cosineBar" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+        </div>
+      </div>
 
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2.5">
-          <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">
-            Hierarchical Tuples (Window = 2):
+      <!-- Tuple Breakdown Side-by-Side -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        <!-- Tuples A -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2">
+          <span class="text-[11px] font-semibold text-blue-400 uppercase block">
+            Tuples of Formula A:
           </span>
-          <div id="tuplesContainer" class="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto">
-            <!-- Dynamic tuple pills -->
-          </div>
-
-          <div class="pt-2 border-t border-[var(--border)] space-y-1.5 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--muted-foreground)]">Top Retrieved Match:</span>
-              <span id="topMatchFormula" class="font-mono font-bold text-blue-400">AB - BA</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[var(--muted-foreground)]">Tangent-CFT Cosine:</span>
-              <span id="topMatchScore" class="font-mono font-bold text-emerald-400">1.0000</span>
-            </div>
+          <div id="containerA" class="flex flex-wrap gap-1.5 min-h-[40px]">
+            <!-- Dynamic pills A -->
           </div>
         </div>
+
+        <!-- Tuples B -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2">
+          <span class="text-[11px] font-semibold text-purple-400 uppercase block">
+            Tuples of Formula B:
+          </span>
+          <div id="containerB" class="flex flex-wrap gap-1.5 min-h-[40px]">
+            <!-- Dynamic pills B -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Scientific Insight Explanation -->
+      <div id="insightBox" class="p-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-xs text-[var(--foreground)] space-y-1">
+        <p class="font-bold text-red-400 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          Phát hiện hạn chế của Baseline (Mô hình tác giả):
+        </p>
+        <p id="insightText" class="text-[var(--muted-foreground)]">
+          `a - b` sinh tuple `(-, a, L)` và `(-, b, R)`. Trong khi `b - a` sinh tuple `(-, b, L)` và `(-, a, R)`. Vì nhánh L/R bị gán cứng, 0 có tuple nào trùng nhau $\rightarrow$ Điểm Cosine tụt về 0.0000!
+        </p>
       </div>
 
     </div>
@@ -106,7 +145,7 @@
   </div>
 
   <script>
-    // 1. FAITHFUL TOKENIZER & PARSER (NO ARTIFICIAL ALGEBRAIC REDUCTION)
+    // 1. TOKENIZER & PARSER
     function parseTokens(str) {
       let s = str.trim();
       let tokens = [];
@@ -199,178 +238,124 @@
       }
     }
 
-    // 2. EXTRACT TANGENT-CFT TUPLES (As defined by Mansouri et al.)
-    // Generates pairs (parent_symbol, child_symbol, edge_label)
-    function extractTangentTuples(node, tuples = []) {
+    // 2. EXTRACT TANGENT-CFT TUPLES
+    function extractTuples(node, tuples = []) {
       if (!node) return tuples;
-
       if (node.l) {
         tuples.push(`(${node.val}, ${node.l.val}, L)`);
-        extractTangentTuples(node.l, tuples);
+        extractTuples(node.l, tuples);
       }
       if (node.r) {
         tuples.push(`(${node.val}, ${node.r.val}, R)`);
-        extractTangentTuples(node.r, tuples);
+        extractTuples(node.r, tuples);
       }
       return tuples;
     }
 
-    // 3. TREE SVG RENDERER
-    function renderTree(ast) {
-      const svg = document.getElementById('treeSvg');
-      svg.innerHTML = '';
-      if (!ast) {
-        document.getElementById('nodeCountBadge').textContent = '0 nodes';
-        return;
-      }
+    // 3. COMPARE FORMULAS
+    function compareFormulas() {
+      let strA = document.getElementById('inputA').value.trim();
+      let strB = document.getElementById('inputB').value.trim();
 
-      let leafIndex = 0, maxDepth = 0;
-      function walk(node, depth) {
-        if (!node) return;
-        if (depth > maxDepth) maxDepth = depth;
-        node.depth = depth;
-        let hasL = !!node.l, hasR = !!node.r;
-        if (!hasL && !hasR) node.col = leafIndex++;
-        else {
-          if (hasL) walk(node.l, depth + 1);
-          if (hasR) walk(node.r, depth + 1);
-          let lc = hasL ? node.l.col : leafIndex;
-          let rc = hasR ? node.r.col : lc;
-          node.col = (lc + rc) / 2;
-        }
-      }
-      walk(ast, 0);
+      // Parse A
+      let astA = new SimpleParser(parseTokens(strA)).parse();
+      let tuplesA = extractTuples(astA);
+      document.getElementById('tuplesCountA').textContent = `${tuplesA.length} tuples`;
 
-      let totalLeaves = Math.max(1, leafIndex);
-      let W = 480, H = 230;
-      let padX = 40, padY = 35;
-      let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
-      let stepY = maxDepth > 0 ? Math.min(65, (H - padY * 2) / maxDepth) : 55;
+      // Parse B
+      let astB = new SimpleParser(parseTokens(strB)).parse();
+      let tuplesB = extractTuples(astB);
+      document.getElementById('tuplesCountB').textContent = `${tuplesB.length} tuples`;
 
-      let totalNodes = 0;
-      function setCoords(node) {
-        if (!node) return;
-        totalNodes++;
-        node.x = padX + node.col * stepX;
-        node.y = padY + node.depth * stepY;
-        if (node.l) setCoords(node.l);
-        if (node.r) setCoords(node.r);
-      }
-      setCoords(ast);
-      document.getElementById('nodeCountBadge').textContent = `${totalNodes} nodes`;
+      // Render Pills
+      let containerA = document.getElementById('containerA');
+      containerA.innerHTML = '';
+      let setB = new Set(tuplesB);
 
-      const nodeRadius = 19;
+      tuplesA.forEach(t => {
+        let isMatch = setB.has(t);
+        let pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.textContent = t;
+        containerA.appendChild(pill);
+      });
 
-      // Draw smooth connection curves
-      function drawLines(node) {
-        if (!node) return;
-        [node.l, node.r].forEach(child => {
-          if (!child) return;
+      let containerB = document.getElementById('containerB');
+      containerB.innerHTML = '';
+      let setA = new Set(tuplesA);
 
-          let startY = node.y + nodeRadius;
-          let endY = child.y - nodeRadius;
+      tuplesB.forEach(t => {
+        let isMatch = setA.has(t);
+        let pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.textContent = t;
+        containerB.appendChild(pill);
+      });
 
-          let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          let midY = (startY + endY) / 2;
-          let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
-          
-          path.setAttribute("d", d);
-          path.setAttribute("fill", "none");
-          path.setAttribute("stroke", "#64748b");
-          path.setAttribute("stroke-width", "2");
-          path.setAttribute("stroke-opacity", "0.6");
-          svg.appendChild(path);
+      // Calculate Jaccard / Cosine Overlap on Tuples
+      let intersection = tuplesA.filter(t => setB.has(t)).length;
+      let score = 0.0;
 
-          drawLines(child);
-        });
-      }
-      drawLines(ast);
-
-      // Draw clean solid nodes
-      function drawNodes(node, isRoot = false) {
-        if (!node) return;
-
-        let bgColor = "#2563eb";
-        if (isRoot) bgColor = "#2563eb";
-        else if (node.type === 'op' || node.type === 'fn') bgColor = "#059669";
-        else if (node.type === 'var') bgColor = "#d97706";
-        else if (node.type === 'num') bgColor = "#7c3aed";
-
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", "node-group cursor-pointer");
-
-        // Outer glow ring
-        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        ring.setAttribute("cx", node.x);
-        ring.setAttribute("cy", node.y);
-        ring.setAttribute("r", nodeRadius + 2.5);
-        ring.setAttribute("fill", "white");
-        ring.setAttribute("fill-opacity", "0.2");
-        g.appendChild(ring);
-
-        // Solid circle
-        const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        c.setAttribute("cx", node.x);
-        c.setAttribute("cy", node.y);
-        c.setAttribute("r", nodeRadius);
-        c.setAttribute("fill", bgColor);
-        c.setAttribute("stroke", "#ffffff");
-        c.setAttribute("stroke-width", "2.2");
-        g.appendChild(c);
-
-        // Text value
-        const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        t.setAttribute("x", node.x);
-        t.setAttribute("y", node.y + 5);
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("fill", "#ffffff");
-        t.setAttribute("font-weight", "800");
-        t.setAttribute("font-size", node.val.length > 2 ? "11px" : "14px");
-        t.setAttribute("font-family", "ui-monospace, monospace");
-        t.textContent = node.val;
-        g.appendChild(t);
-
-        svg.appendChild(g);
-
-        if (node.l) drawNodes(node.l, false);
-        if (node.r) drawNodes(node.r, false);
-      }
-      drawNodes(ast, true);
-    }
-
-    // 4. APP CONTROLLER (FAITHFUL TO TANGENT-CFT)
-    function updateApp() {
-      let raw = document.getElementById('formulaInput').value.trim();
-      document.getElementById('mathView').textContent = raw || "(empty)";
-
-      // Parse Exact Tree
-      let tokens = parseTokens(raw);
-      let ast = new SimpleParser(tokens).parse();
-      renderTree(ast);
-
-      // Extract Tangent-CFT Tuples
-      let tuples = extractTangentTuples(ast);
-      let container = document.getElementById('tuplesContainer');
-      container.innerHTML = '';
-
-      if (tuples.length === 0) {
-        container.innerHTML = `<span class="text-xs text-[var(--muted-foreground)] italic">Single node (no tuples)</span>`;
+      if (tuplesA.length === 0 && tuplesB.length === 0) {
+        score = (strA === strB) ? 1.0 : 0.0;
+      } else if (tuplesA.length === 0 || tuplesB.length === 0) {
+        score = 0.0;
       } else {
-        tuples.forEach(t => {
-          let pill = document.createElement('span');
-          pill.className = "text-[11px] px-2 py-0.5 rounded-md bg-[var(--card)] border border-[var(--border)] font-mono text-emerald-400";
-          pill.textContent = t;
-          container.appendChild(pill);
-        });
+        // Cosine over one-hot tuple frequency
+        score = intersection / Math.sqrt(tuplesA.length * tuplesB.length);
       }
 
-      // Best match info (Preserves exact expression)
-      document.getElementById('topMatchFormula').textContent = raw || "...";
-      document.getElementById('topMatchScore').textContent = "1.0000";
+      // Format score
+      let scoreFixed = score.toFixed(4);
+      let pct = (score * 100).toFixed(1) + "%";
+
+      document.getElementById('cosineScore').textContent = scoreFixed;
+      document.getElementById('cosinePercent').textContent = pct;
+
+      let bar = document.getElementById('cosineBar');
+      bar.style.width = pct;
+
+      let scoreElem = document.getElementById('cosineScore');
+      let pctElem = document.getElementById('cosinePercent');
+
+      if (score >= 0.8) {
+        scoreElem.className = "font-mono text-xl font-extrabold text-emerald-400";
+        pctElem.className = "font-mono font-bold text-emerald-400";
+        bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-300";
+      } else if (score >= 0.4) {
+        scoreElem.className = "font-mono text-xl font-extrabold text-amber-400";
+        pctElem.className = "font-mono font-bold text-amber-400";
+        bar.className = "bg-amber-500 h-full rounded-full transition-all duration-300";
+      } else {
+        scoreElem.className = "font-mono text-xl font-extrabold text-red-400";
+        pctElem.className = "font-mono font-bold text-red-400";
+        bar.className = "bg-red-500 h-full rounded-full transition-all duration-300";
+      }
+
+      // Insight box
+      let insightBox = document.getElementById('insightBox');
+      let insightText = document.getElementById('insightText');
+
+      if (score === 1.0) {
+        insightBox.className = "p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-xs text-[var(--foreground)] space-y-1";
+        insightText.innerHTML = `Hai công thức có cấu trúc cây n-gram hoàn toàn trùng khớp (Cosine = 1.0000).`;
+      } else if (score === 0.0) {
+        insightBox.className = "p-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-xs text-[var(--foreground)] space-y-1";
+        insightText.innerHTML = `<strong>Minh chứng cho điểm mù của Baseline:</strong> Toàn bộ các tuples màu đỏ bị lệch nhau do vị trí trái/phải (L/R) hoặc tên biến bị đảo. Tangent-CFT coi đây là 2 công thức hoàn toàn khác biệt (Cosine = 0.0000)!`;
+      } else {
+        insightBox.className = "p-3.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-[var(--foreground)] space-y-1";
+        insightText.innerHTML = `Chỉ trùng khớp được ${intersection} tuples (màu xanh lá), còn lại các tuples màu đỏ bị lệch nhánh.`;
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', updateApp);
-    updateApp();
+    function setPair(a, b) {
+      document.getElementById('inputA').value = a;
+      document.getElementById('inputB').value = b;
+      compareFormulas();
+    }
+
+    window.addEventListener('DOMContentLoaded', compareFormulas);
+    compareFormulas();
   </script>
 </body>
 </html>
