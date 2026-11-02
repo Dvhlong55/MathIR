@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR - Cây Cú Pháp & Truy Xuất Toán Học</title>
+  <title>MathIR - Syntax Tree Visualizer & Canonical Retrieval</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group {
@@ -19,39 +19,39 @@
 <body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
   <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Header tối giản -->
+    <!-- Minimalist Header -->
     <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
       <div>
         <h1 class="text-lg md:text-xl font-bold tracking-tight">MathIR Sandbox</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Trực quan hóa cây cú pháp toán học (Operator Tree) & Chuẩn hóa chính tắc</p>
+        <p class="text-xs text-[var(--muted-foreground)]">Mathematical Operator Tree (OPT) Visualizer & Canonical Retrieval</p>
       </div>
       <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
-        SC203 • Nhóm 2
+        SC203 • Group 2
       </span>
     </div>
 
-    <!-- Ô nhập biểu thức chính -->
+    <!-- Main Expression Input Card -->
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
       <div>
         <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">
-          Nhập công thức toán học:
+          Input Mathematical Formula:
         </label>
         <input type="text" id="formulaInput" value="(x^2 + 4x^2 + 4)" oninput="updateApp()"
-               placeholder="Gõ biểu thức bất kỳ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
+               placeholder="Enter any formula: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
                class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
       </div>
 
-      <!-- Hiển thị nhanh: Xem trước & Dạng thu gọn -->
+      <!-- Quick Preview: Live Formula & Canonical Form -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
         <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
-          <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase block mb-1">Công thức hiển thị:</span>
+          <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase block mb-1">Formula Preview:</span>
           <div id="mathView" class="font-serif font-bold text-base text-blue-400 break-words min-h-[24px]">
             (x² + 4x² + 4)
           </div>
         </div>
 
         <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
-          <span class="text-[11px] font-semibold text-blue-500 uppercase block mb-1">Dạng chuẩn hóa chính tắc (Canonical):</span>
+          <span class="text-[11px] font-semibold text-blue-500 uppercase block mb-1">Canonical Normalized Form (OPT):</span>
           <div id="canonView" class="font-mono font-bold text-base text-emerald-400 break-words min-h-[24px]">
             5x^2 + 4
           </div>
@@ -59,51 +59,51 @@
       </div>
     </div>
 
-    <!-- Khung chính: Cây cú pháp & Kết quả khớp -->
+    <!-- Main Grid: Syntax Tree & Retrieval Result -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
       
-      <!-- Cây cú pháp 2D (7 cols) -->
+      <!-- 2D Operator Tree (7 cols) -->
       <div class="md:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11"></path></svg>
-            Cây Cú Pháp Phân Cấp (Operator Tree - OPT)
+            Hierarchical Syntax Tree (Operator Tree - OPT)
           </h2>
           <span id="nodeCountBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">0 nodes</span>
         </div>
 
-        <!-- Khung vẽ cây cực sạch, không nhãn chữ thừa -->
+        <!-- Clean Tree SVG Canvas -->
         <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[240px]">
           <svg id="treeSvg" class="w-full h-[230px]" viewBox="0 0 480 230"></svg>
         </div>
       </div>
 
-      <!-- Kết quả truy xuất & So khớp (5 cols) -->
+      <!-- Retrieval & Benchmark Matching (5 cols) -->
       <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-start space-y-3">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-          Kết Quả Khớp Tốt Nhất (Top Match)
+          Top Retrieval Match
         </h2>
 
         <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <div>
-            <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Công thức tìm thấy:</span>
+            <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Retrieved Document / Formula:</span>
             <div id="topMatchFormula" class="font-mono text-lg font-bold text-blue-400 mt-1">
               5x^2 + 4
             </div>
           </div>
 
           <div class="pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">Độ tương đồng MathIR:</span>
+            <span class="text-[var(--muted-foreground)]">MathIR Similarity:</span>
             <span id="topMatchScore" class="font-mono font-bold text-emerald-400 text-sm">98.5%</span>
           </div>
 
           <div class="flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">Khoảng cách cây (TED):</span>
+            <span class="text-[var(--muted-foreground)]">Tree Edit Distance (TED):</span>
             <span id="topMatchTED" class="font-mono font-bold text-[var(--foreground)]">0 edits</span>
           </div>
 
           <div class="flex items-center justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">So khớp chuỗi 1D (Baseline):</span>
+            <span class="text-[var(--muted-foreground)]">1D String Baseline:</span>
             <span id="topMatch1D" class="font-mono text-red-400 font-semibold">14.2%</span>
           </div>
         </div>
@@ -140,7 +140,7 @@
         i++;
       }
 
-      // Implicit multiplication: 4x -> 4 * x
+      // Implicit multiplication: e.g. 4x -> 4 * x
       let res = [];
       for (let j = 0; j < tokens.length; j++) {
         res.push(tokens[j]);
@@ -223,7 +223,7 @@
       }
     }
 
-    // 2. SIMPLIFIER & CANONICALIZER
+    // 2. CANONICALIZER & SIMPLIFIER
     function getCanonical(raw) {
       if (!raw) return "-";
       let s = raw.trim();
@@ -244,7 +244,7 @@
         return `${v}^2 - ${n * n}`;
       }
 
-      // General Polynomial collection: handles (x^2 + 4x^2 + 4), 3a + 5b + 2a...
+      // General Polynomial collection: (x^2 + 4x^2 + 4), 3a + 5b + 2a...
       let clean = s.replace(/[\(\)\[\]]/g, '');
       let terms = clean.match(/[+-]?[^+-]+/g);
       if (terms && terms.length > 0) {
@@ -292,7 +292,7 @@
       return s;
     }
 
-    // 3. CLEAN & MINIMALIST TREE SVG RENDERER (NO EXTRA TEXT LABELS)
+    // 3. CLEAN TREE SVG RENDERER
     function renderTree(ast) {
       const svg = document.getElementById('treeSvg');
       svg.innerHTML = '';
@@ -338,7 +338,7 @@
 
       const nodeRadius = 19;
 
-      // DRAW SMOOTH CONNECTION PATHS
+      // Draw smooth connection curves
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
@@ -363,7 +363,7 @@
       }
       drawLines(ast);
 
-      // DRAW CLEAN SOLID NODES (NO TEXT LABELS UNDERNEATH)
+      // Draw clean solid nodes
       function drawNodes(node, isRoot = false) {
         if (!node) return;
 
@@ -376,7 +376,7 @@
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("class", "node-group cursor-pointer");
 
-        // Outer glow/contrast ring
+        // Outer glow ring
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         ring.setAttribute("cx", node.x);
         ring.setAttribute("cy", node.y);
@@ -385,7 +385,7 @@
         ring.setAttribute("fill-opacity", "0.2");
         g.appendChild(ring);
 
-        // Main solid circle
+        // Solid circle
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", node.x);
         c.setAttribute("cy", node.y);
@@ -395,7 +395,7 @@
         c.setAttribute("stroke-width", "2.2");
         g.appendChild(c);
 
-        // Value text
+        // Text value
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", node.x);
         t.setAttribute("y", node.y + 5);
@@ -418,7 +418,7 @@
     // 4. APP CONTROLLER
     function updateApp() {
       let raw = document.getElementById('formulaInput').value.trim();
-      document.getElementById('mathView').textContent = raw || "(trống)";
+      document.getElementById('mathView').textContent = raw || "(empty)";
 
       let canon = getCanonical(raw);
       document.getElementById('canonView').textContent = canon;
