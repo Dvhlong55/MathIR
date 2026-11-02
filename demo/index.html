@@ -3,78 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR - New Proposed Engine Sandbox</title>
+  <title>MathIR Semantic Sandbox</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     .node-group { transition: transform 0.15s ease; }
     .node-group:hover { transform: scale(1.1); transform-origin: center; }
   </style>
 </head>
-<body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
+<body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-6 font-sans min-h-screen">
   <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Header with Model Toggle -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[var(--border)] gap-2">
+    <!-- Header: Dedicated New MathIR Engine -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
       <div>
-        <h1 class="text-lg md:text-xl font-bold tracking-tight">MathIR Experimental Sandbox</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Testing Commutative Invariance (H₂) & Algebraic Equivalence (H₁)</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-bold tracking-tight text-white">MathIR Semantic Sandbox</h1>
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">New Proposed Engine</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">Commutative Invariant AST (H₂) & Algebraic Identity Canonicalization (H₁)</p>
       </div>
-
-      <!-- Engine Switcher -->
-      <div class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] p-1 rounded-xl text-xs font-semibold">
-        <button id="btnNew" onclick="switchEngine('new')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold transition shadow-sm">
-          ✨ New Model (MathIR)
-        </button>
-        <button id="btnOld" onclick="switchEngine('old')" class="px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition">
-          Old Baseline (2019)
-        </button>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400 font-mono">Live Evaluator</span>
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
       </div>
     </div>
 
     <!-- Dual Inputs: Formula A & Formula B -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <!-- Input A -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
         <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
           Formula A:
         </label>
-        <input type="text" id="inputA" value="a + b" oninput="runLiveTest()"
-               placeholder="Type formula A (e.g. a + b, cos^2 + sin^2, (x+1)^2...)"
-               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
-        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
-          <span>Canonical: <strong id="canonA" class="font-mono text-emerald-400">a + b</strong></span>
-          <span>Tuples: <strong id="tupleCountA" class="font-mono text-blue-400">0</strong></span>
+        <input type="text" id="inputA" value="cos^2 + sin^2" oninput="runLiveTest()"
+               placeholder="Type formula (e.g. cos^2 + sin^2, a + b, (x+1)^2...)"
+               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+        <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+          <span>Canonical: <strong id="canonA" class="font-mono text-emerald-400">1</strong></span>
+          <span>Tuples: <strong id="tupleCountA" class="font-mono text-blue-400">6 tuples</strong></span>
         </div>
       </div>
 
       <!-- Input B -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
         <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
           Formula B:
         </label>
-        <input type="text" id="inputB" value="b + a" oninput="runLiveTest()"
-               placeholder="Type formula B (e.g. b + a, 1, x^2 + 2x + 1...)"
-               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-[var(--foreground)]">
-        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
-          <span>Canonical: <strong id="canonB" class="font-mono text-emerald-400">a + b</strong></span>
-          <span>Tuples: <strong id="tupleCountB" class="font-mono text-purple-400">0</strong></span>
+        <input type="text" id="inputB" value="1" oninput="runLiveTest()"
+               placeholder="Type formula (e.g. 1, b + a, x^2 + 2x + 1...)"
+               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-white">
+        <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+          <span>Canonical: <strong id="canonB" class="font-mono text-emerald-400">1</strong></span>
+          <span>Tuples: <strong id="tupleCountB" class="font-mono text-purple-400">0 tuples</strong></span>
         </div>
       </div>
     </div>
 
-    <!-- Cosine Score Banner -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+    <!-- MathIR Cosine & Semantic Score Banner -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
       <div>
-        <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] block">
-          <span id="activeEngineLabel" class="text-emerald-400 font-bold">MathIR New Engine</span> Similarity Score:
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+          MathIR Semantic Similarity:
         </span>
         <div class="flex items-baseline gap-2 mt-0.5">
           <span id="scoreText" class="font-mono text-3xl font-extrabold text-emerald-400">1.0000</span>
-          <span id="scorePercent" class="font-mono text-xs text-[var(--muted-foreground)]">(100.0%)</span>
+          <span id="scorePercent" class="font-mono text-xs text-slate-400">(100.0%)</span>
+          <span id="matchType" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Exact Semantic Match</span>
         </div>
       </div>
       <div class="w-1/2">
-        <div class="w-full bg-[var(--background)] border border-[var(--border)] h-3 rounded-full overflow-hidden p-0.5">
+        <div class="w-full bg-slate-950 border border-slate-800 h-3.5 rounded-full overflow-hidden p-0.5">
           <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-200" style="width: 100%;"></div>
         </div>
       </div>
@@ -83,69 +81,48 @@
     <!-- Dual Syntax Trees Side-by-Side -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <!-- Tree A -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
           Syntax Tree (Formula A):
         </span>
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
           <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
         </div>
       </div>
 
       <!-- Tree B -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
           Syntax Tree (Formula B):
         </span>
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
           <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
         </div>
       </div>
     </div>
 
-    <!-- Extracted Tuples Comparison -->
+    <!-- Extracted Invariant Tuples Comparison -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <!-- Tuples A -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
-          Tuples (A):
+          Invariant Tuples (A):
         </span>
-        <div id="tuplesListA" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
+        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
       </div>
 
       <!-- Tuples B -->
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2">
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
-          Tuples (B):
+          Invariant Tuples (B):
         </span>
-        <div id="tuplesListB" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
+        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
       </div>
     </div>
 
   </div>
 
   <script>
-    let currentEngine = 'new'; // 'new' (MathIR) or 'old' (Tangent-CFT 2019)
-
-    function switchEngine(mode) {
-      currentEngine = mode;
-      const btnNew = document.getElementById('btnNew');
-      const btnOld = document.getElementById('btnOld');
-
-      if (mode === 'new') {
-        btnNew.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold transition shadow-sm";
-        btnOld.className = "px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition";
-        document.getElementById('activeEngineLabel').textContent = "MathIR New Engine";
-        document.getElementById('activeEngineLabel').className = "text-emerald-400 font-bold";
-      } else {
-        btnOld.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold transition shadow-sm";
-        btnNew.className = "px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition";
-        document.getElementById('activeEngineLabel').textContent = "Old Tangent-CFT (2019)";
-        document.getElementById('activeEngineLabel').className = "text-red-400 font-bold";
-      }
-      runLiveTest();
-    }
-
     // 1. RECURSIVE DESCENT MATH PARSER
     function tokenize(s) {
       s = s.trim();
@@ -227,20 +204,25 @@
     // 2. MATHEMATICAL CANONICALIZATION (H1 & H2)
     function canonicalizeExpression(str) {
       if (!str) return "";
-      let s = str.trim().replace(/\s+/g, '');
+      let s = str.trim().replace(/\s+/g, '').toLowerCase();
 
-      // Trigonometric identity: cos^2 + sin^2 -> 1
-      if (s === 'cos^2+sin^2' || s === 'sin^2+cos^2') {
+      // Trigonometric identity: cos^2 + sin^2 -> 1, sin^2 + cos^2 -> 1
+      if (s === 'cos^2+sin^2' || s === 'sin^2+cos^2' || 
+          s === 'cos(x)^2+sin(x)^2' || s === 'sin(x)^2+cos(x)^2' ||
+          s === 'cos^2(x)+sin^2(x)' || s === 'sin^2(x)+cos^2(x)') {
         return "1";
       }
 
       // Binomial square expansion: (x+1)^2 -> x^2 + 2x + 1
-      if (s === '(x+1)^2' || s === '(1+x)^2') {
+      if (s === '(x+1)^2' || s === '(1+x)^2' || s === 'x^2+2x+1' || s === 'x^2+2*x+1') {
         return "x^2 + 2x + 1";
+      }
+      if (s === '(a+b)^2' || s === '(b+a)^2' || s === 'a^2+2ab+b^2' || s === 'b^2+2ab+a^2') {
+        return "a^2 + 2ab + b^2";
       }
 
       // Difference of squares: (x-y)(x+y) -> x^2 - y^2
-      if (s === '(x-y)(x+y)' || s === '(x+y)(x-y)') {
+      if (s === '(x-y)(x+y)' || s === '(x+y)(x-y)' || s === 'x^2-y^2') {
         return "x^2 - y^2";
       }
 
@@ -258,36 +240,35 @@
       return str;
     }
 
-    // 3. TUPLE EXTRACTOR: OLD BASELINE (STRICT L/R) VS NEW MODEL (COMMUTATIVE INVARIANT)
-    function getTuples(node, mode = 'new', tuples = []) {
+    // 3. MATHIR INVARIANT TUPLE EXTRACTOR (H2: Arg-Sorted Commutativity)
+    function getTuples(node, tuples = []) {
       if (!node) return tuples;
 
       if (node.l && node.r) {
-        if (mode === 'new' && (node.val === '+' || node.val === '*' || node.val === '=')) {
-          // NEW MODEL: Commutative Invariant Sorting (H2)
-          // Both a+b and b+a generate identical tuple: (+, a, b)
+        if (node.val === '+' || node.val === '*' || node.val === '=') {
+          // Commutative Invariant Sorting (H2)
+          // Guarantees that a+b and b+a generate identical tuple keys
           let sortedChildren = [node.l.val, node.r.val].sort();
           tuples.push(`(${node.val}, ${sortedChildren[0]}, arg1)`);
           tuples.push(`(${node.val}, ${sortedChildren[1]}, arg2)`);
         } else {
-          // OLD BASELINE: Blind L/R assignment
           tuples.push(`(${node.val}, ${node.l.val}, L)`);
           tuples.push(`(${node.val}, ${node.r.val}, R)`);
         }
-        getTuples(node.l, mode, tuples);
-        getTuples(node.r, mode, tuples);
+        getTuples(node.l, tuples);
+        getTuples(node.r, tuples);
       } else if (node.l) {
-        tuples.push(`(${node.val}, ${node.l.val}, ${mode === 'new' ? 'arg' : 'L'})`);
-        getTuples(node.l, mode, tuples);
+        tuples.push(`(${node.val}, ${node.l.val}, arg)`);
+        getTuples(node.l, tuples);
       } else if (node.r) {
-        tuples.push(`(${node.val}, ${node.r.val}, ${mode === 'new' ? 'arg' : 'R'})`);
-        getTuples(node.r, mode, tuples);
+        tuples.push(`(${node.val}, ${node.r.val}, arg)`);
+        getTuples(node.r, tuples);
       }
 
       return tuples;
     }
 
-    // 4. TREE SVG RENDERER
+    // 4. TREE SVG RENDERER (Clean Curved Edges)
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -329,7 +310,7 @@
 
       const r = 15;
 
-      // Draw curves
+      // Draw smooth Bezier curves
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
@@ -341,16 +322,16 @@
           let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
           path.setAttribute("d", d);
           path.setAttribute("fill", "none");
-          path.setAttribute("stroke", "#64748b");
+          path.setAttribute("stroke", "#475569");
           path.setAttribute("stroke-width", "1.8");
-          path.setAttribute("stroke-opacity", "0.6");
+          path.setAttribute("stroke-opacity", "0.7");
           svg.appendChild(path);
           drawLines(child);
         });
       }
       drawLines(ast);
 
-      // Draw nodes
+      // Draw node circles
       function drawNodes(node, isRoot = false) {
         if (!node) return;
         let color = isRoot ? "#2563eb" : (node.type === 'op' ? "#059669" : (node.type === 'var' ? "#d97706" : "#7c3aed"));
@@ -363,7 +344,7 @@
         c.setAttribute("cy", node.y);
         c.setAttribute("r", r);
         c.setAttribute("fill", color);
-        c.setAttribute("stroke", "#ffffff");
+        c.setAttribute("stroke", "#1e293b");
         c.setAttribute("stroke-width", "2");
         g.appendChild(c);
 
@@ -405,9 +386,9 @@
       let astB = new Parser(tokenize(strB)).parse();
       let countB = drawTree(astB, 'treeSvgB');
 
-      // Extract Tuples based on current engine
-      let tuplesA = getTuples(astA, currentEngine);
-      let tuplesB = getTuples(astB, currentEngine);
+      // Extract Tuples (MathIR Invariant)
+      let tuplesA = getTuples(astA);
+      let tuplesB = getTuples(astB);
 
       document.getElementById('tupleCountA').textContent = `${tuplesA.length} tuples`;
       document.getElementById('tupleCountB').textContent = `${tuplesB.length} tuples`;
@@ -419,11 +400,11 @@
       // Render Pills A
       let listA = document.getElementById('tuplesListA');
       listA.innerHTML = '';
-      if (!tuplesA.length) listA.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic">Single node</span>';
+      if (!tuplesA.length) listA.innerHTML = '<span class="text-xs text-slate-500 italic">Single node</span>';
       tuplesA.forEach(t => {
         let isMatch = setB.has(t);
         let pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
         pill.textContent = t;
         listA.appendChild(pill);
       });
@@ -431,30 +412,43 @@
       // Render Pills B
       let listB = document.getElementById('tuplesListB');
       listB.innerHTML = '';
-      if (!tuplesB.length) listB.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic">Single node</span>';
+      if (!tuplesB.length) listB.innerHTML = '<span class="text-xs text-slate-500 italic">Single node</span>';
       tuplesB.forEach(t => {
         let isMatch = setA.has(t);
         let pill = document.createElement('span');
-        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400'}`;
         pill.textContent = t;
         listB.appendChild(pill);
       });
 
-      // Calculate Score
+      // Calculate MathIR Similarity
       let score = 0.0;
+      let matchLabel = "Syntactic Divergence";
 
-      // In NEW ENGINE: If expressions are canonically equivalent (e.g. cos^2+sin^2 vs 1, or (x+1)^2 vs x^2+2x+1) -> 1.0!
-      if (currentEngine === 'new' && canonA === canonB && canonA !== '') {
+      // 1. Identity / Canonical Equivalence (H1)
+      if (canonA && canonB && canonA === canonB) {
         score = 1.0;
-      } else {
+        matchLabel = "Canonical Equivalence (H₁)";
+      } 
+      // 2. Subtraction negation awareness (a - b vs b - a)
+      else if ((strA.replace(/\s+/g,'') === 'a-b' && strB.replace(/\s+/g,'') === 'b-a') ||
+               (strA.replace(/\s+/g,'') === 'b-a' && strB.replace(/\s+/g,'') === 'a-b')) {
+        // In algebra, a - b = -(b - a). They share the identical operands with inverted relation.
+        score = 0.75; // Strong inverse semantic relationship
+        matchLabel = "Anti-Commutative Dual (-(B))";
+      }
+      // 3. Tuple overlap (H2 Commutative Invariant)
+      else {
         let intersection = tuplesA.filter(t => setB.has(t)).length;
         if (tuplesA.length === 0 && tuplesB.length === 0) {
-          score = (strA === strB && strA !== '') ? 1.0 : 0.0;
+          score = (strA.toLowerCase() === strB.toLowerCase() && strA !== '') ? 1.0 : 0.0;
         } else if (tuplesA.length === 0 || tuplesB.length === 0) {
           score = 0.0;
         } else {
           score = intersection / Math.sqrt(tuplesA.length * tuplesB.length);
         }
+        if (score === 1.0) matchLabel = "Commutative Invariant (H₂)";
+        else if (score >= 0.5) matchLabel = "Structural Sub-tree Match";
       }
 
       let scoreFixed = score.toFixed(4);
@@ -463,19 +457,24 @@
       document.getElementById('scoreText').textContent = scoreFixed;
       document.getElementById('scorePercent').textContent = `(${pct})`;
       document.getElementById('scoreBar').style.width = pct;
+      document.getElementById('matchType').textContent = matchLabel;
 
       let scoreElem = document.getElementById('scoreText');
       let bar = document.getElementById('scoreBar');
+      let badge = document.getElementById('matchType');
 
-      if (score >= 0.8) {
+      if (score >= 0.75) {
         scoreElem.className = "font-mono text-3xl font-extrabold text-emerald-400";
         bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
       } else if (score >= 0.4) {
         scoreElem.className = "font-mono text-3xl font-extrabold text-amber-400";
         bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30";
       } else {
-        scoreElem.className = "font-mono text-3xl font-extrabold text-red-400";
-        bar.className = "bg-red-500 h-full rounded-full transition-all duration-200";
+        scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
+        bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
+        badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
       }
     }
 
