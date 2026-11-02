@@ -6,173 +6,173 @@
   <title>MathIR — Hybrid Engine Workbench</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-zinc-950 text-zinc-200 min-h-screen p-4 sm:p-8 flex justify-center items-start font-sans antialiased selection:bg-zinc-700 selection:text-white">
 
   <div class="w-full max-w-3xl space-y-6">
 
-    <!-- Header tối giản -->
-    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
+    <!-- Header Grayscale -->
+    <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
       <div>
         <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
           MathIR Hybrid Workbench
-          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono font-medium">PyTorch + SymPy</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-700 font-mono font-medium">PyTorch + SymPy</span>
         </h1>
-        <p class="text-xs text-slate-400 mt-1">So khớp công thức: CAS Chứng minh Đại số & MathBERT 768-dim Vector Dense</p>
+        <p class="text-xs text-zinc-400 mt-1">So khớp công thức: CAS Chứng minh Đại số & MathBERT 768-dim Vector Dense</p>
       </div>
-      <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <div class="flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-700">
+        <span class="w-2 h-2 rounded-full bg-zinc-400"></span>
         <span id="backendStatus">Port 8000</span>
       </div>
     </div>
 
-    <!-- Quick Presets: 1 hàng nút bấm gọn gàng -->
+    <!-- Quick Presets: Hàng nút bấm Grayscale -->
     <div class="space-y-2">
-      <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Chọn nhanh ca kiểm thử:</div>
+      <div class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Chọn nhanh ca kiểm thử:</div>
       <div class="flex flex-wrap gap-2 text-xs">
         <!-- Success Cases -->
         <button onclick="loadPreset('a*b - b*a', '0')"
-          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
-          ✅ Giao hoán: ab - ba
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
+          ab - ba = 0
         </button>
         <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
-          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
-          ✅ Lượng giác: cos²+sin²
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
+          cos² + sin² = 1
         </button>
         <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
-          class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 transition font-mono">
-          ✅ Hằng đẳng thức bậc 3
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 text-zinc-200 transition font-mono">
+          Hằng đẳng thức bậc 3
         </button>
 
         <!-- Bottleneck Cases -->
         <button onclick="loadPreset('sqrt(x^2)', 'x')"
-          class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition font-mono">
-          ⚠️ 1. Căn thức: √(x²) vs x
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
+          [Bế tắc 1] √(x²) vs x
         </button>
         <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
-          class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 transition font-mono">
-          🚨 2. Ba chấm: 1+2+...+n
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
+          [Bế tắc 2] 1+2+...+n
         </button>
         <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
-          class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition font-mono">
-          ⚠️ 3. Biến câm: ∑i vs ∑k
+          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 text-zinc-100 transition font-mono font-medium">
+          [Bế tắc 3] ∑i vs ∑k
         </button>
       </div>
     </div>
 
-    <!-- Inputs: 2 thanh nhập công thức thoáng đãng -->
+    <!-- Inputs: 2 ô nhập đơn sắc -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="space-y-1.5">
-        <label class="text-xs font-semibold text-blue-400 uppercase tracking-wide">Công thức A (Query)</label>
+        <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Công thức A (Query)</label>
         <input type="text" id="inputA" value="a*b - b*a" oninput="triggerEvaluation()"
           placeholder="Nhập công thức A..."
-          class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-blue-500 transition shadow-inner">
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-zinc-500 transition shadow-inner">
       </div>
       <div class="space-y-1.5">
-        <label class="text-xs font-semibold text-purple-400 uppercase tracking-wide">Công thức B (Target)</label>
+        <label class="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Công thức B (Target)</label>
         <input type="text" id="inputB" value="0" oninput="triggerEvaluation()"
           placeholder="Nhập công thức B..."
-          class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-purple-500 transition shadow-inner">
+          class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white font-mono text-base focus:outline-none focus:border-zinc-500 transition shadow-inner">
       </div>
     </div>
 
-    <!-- Kết quả chính (Hero Card) -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
+    <!-- Kết quả chính (Hero Card) - Grayscale -->
+    <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 space-y-5 shadow-xl">
       
-      <!-- Fused Score to, rõ, dễ nhìn -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+      <!-- Fused Score to, rõ, đơn sắc -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800">
         <div>
-          <div class="text-xs text-slate-400 uppercase tracking-wider font-medium">Độ tương đồng Hybrid Fused:</div>
+          <div class="text-xs text-zinc-400 uppercase tracking-wider font-medium">Độ tương đồng Hybrid Fused:</div>
           <div class="flex items-baseline gap-3 mt-1">
-            <span id="scoreText" class="font-mono text-4xl font-black text-emerald-400">100%</span>
-            <span id="matchType" class="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            <span id="scoreText" class="font-mono text-4xl font-black text-white">100%</span>
+            <span id="matchType" class="text-xs font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">
               Đồng nhất đại số (CAS Proved)
             </span>
           </div>
         </div>
 
-        <div class="w-full sm:w-48 bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5">
-          <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+        <div class="w-full sm:w-48 bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-800 p-0.5">
+          <div id="scoreBar" class="bg-zinc-200 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
         </div>
       </div>
 
-      <!-- 3 Kênh đánh giá: Rõ ràng, không rối mắt -->
+      <!-- 3 Kênh đánh giá: Grayscale -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
         
         <!-- Kênh 1: CAS -->
-        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
-          <div class="text-slate-400 font-medium flex items-center justify-between">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+          <div class="text-zinc-400 font-medium flex items-center justify-between">
             <span>1. CAS (SymPy)</span>
-            <span id="casStatusBadge" class="font-mono font-bold text-emerald-400">Δ = 0</span>
+            <span id="casStatusBadge" class="font-mono font-bold text-white">Δ = 0</span>
           </div>
-          <div class="font-mono text-slate-200 truncate" id="casDiffText">Hiệu số: 0</div>
+          <div class="font-mono text-zinc-300 truncate" id="casDiffText">Hiệu số: 0</div>
         </div>
 
         <!-- Kênh 2: Neural -->
-        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
-          <div class="text-slate-400 font-medium flex items-center justify-between">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+          <div class="text-zinc-400 font-medium flex items-center justify-between">
             <span>2. Neural (MathBERT)</span>
-            <span id="neuralPct" class="font-mono font-bold text-purple-400">85.4%</span>
+            <span id="neuralPct" class="font-mono font-bold text-white">85.4%</span>
           </div>
-          <div class="font-mono text-slate-200 truncate" id="neuralSimText">Cosine: 0.8540</div>
+          <div class="font-mono text-zinc-300 truncate" id="neuralSimText">Cosine: 0.8540</div>
         </div>
 
         <!-- Kênh 3: AST -->
-        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
-          <div class="text-slate-400 font-medium flex items-center justify-between">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 space-y-1">
+          <div class="text-zinc-400 font-medium flex items-center justify-between">
             <span>3. AST (Tangent-CFT)</span>
-            <span id="astOverlapBadge" class="font-mono font-bold text-amber-400">0.0%</span>
+            <span id="astOverlapBadge" class="font-mono font-bold text-white">0.0%</span>
           </div>
-          <div class="font-mono text-slate-200 truncate" id="astOverlapText">Trùng: 0 tuples</div>
+          <div class="font-mono text-zinc-300 truncate" id="astOverlapText">Trùng: 0 tuples</div>
         </div>
 
       </div>
 
-      <!-- Khung cảnh báo bế tắc (chỉ hiện khi có bế tắc) -->
-      <div id="bottleneckBanner" class="hidden rounded-xl p-4 text-xs space-y-2 border">
-        <div class="flex items-center gap-2 font-bold text-sm" id="bottleneckTitle">
-          ⚠️ Điểm Bế Tắc Của Mô Hình
+      <!-- Khung cảnh báo bế tắc - Đơn sắc -->
+      <div id="bottleneckBanner" class="hidden rounded-xl p-4 text-xs space-y-2 border border-zinc-700 bg-zinc-950">
+        <div class="flex items-center gap-2 font-bold text-sm text-zinc-100" id="bottleneckTitle">
+          Điểm Bế Tắc Của Mô Hình
         </div>
-        <p id="bottleneckDesc" class="text-slate-300 leading-relaxed"></p>
-        <div class="pt-2 border-t border-slate-700/50 text-slate-400">
-          <strong class="text-blue-400">Đề xuất giải pháp (NCKH):</strong>
-          <span id="bottleneckRec" class="text-slate-300 ml-1"></span>
+        <p id="bottleneckDesc" class="text-zinc-300 leading-relaxed"></p>
+        <div class="pt-2 border-t border-zinc-800 text-zinc-400">
+          <strong class="text-zinc-200">Đề xuất giải pháp (NCKH):</strong>
+          <span id="bottleneckRec" class="text-zinc-300 ml-1"></span>
         </div>
       </div>
 
     </div>
 
-    <!-- Khối chi tiết cây cú pháp (Thu gọn mặc định, không làm rối mắt) -->
-    <details class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 text-xs text-slate-400 cursor-pointer transition">
-      <summary class="font-semibold text-slate-300 hover:text-white select-none">
-        🔍 Xem chi tiết Cây Cú Pháp (AST) & Danh Sách Tuples (Click để mở)
+    <!-- Khối chi tiết cây cú pháp (Thu gọn mặc định) -->
+    <details class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 text-xs text-zinc-400 cursor-pointer transition">
+      <summary class="font-semibold text-zinc-300 hover:text-white select-none">
+        Xem chi tiết Cây Cú Pháp (AST) & Danh Sách Tuples (Click để mở)
       </summary>
       
-      <div class="mt-4 space-y-4 pt-4 border-t border-slate-800">
-        <!-- 2 Cây AST -->
+      <div class="mt-4 space-y-4 pt-4 border-t border-zinc-800">
+        <!-- 2 Cây AST Grayscale -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1.5">
-            <span class="text-blue-400 font-semibold uppercase text-[11px]">Cây AST Công Thức A:</span>
-            <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
+            <span class="text-zinc-300 font-semibold uppercase text-[11px]">Cây AST Công Thức A:</span>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
               <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
             </div>
           </div>
           <div class="space-y-1.5">
-            <span class="text-purple-400 font-semibold uppercase text-[11px]">Cây AST Công Thức B:</span>
-            <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
+            <span class="text-zinc-300 font-semibold uppercase text-[11px]">Cây AST Công Thức B:</span>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[180px]">
               <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 320 180"></svg>
             </div>
           </div>
         </div>
 
-        <!-- Danh sách Tuples -->
+        <!-- Danh sách Tuples Grayscale -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <div class="text-[11px] font-semibold text-slate-400 mb-1">Tuples (A): <span id="tupleCountA" class="text-blue-400 font-mono">0</span></div>
-            <div id="tuplesListA" class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
+            <div class="text-[11px] font-semibold text-zinc-400 mb-1">Tuples (A): <span id="tupleCountA" class="text-zinc-200 font-mono">0</span></div>
+            <div id="tuplesListA" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
           </div>
           <div>
-            <div class="text-[11px] font-semibold text-slate-400 mb-1">Tuples (B): <span id="tupleCountB" class="text-purple-400 font-mono">0</span></div>
-            <div id="tuplesListB" class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
+            <div class="text-[11px] font-semibold text-zinc-400 mb-1">Tuples (B): <span id="tupleCountB" class="text-zinc-200 font-mono">0</span></div>
+            <div id="tuplesListB" class="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-wrap gap-1 max-h-[120px] overflow-y-auto"></div>
           </div>
         </div>
       </div>
@@ -211,15 +211,15 @@
         renderResults(data);
       } catch (err) {
         document.getElementById('backendStatus').textContent = "Offline";
-        document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-full border border-rose-500/20";
+        document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800";
       }
     }
 
     function renderResults(res) {
       document.getElementById('backendStatus').textContent = "Online";
-      document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20";
+      document.getElementById('backendStatus').parentElement.className = "flex items-center gap-2 text-xs font-mono text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-700";
 
-      // 1. Fused Score
+      // 1. Fused Score Grayscale
       const fused = res.fused_score;
       const pct = (fused * 100).toFixed(1) + "%";
       const scoreElem = document.getElementById('scoreText');
@@ -230,33 +230,16 @@
       barElem.style.width = pct;
       matchElem.textContent = res.match_type;
 
-      if (fused >= 0.8) {
-        scoreElem.className = "font-mono text-4xl font-black text-emerald-400";
-        barElem.className = "bg-emerald-500 h-full rounded-full transition-all duration-300";
-        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
-      } else if (fused >= 0.4) {
-        scoreElem.className = "font-mono text-4xl font-black text-amber-400";
-        barElem.className = "bg-amber-500 h-full rounded-full transition-all duration-300";
-        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20";
-      } else {
-        scoreElem.className = "font-mono text-4xl font-black text-rose-400";
-        barElem.className = "bg-rose-500 h-full rounded-full transition-all duration-300";
-        matchElem.className = "text-xs font-medium px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20";
-      }
-
       // 2. Kênh CAS
       const casBadge = document.getElementById('casStatusBadge');
       if (res.is_symbolic_equivalent) {
         casBadge.textContent = "Δ = 0";
-        casBadge.className = "font-mono font-bold text-emerald-400";
         document.getElementById('casDiffText').textContent = "Bằng nhau tuyệt đối";
       } else if (res.diff && res.diff.includes("Parse Error")) {
         casBadge.textContent = "Lỗi cú pháp";
-        casBadge.className = "font-mono font-bold text-rose-400";
         document.getElementById('casDiffText').textContent = "Không parse được '...'";
       } else {
         casBadge.textContent = "Δ ≠ 0";
-        casBadge.className = "font-mono font-bold text-slate-400";
         document.getElementById('casDiffText').textContent = "Δ: " + res.diff;
       }
 
@@ -277,14 +260,6 @@
         document.getElementById('bottleneckTitle').textContent = res.bottleneck_info.title;
         document.getElementById('bottleneckDesc').textContent = res.bottleneck_info.description;
         document.getElementById('bottleneckRec').textContent = res.bottleneck_info.recommendation;
-
-        if (res.bottleneck_info.type === 'SUCCESS_CAS_IDENTITY') {
-          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-emerald-950/30 border-emerald-800/40 text-emerald-300";
-        } else if (res.bottleneck_info.severity === 'critical') {
-          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-rose-950/30 border-rose-800/50 text-rose-300";
-        } else {
-          banner.className = "rounded-xl p-4 text-xs space-y-2 border bg-amber-950/30 border-amber-800/50 text-amber-300";
-        }
       } else {
         banner.classList.add('hidden');
       }
@@ -301,7 +276,7 @@
       listA.innerHTML = '';
       (res.tuplesA || []).forEach(t => {
         const span = document.createElement('span');
-        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-slate-800 text-slate-400'}`;
+        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`;
         span.textContent = t;
         listA.appendChild(span);
       });
@@ -310,13 +285,13 @@
       listB.innerHTML = '';
       (res.tuplesB || []).forEach(t => {
         const span = document.createElement('span');
-        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-slate-800 text-slate-400'}`;
+        span.className = `px-2 py-0.5 rounded font-mono text-[10px] ${commonSet.has(t) ? 'bg-zinc-700 text-white font-bold' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`;
         span.textContent = t;
         listB.appendChild(span);
       });
     }
 
-    // Vẽ cây tối giản gọn gàng
+    // Vẽ cây đơn sắc thanh lịch
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -365,7 +340,7 @@
           line.setAttribute("y1", node.y);
           line.setAttribute("x2", child.x);
           line.setAttribute("y2", child.y);
-          line.setAttribute("stroke", "#475569");
+          line.setAttribute("stroke", "#52525b");
           line.setAttribute("stroke-width", "1.5");
           svg.appendChild(line);
           drawLines(child);
@@ -375,21 +350,24 @@
 
       function drawNodes(node) {
         if (!node) return;
-        let color = node.type === 'op' ? "#10b981" : (node.type === 'var' ? "#f59e0b" : "#6366f1");
+        let fillColor = node.type === 'op' ? "#27272a" : "#18181b";
+        let strokeColor = node.type === 'op' ? "#a1a1aa" : "#71717a";
 
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", node.x);
         c.setAttribute("cy", node.y);
         c.setAttribute("r", r);
-        c.setAttribute("fill", color);
+        c.setAttribute("fill", fillColor);
+        c.setAttribute("stroke", strokeColor);
+        c.setAttribute("stroke-width", "1.5");
         svg.appendChild(c);
 
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", node.x);
         t.setAttribute("y", node.y + 3.5);
         t.setAttribute("text-anchor", "middle");
-        t.setAttribute("fill", "#ffffff");
-        t.setAttribute("font-weight", "bold");
+        t.setAttribute("fill", "#fafafa");
+        t.setAttribute("font-weight", "500");
         t.setAttribute("font-size", "10px");
         t.setAttribute("font-family", "monospace");
         t.textContent = node.val;
