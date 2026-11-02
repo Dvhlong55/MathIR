@@ -29,6 +29,81 @@
     </div>
 
     <!-- Dual Inputs: Formula A & Formula B -->
+    <!-- Test Scenarios & Bottleneck Presets -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          Kịch bản Thực nghiệm & Khảo sát Điểm Bế Tắc (Benchmark & Bottlenecks)
+        </span>
+        <span class="text-[11px] text-slate-500">Nhấp vào nút để kiểm thử trực tiếp trên PyTorch & SymPy</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+        <!-- Cột 1: CAS Cứu Nguy (Success Cases) -->
+        <div class="bg-slate-950 border border-emerald-900/40 rounded-xl p-2.5 space-y-1.5">
+          <div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>✅ CAS Cứu Nguy (AST Thất Bại):</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadPreset('a^3 + b^3 + c^3 - 3*a*b*c', '(a+b+c)*(a^2+b^2+c^2-a*b-b*c-c*a)')"
+              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
+              Hằng đẳng thức bậc 3
+            </button>
+            <button onclick="loadPreset('cos(x)^2 + sin(x)^2', '1')"
+              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
+              Lượng giác: cos²+sin²
+            </button>
+            <button onclick="loadPreset('a*b - b*a', '0')"
+              class="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-950 hover:text-emerald-300 hover:border-emerald-700/50 border border-slate-700 text-slate-200 transition text-[11px] font-mono">
+              Giao hoán: ab - ba
+            </button>
+          </div>
+        </div>
+
+        <!-- Cột 2: Các Điểm Bế Tắc (Bottleneck Cases) -->
+        <div class="bg-slate-950 border border-amber-900/40 rounded-xl p-2.5 space-y-1.5">
+          <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>⚠️ Điểm Bế Tắc Hệ Thống (Bottlenecks):</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadPreset('sqrt(x^2)', 'x')"
+              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
+              1. Căn thức: √(x²) vs x
+            </button>
+            <button onclick="loadPreset('1 + 2 + ... + n', 'n*(n+1)/2')"
+              class="px-2 py-1 rounded bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 transition text-[11px] font-mono">
+              2. Dãy số: 1+2+...+n
+            </button>
+            <button onclick="loadPreset('sum(i, (i, 1, n))', 'sum(k, (k, 1, m))')"
+              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
+              3. Biến câm: ∑i vs ∑k
+            </button>
+            <button onclick="loadPreset('sin(x)/x', '1')"
+              class="px-2 py-1 rounded bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 transition text-[11px] font-mono">
+              4. Giới hạn: sin(x)/x
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottleneck Analysis Banner -->
+    <div id="bottleneckBanner" class="hidden bg-slate-900 border rounded-2xl p-4 shadow-sm space-y-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="bottleneckIcon" class="text-base">⚠️</span>
+          <span id="bottleneckTitle" class="text-xs font-bold uppercase tracking-wider text-amber-400">Phân Tích Bế Tắc</span>
+        </div>
+        <span id="bottleneckBadge" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">BOTTLENECK</span>
+      </div>
+      <p id="bottleneckDesc" class="text-xs text-slate-300 leading-relaxed"></p>
+      <div class="pt-1 border-t border-slate-800/80 flex items-start gap-1.5 text-xs text-slate-400">
+        <strong class="text-blue-400 shrink-0">Đề xuất giải pháp (NCKH):</strong>
+        <span id="bottleneckRec" class="text-slate-300"></span>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <!-- Input A -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
@@ -168,6 +243,12 @@
     const BACKEND_URL = 'http://127.0.0.1:8000/api/evaluate';
     let debounceTimer = null;
 
+    function loadPreset(formulaA, formulaB) {
+      document.getElementById('inputA').value = formulaA;
+      document.getElementById('inputB').value = formulaB;
+      triggerEvaluation();
+    }
+
     function triggerEvaluation() {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(callPythonBackend, 180);
@@ -218,6 +299,9 @@
       if (res.is_symbolic_equivalent) {
         casBadge.textContent = "Δ = 0 (Proved Identical)";
         casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else if (res.diff && res.diff.includes("Parse Error")) {
+        casBadge.textContent = "Syntax Error";
+        casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
       } else {
         casBadge.textContent = "Δ ≠ 0 (Independent)";
         casBadge.className = "text-[11px] px-2 py-0.5 rounded font-mono text-slate-400 bg-slate-800 border border-slate-700";
@@ -259,6 +343,39 @@
         scoreElem.className = "font-mono text-3xl font-extrabold text-rose-400";
         bar.className = "bg-rose-500 h-full rounded-full transition-all duration-200";
         badge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30";
+      }
+
+      // Bottleneck Banner Handling
+      const banner = document.getElementById('bottleneckBanner');
+      if (res.bottleneck_info) {
+        banner.classList.remove('hidden');
+        document.getElementById('bottleneckTitle').textContent = res.bottleneck_info.title;
+        document.getElementById('bottleneckDesc').textContent = res.bottleneck_info.description;
+        document.getElementById('bottleneckRec').textContent = res.bottleneck_info.recommendation;
+        
+        const bIcon = document.getElementById('bottleneckIcon');
+        const bBadge = document.getElementById('bottleneckBadge');
+        if (res.bottleneck_info.type === 'SUCCESS_CAS_IDENTITY') {
+          banner.className = "bg-emerald-950/20 border border-emerald-700/50 rounded-2xl p-4 shadow-sm space-y-2";
+          bIcon.textContent = "✅";
+          bBadge.textContent = "CAS SUCCESS";
+          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-emerald-400";
+        } else if (res.bottleneck_info.severity === 'critical') {
+          banner.className = "bg-rose-950/30 border border-rose-800/60 rounded-2xl p-4 shadow-sm space-y-2";
+          bIcon.textContent = "🚨";
+          bBadge.textContent = "CRITICAL BOTTLENECK";
+          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-rose-400";
+        } else {
+          banner.className = "bg-amber-950/25 border border-amber-800/50 rounded-2xl p-4 shadow-sm space-y-2";
+          bIcon.textContent = "⚠️";
+          bBadge.textContent = "BOTTLENECK DETECTED";
+          bBadge.className = "text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+          document.getElementById('bottleneckTitle').className = "text-xs font-bold uppercase tracking-wider text-amber-400";
+        }
+      } else {
+        banner.classList.add('hidden');
       }
 
       // 6. Trees
