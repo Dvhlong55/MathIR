@@ -6,8 +6,14 @@
   <title>MathIR - Cây Cú Pháp & Truy Xuất Toán Học</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
-    .tree-node { transition: all 0.2s ease; }
-    .tree-node:hover { filter: brightness(1.2); transform: scale(1.08); transform-origin: center; }
+    .node-group {
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .node-group:hover {
+      transform: scale(1.1);
+      transform-origin: center;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    }
   </style>
 </head>
 <body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
@@ -17,7 +23,7 @@
     <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
       <div>
         <h1 class="text-lg md:text-xl font-bold tracking-tight">MathIR Sandbox</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Kiểm tra cây cú pháp toán học (OPT) & Chuẩn hóa chính tắc</p>
+        <p class="text-xs text-[var(--muted-foreground)]">Trực quan hóa cây cú pháp toán học (Operator Tree) & Chuẩn hóa chính tắc</p>
       </div>
       <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
         SC203 • Nhóm 2
@@ -30,14 +36,12 @@
         <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">
           Nhập công thức toán học:
         </label>
-        <div class="relative">
-          <input type="text" id="formulaInput" value="(x^2 + 4x^2 + 4)" oninput="updateApp()"
-                 placeholder="Ví dụ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
-                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
-        </div>
+        <input type="text" id="formulaInput" value="(x^2 + 4x^2 + 4)" oninput="updateApp()"
+               placeholder="Ví dụ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
+               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
       </div>
 
-      <!-- Hiển thị nhanh 2 kết quả cốt lõi: Xem trước & Dạng thu gọn -->
+      <!-- Hiển thị nhanh: Xem trước & Dạng thu gọn -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
         <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
           <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase block mb-1">Công thức hiển thị:</span>
@@ -63,20 +67,21 @@
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11"></path></svg>
-            Cây Cú Pháp Phân Cấp (Operator Tree)
+            Cây Cú Pháp Phân Cấp (Operator Tree - OPT)
           </h2>
           <span id="nodeCountBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">0 nodes</span>
         </div>
 
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[200px]">
-          <svg id="treeSvg" class="w-full h-[200px]" viewBox="0 0 450 200"></svg>
+        <!-- Khung vẽ cây với nền rõ ràng, thoáng đãng -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[260px]">
+          <svg id="treeSvg" class="w-full h-[250px]" viewBox="0 0 480 250"></svg>
         </div>
 
-        <div class="flex items-center justify-center gap-3 mt-2 text-[10px] text-[var(--muted-foreground)]">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Gốc</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Toán tử</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Biến</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-500 inline-block"></span> Số</span>
+        <div class="flex items-center justify-center gap-4 mt-2.5 text-[10px] text-[var(--muted-foreground)]">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block shadow-sm"></span> Gốc (Root)</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-sm"></span> Toán tử (Op)</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block shadow-sm"></span> Biến số (Var)</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block shadow-sm"></span> Hằng số (Num)</span>
         </div>
       </div>
 
@@ -87,7 +92,7 @@
             Kết Quả Khớp Tốt Nhất (Top Match)
           </h2>
 
-          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2">
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2.5">
             <div>
               <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Công thức tìm thấy:</span>
               <div id="topMatchFormula" class="font-mono text-base font-bold text-blue-400 mt-0.5">
@@ -107,7 +112,7 @@
 
             <div class="flex items-center justify-between text-xs">
               <span class="text-[var(--muted-foreground)]">So khớp chuỗi 1D (Baseline):</span>
-              <span id="topMatch1D" class="font-mono text-red-400">14.2%</span>
+              <span id="topMatch1D" class="font-mono text-red-400 font-semibold">14.2%</span>
             </div>
           </div>
         </div>
@@ -116,16 +121,16 @@
         <div>
           <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1.5">Gợi ý thử nhanh:</span>
           <div class="flex flex-wrap gap-1.5">
-            <button onclick="applyFormula('3x^2 + 5x^2 - 7')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+            <button onclick="applyFormula('3x^2 + 5x^2 - 7')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
               3x^2 + 5x^2 - 7
             </button>
-            <button onclick="applyFormula('(x + 1)^2')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+            <button onclick="applyFormula('(x + 1)^2')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
               (x + 1)^2
             </button>
-            <button onclick="applyFormula('2a + 3b + 4a')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+            <button onclick="applyFormula('2a + 3b + 4a')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
               2a + 3b + 4a
             </button>
-            <button onclick="applyFormula('(x - 3)*(x + 3)')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+            <button onclick="applyFormula('(x - 3)*(x + 3)')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono transition">
               (x - 3)*(x + 3)
             </button>
           </div>
@@ -316,7 +321,7 @@
       return s;
     }
 
-    // 3. TREE SVG RENDERER
+    // 3. CLEAN, CRYSTAL-CLEAR TREE SVG RENDERER (NO OVERLAPPING LINES)
     function renderTree(ast) {
       const svg = document.getElementById('treeSvg');
       svg.innerHTML = '';
@@ -343,10 +348,10 @@
       walk(ast, 0);
 
       let totalLeaves = Math.max(1, leafIndex);
-      let W = 450, H = 200;
-      let padX = 35, padY = 28;
+      let W = 480, H = 250;
+      let padX = 40, padY = 32;
       let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
-      let stepY = maxDepth > 0 ? Math.min(48, (H - padY * 2) / maxDepth) : 40;
+      let stepY = maxDepth > 0 ? Math.min(65, (H - padY * 2) / maxDepth) : 55;
 
       let totalNodes = 0;
       function setCoords(node) {
@@ -360,49 +365,104 @@
       setCoords(ast);
       document.getElementById('nodeCountBadge').textContent = `${totalNodes} nodes`;
 
-      // Draw lines
+      const nodeRadius = 18;
+
+      // STEP 1: DRAW SMOOTH CONNECTION PATHS (LINES NEVER OVERLAP NODES)
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
           if (!child) return;
-          let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", node.x); line.setAttribute("y1", node.y);
-          line.setAttribute("x2", child.x); line.setAttribute("y2", child.y);
-          line.setAttribute("stroke", "currentColor");
-          line.setAttribute("class", "text-[var(--border)]");
-          line.setAttribute("stroke-width", "2");
-          line.setAttribute("stroke-dasharray", "3 3");
-          svg.appendChild(line);
+
+          // Start from bottom edge of parent, end at top edge of child
+          let startY = node.y + nodeRadius;
+          let endY = child.y - nodeRadius;
+
+          // Elegant smooth cubic bezier curve
+          let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          let midY = (startY + endY) / 2;
+          let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
+          
+          path.setAttribute("d", d);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "#64748b");
+          path.setAttribute("stroke-width", "2");
+          path.setAttribute("stroke-opacity", "0.6");
+          svg.appendChild(path);
+
           drawLines(child);
         });
       }
       drawLines(ast);
 
-      // Draw circles & text
+      // STEP 2: DRAW SOLID HIGH-CONTRAST NODES (DRAWN OVER EDGES)
       function drawNodes(node, isRoot = false) {
         if (!node) return;
-        let color = "#3b82f6", bg = "rgba(59,130,246,0.15)";
-        if (isRoot) { color = "#3b82f6"; bg = "rgba(59,130,246,0.25)"; }
-        else if (node.type === 'op' || node.type === 'fn') { color = "#10b981"; bg = "rgba(16,185,129,0.15)"; }
-        else if (node.type === 'var') { color = "#f59e0b"; bg = "rgba(245,158,11,0.15)"; }
-        else if (node.type === 'num') { color = "#ec4899"; bg = "rgba(236,72,153,0.15)"; }
 
-        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", "tree-node cursor-pointer");
+        // Vivid high-contrast palette
+        let bgColor = "#2563eb"; // Blue
+        let labelText = "Root";
 
-        let c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        c.setAttribute("cx", node.x); c.setAttribute("cy", node.y);
-        c.setAttribute("r", isRoot ? "17" : "14");
-        c.setAttribute("fill", bg); c.setAttribute("stroke", color); c.setAttribute("stroke-width", "2");
+        if (isRoot) {
+          bgColor = "#2563eb"; // Root Op
+          labelText = "Gốc";
+        } else if (node.type === 'op' || node.type === 'fn') {
+          bgColor = "#059669"; // Green Op
+          labelText = "Toán tử";
+        } else if (node.type === 'var') {
+          bgColor = "#d97706"; // Amber Var
+          labelText = "Biến";
+        } else if (node.type === 'num') {
+          bgColor = "#7c3aed"; // Purple Num
+          labelText = "Số";
+        }
 
-        let t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        t.setAttribute("x", node.x); t.setAttribute("y", node.y + 4);
-        t.setAttribute("text-anchor", "middle"); t.setAttribute("fill", color);
-        t.setAttribute("font-weight", "bold"); t.setAttribute("font-size", isRoot ? "13px" : "11px");
-        t.setAttribute("font-family", "monospace");
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "node-group cursor-pointer");
+
+        // Outer white ring for sharp separation
+        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        ring.setAttribute("cx", node.x);
+        ring.setAttribute("cy", node.y);
+        ring.setAttribute("r", nodeRadius + 2);
+        ring.setAttribute("fill", "white");
+        ring.setAttribute("fill-opacity", "0.15");
+        g.appendChild(ring);
+
+        // Solid colored circle
+        const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute("cx", node.x);
+        c.setAttribute("cy", node.y);
+        c.setAttribute("r", nodeRadius);
+        c.setAttribute("fill", bgColor);
+        c.setAttribute("stroke", "#ffffff");
+        c.setAttribute("stroke-width", "2");
+        g.appendChild(c);
+
+        // Value text (crystal clear white, bold, perfectly centered)
+        const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        t.setAttribute("x", node.x);
+        t.setAttribute("y", node.y + 5);
+        t.setAttribute("text-anchor", "middle");
+        t.setAttribute("fill", "#ffffff");
+        t.setAttribute("font-weight", "800");
+        t.setAttribute("font-size", "14px");
+        t.setAttribute("font-family", "ui-monospace, monospace");
         t.textContent = node.val;
+        g.appendChild(t);
 
-        g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+        // Small role label below node
+        const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        sub.setAttribute("x", node.x);
+        sub.setAttribute("y", node.y + nodeRadius + 11);
+        sub.setAttribute("text-anchor", "middle");
+        sub.setAttribute("fill", "#94a3b8");
+        sub.setAttribute("font-size", "9px");
+        sub.setAttribute("font-weight", "500");
+        sub.textContent = labelText;
+        g.appendChild(sub);
+
+        svg.appendChild(g);
+
         if (node.l) drawNodes(node.l, false);
         if (node.r) drawNodes(node.r, false);
       }
