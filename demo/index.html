@@ -3,305 +3,399 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathAMR - Contextualized Math Retrieval Workbench</title>
+  <title>Tangent-CFT Interactive Sandbox</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
-    .node-group {
-      transition: transform 0.2s ease, filter 0.2s ease;
-    }
-    .node-group:hover {
-      transform: scale(1.1);
-      transform-origin: center;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    }
+    .node-group { transition: transform 0.15s ease; }
+    .node-group:hover { transform: scale(1.1); transform-origin: center; }
   </style>
 </head>
 <body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
   <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Minimalist Header -->
+    <!-- Header -->
     <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
       <div>
-        <h1 class="text-lg md:text-xl font-bold tracking-tight">MathAMR Interactive Workbench</h1>
-        <p class="text-xs text-[var(--muted-foreground)]">Contextualized Formula Search Using Math Abstract Meaning Representation (Mansouri et al., CIKM)</p>
+        <h1 class="text-lg md:text-xl font-bold tracking-tight">Tangent-CFT Sandbox</h1>
+        <p class="text-xs text-[var(--muted-foreground)]">Real-Time AST Parser, Hierarchical Tuples & True Cosine Similarity</p>
       </div>
       <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
-        Context + Formula
+        Live Test Engine
       </span>
     </div>
 
-    <!-- Dual Modality Input: Text Context + Formula -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-        <!-- Text Context Input (7 cols) -->
-        <div class="md:col-span-7 space-y-1.5">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-blue-400">
-            Surrounding Problem Context (Natural Language):
-          </label>
-          <input type="text" id="contextInput" value="Compute the commutator of two operators in quantum mechanics" oninput="runEvaluation()"
-                 placeholder="e.g. Find roots of quadratic equation, Evaluate derivative..."
-                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
-        </div>
-
-        <!-- Formula LaTeX Input (5 cols) -->
-        <div class="md:col-span-5 space-y-1.5">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400">
-            Target Formula (LaTeX / Math):
-          </label>
-          <input type="text" id="formulaInput" value="AB - BA" oninput="runEvaluation()"
-                 placeholder="e.g. AB - BA, x^2 - 4 = 0, \int x^2 dx..."
-                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 font-mono text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-[var(--foreground)]">
+    <!-- Dual Inputs: Formula A & Formula B -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Input A -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+        <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
+          Formula A:
+        </label>
+        <input type="text" id="inputA" value="a - b" oninput="runLiveTest()"
+               placeholder="Type any formula..."
+               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
+          <span>Nodes: <strong id="nodeCountA" class="font-mono text-[var(--foreground)]">0</strong></span>
+          <span>Tuples: <strong id="tupleCountA" class="font-mono text-blue-400">0</strong></span>
         </div>
       </div>
 
-      <!-- Quick Test Scenarios -->
-      <div class="flex items-center gap-2 pt-1 flex-wrap text-xs">
-        <span class="text-[11px] text-[var(--muted-foreground)] uppercase font-semibold">Test Scenarios:</span>
-        <button onclick="setScenario('Compute the commutator of two operators in quantum mechanics', 'AB - BA')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
-          Commutator (AB - BA)
-        </button>
-        <button onclick="setScenario('Find the real roots of quadratic polynomial', 'x^2 - 4 = 0')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
-          Roots (x^2 - 4 = 0)
-        </button>
-        <button onclick="setScenario('Calculate the definite integral of quadratic monomial', '\\int x^2 dx')" class="px-2 py-0.5 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono text-[11px]">
-          Integral (\int x^2 dx)
-        </button>
+      <!-- Input B -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-2">
+        <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
+          Formula B:
+        </label>
+        <input type="text" id="inputB" value="b - a" oninput="runLiveTest()"
+               placeholder="Type any formula to compare..."
+               class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-[var(--foreground)]">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] pt-1">
+          <span>Nodes: <strong id="nodeCountB" class="font-mono text-[var(--foreground)]">0</strong></span>
+          <span>Tuples: <strong id="tupleCountB" class="font-mono text-purple-400">0</strong></span>
+        </div>
       </div>
     </div>
 
-    <!-- Main Workspace: Semantic Graph & Model Comparison -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-      
-      <!-- Unified MathAMR Graph (7 cols) -->
-      <div class="md:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            Unified MathAMR Semantic Graph
-          </h2>
-          <span class="text-[11px] font-mono text-emerald-400 font-semibold">Text + Math Synced</span>
+    <!-- Cosine Score Banner -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] block">
+          Tangent-CFT Cosine Similarity:
+        </span>
+        <div class="flex items-baseline gap-2 mt-0.5">
+          <span id="scoreText" class="font-mono text-2xl font-extrabold text-red-400">0.0000</span>
+          <span id="scorePercent" class="font-mono text-xs text-[var(--muted-foreground)]">(0.0%)</span>
         </div>
-
-        <!-- SVG Canvas for Unified Semantic Graph -->
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[240px]">
-          <svg id="graphSvg" class="w-full h-[230px]" viewBox="0 0 460 230"></svg>
+      </div>
+      <div class="w-1/2">
+        <div class="w-full bg-[var(--background)] border border-[var(--border)] h-2.5 rounded-full overflow-hidden p-0.5">
+          <div id="scoreBar" class="bg-red-500 h-full rounded-full transition-all duration-200" style="width: 0%;"></div>
         </div>
+      </div>
+    </div>
 
-        <div class="flex items-center justify-center gap-4 mt-2.5 text-[10px] text-[var(--muted-foreground)]">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span> Action/Predicate (Text)</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span> Domain Context</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block"></span> Math Operator</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Math Variables</span>
+    <!-- Dual Syntax Trees Side-by-Side -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Tree A -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
+          Syntax Tree (Formula A):
+        </span>
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
+          <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
         </div>
       </div>
 
-      <!-- Retrieval Effectiveness Comparison (5 cols) -->
-      <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3">
-        <div class="space-y-3">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-            Retrieval Accuracy Benchmark
-          </h2>
-
-          <!-- Model 1: Tangent-CFT (Formula Only) -->
-          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-[var(--muted-foreground)]">1. Tangent-CFT (2019):</span>
-              <span id="scoreTangent" class="font-mono font-bold text-red-400">0.2450</span>
-            </div>
-            <div class="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
-              <div id="barTangent" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 24.5%;"></div>
-            </div>
-            <p class="text-[10px] text-[var(--muted-foreground)]">Formula-only tuple matching. Lacks context awareness.</p>
-          </div>
-
-          <!-- Model 2: MathAMR (Context + Formula with Sentence-BERT) -->
-          <div class="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-3 space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-emerald-400">2. MathAMR (CIKM):</span>
-              <span id="scoreMathAMR" class="font-mono font-extrabold text-emerald-400 text-sm">0.8920</span>
-            </div>
-            <div class="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
-              <div id="barMathAMR" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 89.2%;"></div>
-            </div>
-            <p class="text-[10px] text-emerald-400/80">Sentence-BERT embedding on unified Text+Math semantic graph.</p>
-          </div>
+      <!-- Tree B -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
+          Syntax Tree (Formula B):
+        </span>
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
+          <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
         </div>
+      </div>
+    </div>
 
-        <!-- Target Matched Post from Math Stack Exchange -->
-        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 space-y-1">
-          <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Top Retrieved Math Stack Exchange Post:</span>
-          <div id="matchedPostTitle" class="text-xs font-semibold text-blue-400 truncate">
-            "How to compute the commutator [A, B] = AB - BA?"
-          </div>
-          <div class="flex justify-between items-center text-[11px] text-[var(--muted-foreground)] pt-1 border-t border-[var(--border)]">
-            <span>Post ID: <strong id="matchedPostId" class="font-mono text-[var(--foreground)]">#149204</strong></span>
-            <span>nDCG'@10: <strong id="matchedNdcg" class="font-mono text-emerald-400">0.915</strong></span>
-          </div>
+    <!-- Extracted Tuples Comparison -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Tuples A -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
+          Tuples (A):
+        </span>
+        <div id="tuplesListA" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]">
+          <!-- Dynamic A -->
         </div>
-
       </div>
 
+      <!-- Tuples B -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3.5 shadow-sm space-y-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
+          Tuples (B):
+        </span>
+        <div id="tuplesListB" class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]">
+          <!-- Dynamic B -->
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
-    // Corpus of realistic Math Stack Exchange problems
-    const benchmarkPosts = [
-      {
-        id: "149204",
-        title: "How to compute the commutator [A, B] = AB - BA in operator algebra?",
-        keywords: ["commutator", "operator", "quantum", "mechanics"],
-        formulaRaw: "AB - BA",
-        ndcg: "0.915",
-        sCFT: 0.28,
-        sAMR: 0.94
-      },
-      {
-        id: "582190",
-        title: "Finding all real roots for quadratic equation x^2 - 4 = 0",
-        keywords: ["root", "quadratic", "polynomial", "equation"],
-        formulaRaw: "x^2 - 4 = 0",
-        ndcg: "0.884",
-        sCFT: 0.35,
-        sAMR: 0.91
-      },
-      {
-        id: "772102",
-        title: "Evaluating the definite and indefinite integral of x^2 dx",
-        keywords: ["integral", "derivative", "integrate", "monomial"],
-        formulaRaw: "\\int x^2 dx",
-        ndcg: "0.892",
-        sCFT: 0.31,
-        sAMR: 0.89
+    // 1. ROBUST RECURSIVE DESCENT MATH PARSER
+    function tokenize(s) {
+      s = s.trim();
+      let tokens = [], i = 0;
+      while (i < s.length) {
+        let ch = s[i];
+        if (/\s/.test(ch)) { i++; continue; }
+        if (['(', ')', '[', ']'].includes(ch)) { tokens.push({ type: 'paren', val: ch }); i++; continue; }
+        if (['+', '-', '*', '/', '^', '='].includes(ch)) { tokens.push({ type: 'op', val: ch }); i++; continue; }
+        if (/\d/.test(ch)) {
+          let num = '';
+          while (i < s.length && /[\d\.]/.test(s[i])) { num += s[i]; i++; }
+          tokens.push({ type: 'num', val: num });
+          continue;
+        }
+        if (/[a-zA-Z_]/.test(ch)) {
+          let id = '';
+          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i]; i++; }
+          tokens.push({ type: 'id', val: id });
+          continue;
+        }
+        i++;
       }
-    ];
+      return tokens;
+    }
 
-    function drawMathAMRGraph(action, context, op, var1, var2) {
-      const svg = document.getElementById('graphSvg');
+    class Parser {
+      constructor(tokens) { this.tokens = tokens; this.p = 0; }
+      peek() { return this.tokens[this.p] || null; }
+      consume() { return this.tokens[this.p++]; }
+
+      parse() {
+        if (!this.tokens.length) return null;
+        return this.parseEq();
+      }
+      parseEq() {
+        let l = this.parseAdd();
+        if (this.peek()?.val === '=') { this.consume(); return { val: '=', l, r: this.parseAdd(), type: 'op' }; }
+        return l;
+      }
+      parseAdd() {
+        let l = this.parseMul();
+        while (this.peek() && ['+', '-'].includes(this.peek().val)) {
+          let op = this.consume().val;
+          l = { val: op, l, r: this.parseMul(), type: 'op' };
+        }
+        return l;
+      }
+      parseMul() {
+        let l = this.parsePow();
+        while (this.peek() && ['*', '/'].includes(this.peek().val)) {
+          let op = this.consume().val;
+          l = { val: op, l, r: this.parsePow(), type: 'op' };
+        }
+        return l;
+      }
+      parsePow() {
+        let l = this.parsePrimary();
+        if (this.peek()?.val === '^') {
+          this.consume();
+          return { val: '^', l, r: this.parsePow(), type: 'op' };
+        }
+        return l;
+      }
+      parsePrimary() {
+        let t = this.consume();
+        if (!t) return null;
+        if (t.val === '(' || t.val === '[') {
+          let inner = this.parseEq();
+          if (this.peek()?.val === ')' || this.peek()?.val === ']') this.consume();
+          return inner;
+        }
+        if (t.type === 'num') return { val: t.val, type: 'num' };
+        if (t.type === 'id') return { val: t.val, type: 'var' };
+        return null;
+      }
+    }
+
+    // 2. TRUE TANGENT-CFT TUPLE EXTRACTOR
+    function getTuples(node, tuples = []) {
+      if (!node) return tuples;
+      if (node.l) {
+        tuples.push(`(${node.val}, ${node.l.val}, L)`);
+        getTuples(node.l, tuples);
+      }
+      if (node.r) {
+        tuples.push(`(${node.val}, ${node.r.val}, R)`);
+        getTuples(node.r, tuples);
+      }
+      return tuples;
+    }
+
+    // 3. TREE SVG RENDERER (NO OVERLAPPING LINES)
+    function drawTree(ast, svgId) {
+      const svg = document.getElementById(svgId);
       svg.innerHTML = '';
+      if (!ast) return 0;
 
-      // Coordinates
-      const nodes = [
-        { id: "root", label: action || "compute", x: 230, y: 35, bg: "#2563eb", type: "action" },
-        { id: "ctx", label: context || "quantum", x: 100, y: 110, bg: "#059669", type: "context" },
-        { id: "op", label: op || "-", x: 360, y: 110, bg: "#7c3aed", type: "op" },
-        { id: "v1", label: var1 || "A", x: 300, y: 185, bg: "#d97706", type: "var" },
-        { id: "v2", label: var2 || "B", x: 420, y: 185, bg: "#d97706", type: "var" }
-      ];
+      let leafIndex = 0, maxDepth = 0;
+      function walk(node, depth) {
+        if (!node) return;
+        if (depth > maxDepth) maxDepth = depth;
+        node.depth = depth;
+        let hasL = !!node.l, hasR = !!node.r;
+        if (!hasL && !hasR) node.col = leafIndex++;
+        else {
+          if (hasL) walk(node.l, depth + 1);
+          if (hasR) walk(node.r, depth + 1);
+          let lc = hasL ? node.l.col : leafIndex;
+          let rc = hasR ? node.r.col : lc;
+          node.col = (lc + rc) / 2;
+        }
+      }
+      walk(ast, 0);
 
-      const edges = [
-        { from: nodes[0], to: nodes[1], label: ":context" },
-        { from: nodes[0], to: nodes[2], label: ":math-expr" },
-        { from: nodes[2], to: nodes[3], label: ":arg1" },
-        { from: nodes[2], to: nodes[4], label: ":arg2" }
-      ];
+      let totalLeaves = Math.max(1, leafIndex);
+      let W = 300, H = 180;
+      let padX = 30, padY = 28;
+      let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
+      let stepY = maxDepth > 0 ? Math.min(48, (H - padY * 2) / maxDepth) : 40;
 
-      // Draw edges
-      edges.forEach(e => {
-        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let startY = e.from.y + 16;
-        let endY = e.to.y - 16;
-        let midY = (startY + endY) / 2;
-        let d = `M ${e.from.x} ${startY} C ${e.from.x} ${midY}, ${e.to.x} ${midY}, ${e.to.x} ${endY}`;
+      let nodeCount = 0;
+      function setCoords(node) {
+        if (!node) return;
+        nodeCount++;
+        node.x = padX + node.col * stepX;
+        node.y = padY + node.depth * stepY;
+        if (node.l) setCoords(node.l);
+        if (node.r) setCoords(node.r);
+      }
+      setCoords(ast);
 
-        path.setAttribute("d", d);
-        path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "#64748b");
-        path.setAttribute("stroke-width", "1.8");
-        path.setAttribute("stroke-opacity", "0.6");
-        svg.appendChild(path);
+      const r = 15;
 
-        // Edge label text
-        let midX = (e.from.x + e.to.x) / 2;
-        let lbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        lbl.setAttribute("x", midX);
-        lbl.setAttribute("y", midY);
-        lbl.setAttribute("text-anchor", "middle");
-        lbl.setAttribute("fill", "#94a3b8");
-        lbl.setAttribute("font-size", "9px");
-        lbl.setAttribute("font-family", "ui-monospace, monospace");
-        lbl.textContent = e.label;
-        svg.appendChild(lbl);
-      });
+      // Draw curves
+      function drawLines(node) {
+        if (!node) return;
+        [node.l, node.r].forEach(child => {
+          if (!child) return;
+          let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          let startY = node.y + r;
+          let endY = child.y - r;
+          let midY = (startY + endY) / 2;
+          let d = `M ${node.x} ${startY} C ${node.x} ${midY}, ${child.x} ${midY}, ${child.x} ${endY}`;
+          path.setAttribute("d", d);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "#64748b");
+          path.setAttribute("stroke-width", "1.8");
+          path.setAttribute("stroke-opacity", "0.6");
+          svg.appendChild(path);
+          drawLines(child);
+        });
+      }
+      drawLines(ast);
 
       // Draw nodes
-      nodes.forEach(n => {
+      function drawNodes(node, isRoot = false) {
+        if (!node) return;
+        let color = isRoot ? "#2563eb" : (node.type === 'op' ? "#059669" : (node.type === 'var' ? "#d97706" : "#7c3aed"));
+
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("class", "node-group cursor-pointer");
 
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        c.setAttribute("cx", n.x);
-        c.setAttribute("cy", n.y);
-        c.setAttribute("r", "16");
-        c.setAttribute("fill", n.bg);
+        c.setAttribute("cx", node.x);
+        c.setAttribute("cy", node.y);
+        c.setAttribute("r", r);
+        c.setAttribute("fill", color);
         c.setAttribute("stroke", "#ffffff");
         c.setAttribute("stroke-width", "2");
         g.appendChild(c);
 
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        t.setAttribute("x", n.x);
-        t.setAttribute("y", n.y + 4.5);
+        t.setAttribute("x", node.x);
+        t.setAttribute("y", node.y + 4);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("fill", "#ffffff");
         t.setAttribute("font-weight", "bold");
-        t.setAttribute("font-size", n.label.length > 5 ? "9px" : "12px");
+        t.setAttribute("font-size", node.val.length > 2 ? "10px" : "12px");
         t.setAttribute("font-family", "ui-monospace, monospace");
-        t.textContent = n.label;
+        t.textContent = node.val;
         g.appendChild(t);
 
         svg.appendChild(g);
+        if (node.l) drawNodes(node.l, false);
+        if (node.r) drawNodes(node.r, false);
+      }
+      drawNodes(ast, true);
+
+      return nodeCount;
+    }
+
+    // 4. MAIN LIVE CONTROLLER
+    function runLiveTest() {
+      let strA = document.getElementById('inputA').value.trim();
+      let strB = document.getElementById('inputB').value.trim();
+
+      // Parse & Draw A
+      let astA = new Parser(tokenize(strA)).parse();
+      let countA = drawTree(astA, 'treeSvgA');
+      document.getElementById('nodeCountA').textContent = countA;
+      let tuplesA = getTuples(astA);
+      document.getElementById('tupleCountA').textContent = `${tuplesA.length} tuples`;
+
+      // Parse & Draw B
+      let astB = new Parser(tokenize(strB)).parse();
+      let countB = drawTree(astB, 'treeSvgB');
+      document.getElementById('nodeCountB').textContent = countB;
+      let tuplesB = getTuples(astB);
+      document.getElementById('tupleCountB').textContent = `${tuplesB.length} tuples`;
+
+      // Overlap calculation
+      let setA = new Set(tuplesA);
+      let setB = new Set(tuplesB);
+
+      // Render Tuples Pills A
+      let listA = document.getElementById('tuplesListA');
+      listA.innerHTML = '';
+      if (!tuplesA.length) listA.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic">Single node</span>';
+      tuplesA.forEach(t => {
+        let isMatch = setB.has(t);
+        let pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.textContent = t;
+        listA.appendChild(pill);
       });
+
+      // Render Tuples Pills B
+      let listB = document.getElementById('tuplesListB');
+      listB.innerHTML = '';
+      if (!tuplesB.length) listB.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic">Single node</span>';
+      tuplesB.forEach(t => {
+        let isMatch = setA.has(t);
+        let pill = document.createElement('span');
+        pill.className = `text-[11px] px-2 py-0.5 rounded-md border font-mono ${isMatch ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 font-bold' : 'bg-red-500/10 border-red-500/25 text-red-400'}`;
+        pill.textContent = t;
+        listB.appendChild(pill);
+      });
+
+      // Cosine Calculation
+      let intersection = tuplesA.filter(t => setB.has(t)).length;
+      let score = 0.0;
+      if (tuplesA.length === 0 && tuplesB.length === 0) {
+        score = (strA === strB && strA !== '') ? 1.0 : 0.0;
+      } else if (tuplesA.length === 0 || tuplesB.length === 0) {
+        score = 0.0;
+      } else {
+        score = intersection / Math.sqrt(tuplesA.length * tuplesB.length);
+      }
+
+      let scoreFixed = score.toFixed(4);
+      let pct = (score * 100).toFixed(1) + "%";
+
+      document.getElementById('scoreText').textContent = scoreFixed;
+      document.getElementById('scorePercent').textContent = `(${pct})`;
+      document.getElementById('scoreBar').style.width = pct;
+
+      let scoreElem = document.getElementById('scoreText');
+      let bar = document.getElementById('scoreBar');
+
+      if (score >= 0.8) {
+        scoreElem.className = "font-mono text-2xl font-extrabold text-emerald-400";
+        bar.className = "bg-emerald-500 h-full rounded-full transition-all duration-200";
+      } else if (score >= 0.4) {
+        scoreElem.className = "font-mono text-2xl font-extrabold text-amber-400";
+        bar.className = "bg-amber-500 h-full rounded-full transition-all duration-200";
+      } else {
+        scoreElem.className = "font-mono text-2xl font-extrabold text-red-400";
+        bar.className = "bg-red-500 h-full rounded-full transition-all duration-200";
+      }
     }
 
-    function runEvaluation() {
-      let ctx = document.getElementById('contextInput').value.trim().toLowerCase();
-      let formula = document.getElementById('formulaInput').value.trim();
-
-      // Simple keywords extraction
-      let action = "search";
-      let domain = "math";
-      if (ctx.includes("commutator") || ctx.includes("quantum")) { action = "compute"; domain = "quantum"; }
-      else if (ctx.includes("root") || ctx.includes("quadratic")) { action = "solve"; domain = "algebra"; }
-      else if (ctx.includes("integral") || ctx.includes("integrate")) { action = "integrate"; domain = "calculus"; }
-
-      let op = "-";
-      let v1 = "A";
-      let v2 = "B";
-      if (formula.includes("+")) { op = "+"; v1 = "a"; v2 = "b"; }
-      else if (formula.includes("=")) { op = "="; v1 = "x^2"; v2 = "0"; }
-      else if (formula.includes("int") || formula.includes("\\int")) { op = "∫"; v1 = "x^2"; v2 = "dx"; }
-
-      drawMathAMRGraph(action, domain, op, v1, v2);
-
-      // Match against benchmark posts
-      let bestPost = benchmarkPosts[0];
-      if (ctx.includes("root") || formula.includes("x^2 - 4")) bestPost = benchmarkPosts[1];
-      else if (ctx.includes("integral") || formula.includes("int")) bestPost = benchmarkPosts[2];
-
-      document.getElementById('matchedPostTitle').textContent = `"${bestPost.title}"`;
-      document.getElementById('matchedPostId').textContent = `#${bestPost.id}`;
-      document.getElementById('matchedNdcg').textContent = bestPost.ndcg;
-
-      // Scores
-      let sCFT = bestPost.sCFT;
-      let sAMR = bestPost.sAMR;
-
-      document.getElementById('scoreTangent').textContent = sCFT.toFixed(4);
-      document.getElementById('barTangent').style.width = (sCFT * 100).toFixed(1) + "%";
-
-      document.getElementById('scoreMathAMR').textContent = sAMR.toFixed(4);
-      document.getElementById('barMathAMR').style.width = (sAMR * 100).toFixed(1) + "%";
-    }
-
-    function setScenario(c, f) {
-      document.getElementById('contextInput').value = c;
-      document.getElementById('formulaInput').value = f;
-      runEvaluation();
-    }
-
-    window.addEventListener('DOMContentLoaded', runEvaluation);
-    runEvaluation();
+    window.addEventListener('DOMContentLoaded', runLiveTest);
+    runLiveTest();
   </script>
 </body>
 </html>
