@@ -129,17 +129,6 @@
         </div>
       </div>
 
-      <!-- Scientific Insight Explanation -->
-      <div id="insightBox" class="p-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-xs text-[var(--foreground)] space-y-1">
-        <p class="font-bold text-red-400 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          Phát hiện hạn chế của Baseline (Mô hình tác giả):
-        </p>
-        <p id="insightText" class="text-[var(--muted-foreground)]">
-          `a - b` sinh tuple `(-, a, L)` và `(-, b, R)`. Trong khi `b - a` sinh tuple `(-, b, L)` và `(-, a, R)`. Vì nhánh L/R bị gán cứng, 0 có tuple nào trùng nhau $\rightarrow$ Điểm Cosine tụt về 0.0000!
-        </p>
-      </div>
-
     </div>
 
   </div>
@@ -301,7 +290,6 @@
       } else if (tuplesA.length === 0 || tuplesB.length === 0) {
         score = 0.0;
       } else {
-        // Cosine over one-hot tuple frequency
         score = intersection / Math.sqrt(tuplesA.length * tuplesB.length);
       }
 
@@ -330,21 +318,6 @@
         scoreElem.className = "font-mono text-xl font-extrabold text-red-400";
         pctElem.className = "font-mono font-bold text-red-400";
         bar.className = "bg-red-500 h-full rounded-full transition-all duration-300";
-      }
-
-      // Insight box
-      let insightBox = document.getElementById('insightBox');
-      let insightText = document.getElementById('insightText');
-
-      if (score === 1.0) {
-        insightBox.className = "p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-xs text-[var(--foreground)] space-y-1";
-        insightText.innerHTML = `Hai công thức có cấu trúc cây n-gram hoàn toàn trùng khớp (Cosine = 1.0000).`;
-      } else if (score === 0.0) {
-        insightBox.className = "p-3.5 rounded-xl border border-red-500/20 bg-red-500/5 text-xs text-[var(--foreground)] space-y-1";
-        insightText.innerHTML = `<strong>Minh chứng cho điểm mù của Baseline:</strong> Toàn bộ các tuples màu đỏ bị lệch nhau do vị trí trái/phải (L/R) hoặc tên biến bị đảo. Tangent-CFT coi đây là 2 công thức hoàn toàn khác biệt (Cosine = 0.0000)!`;
-      } else {
-        insightBox.className = "p-3.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-[var(--foreground)] space-y-1";
-        insightText.innerHTML = `Chỉ trùng khớp được ${intersection} tuples (màu xanh lá), còn lại các tuples màu đỏ bị lệch nhánh.`;
       }
     }
 
