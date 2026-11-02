@@ -35,12 +35,12 @@
         <label class="block text-xs font-bold uppercase tracking-wider text-blue-400">
           Formula A:
         </label>
-        <input type="text" id="inputA" value="cos^2 + sin^2" oninput="runLiveTest()"
-               placeholder="Type formula (e.g. cos^2 + sin^2, a + b, (x+1)^2...)"
+        <input type="text" id="inputA" value="a^3+b^3+c^3 - 3abc" oninput="runLiveTest()"
+               placeholder="Type formula (e.g. a^3+b^3+c^3 - 3abc, cos^2 + sin^2...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
         <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-          <span>Canonical: <strong id="canonA" class="font-mono text-emerald-400">1</strong></span>
-          <span>Tuples: <strong id="tupleCountA" class="font-mono text-blue-400">6 tuples</strong></span>
+          <span>Canonical: <strong id="canonA" class="font-mono text-emerald-400">-</strong></span>
+          <span>Tuples: <strong id="tupleCountA" class="font-mono text-blue-400">0</strong></span>
         </div>
       </div>
 
@@ -49,12 +49,12 @@
         <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
           Formula B:
         </label>
-        <input type="text" id="inputB" value="1" oninput="runLiveTest()"
-               placeholder="Type formula (e.g. 1, b + a, x^2 + 2x + 1...)"
+        <input type="text" id="inputB" value="(a+b+c)(a^2+b^2+c^2-ab -bc -ca)" oninput="runLiveTest()"
+               placeholder="Type formula (e.g. (a+b+c)(a^2+b^2+c^2-ab-bc-ca), 1...)"
                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 text-white">
         <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-          <span>Canonical: <strong id="canonB" class="font-mono text-emerald-400">1</strong></span>
-          <span>Tuples: <strong id="tupleCountB" class="font-mono text-purple-400">0 tuples</strong></span>
+          <span>Canonical: <strong id="canonB" class="font-mono text-emerald-400">-</strong></span>
+          <span>Tuples: <strong id="tupleCountB" class="font-mono text-purple-400">0</strong></span>
         </div>
       </div>
     </div>
@@ -85,8 +85,8 @@
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
           Syntax Tree (Formula A):
         </span>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
-          <svg id="treeSvgA" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
+          <svg id="treeSvgA" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
         </div>
       </div>
 
@@ -95,8 +95,8 @@
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
           Syntax Tree (Formula B):
         </span>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[190px]">
-          <svg id="treeSvgB" class="w-full h-[180px]" viewBox="0 0 300 180"></svg>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-center overflow-x-auto min-h-[220px]">
+          <svg id="treeSvgB" class="w-full h-[210px]" viewBox="0 0 320 210"></svg>
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
         <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 block">
           Invariant Tuples (A):
         </span>
-        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
+        <div id="tuplesListA" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
       </div>
 
       <!-- Tuples B -->
@@ -116,35 +116,58 @@
         <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 block">
           Invariant Tuples (B):
         </span>
-        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px]"></div>
+        <div id="tuplesListB" class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap gap-1.5 min-h-[50px] max-h-[160px] overflow-y-auto"></div>
       </div>
     </div>
 
   </div>
 
   <script>
-    // 1. RECURSIVE DESCENT MATH PARSER
+    // 1. RECURSIVE DESCENT MATH PARSER WITH IMPLICIT MULTIPLICATION
     function tokenize(s) {
       s = s.trim();
-      let tokens = [], i = 0;
+      let raw = [], i = 0;
       while (i < s.length) {
         let ch = s[i];
         if (/\s/.test(ch)) { i++; continue; }
-        if (['(', ')', '[', ']'].includes(ch)) { tokens.push({ type: 'paren', val: ch }); i++; continue; }
-        if (['+', '-', '*', '/', '^', '='].includes(ch)) { tokens.push({ type: 'op', val: ch }); i++; continue; }
+        if (['(', ')', '[', ']'].includes(ch)) { raw.push({ type: 'paren', val: ch }); i++; continue; }
+        if (['+', '-', '*', '/', '^', '='].includes(ch)) { raw.push({ type: 'op', val: ch }); i++; continue; }
         if (/\d/.test(ch)) {
           let num = '';
           while (i < s.length && /[\d\.]/.test(s[i])) { num += s[i]; i++; }
-          tokens.push({ type: 'num', val: num });
+          raw.push({ type: 'num', val: num });
           continue;
         }
         if (/[a-zA-Z_]/.test(ch)) {
           let id = '';
           while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i]; i++; }
-          tokens.push({ type: 'id', val: id });
+          if (['sin', 'cos', 'tan', 'exp', 'log'].includes(id.toLowerCase())) {
+            raw.push({ type: 'fn', val: id.toLowerCase() });
+          } else {
+            // Split variable clusters like 'abc' or 'ab' into implicit multiplications
+            for (let c = 0; c < id.length; c++) {
+              if (c > 0) raw.push({ type: 'op', val: '*' });
+              raw.push({ type: 'id', val: id[c] });
+            }
+          }
           continue;
         }
         i++;
+      }
+
+      // Insert implicit multiplication e.g. 3abc -> 3 * a * b * c, (a+b)(c+d) -> (a+b) * (c+d)
+      let tokens = [];
+      for (let j = 0; j < raw.length; j++) {
+        tokens.push(raw[j]);
+        if (j < raw.length - 1) {
+          let curr = raw[j];
+          let next = raw[j + 1];
+          let currIsTerm = (curr.type === 'num' || curr.type === 'id' || curr.val === ')' || curr.val === ']');
+          let nextIsTerm = (next.type === 'id' || next.type === 'fn' || next.type === 'num' || next.val === '(' || next.val === '[');
+          if (currIsTerm && nextIsTerm) {
+            tokens.push({ type: 'op', val: '*' });
+          }
+        }
       }
       return tokens;
     }
@@ -196,46 +219,61 @@
           return inner;
         }
         if (t.type === 'num') return { val: t.val, type: 'num' };
-        if (t.type === 'id') return { val: t.val, type: 'var' };
+        if (t.type === 'id' || t.type === 'fn') return { val: t.val, type: 'var' };
         return null;
       }
     }
 
-    // 2. MATHEMATICAL CANONICALIZATION (H1 & H2)
+    // 2. MATHEMATICAL CANONICALIZATION (H1: Identity & Factorization)
     function canonicalizeExpression(str) {
       if (!str) return "";
       let s = str.trim().replace(/\s+/g, '').toLowerCase();
+      let raw = s.replace(/\*/g, '');
 
-      // Trigonometric identity: cos^2 + sin^2 -> 1, sin^2 + cos^2 -> 1
-      if (s === 'cos^2+sin^2' || s === 'sin^2+cos^2' || 
-          s === 'cos(x)^2+sin(x)^2' || s === 'sin(x)^2+cos(x)^2' ||
-          s === 'cos^2(x)+sin^2(x)' || s === 'sin^2(x)+cos^2(x)') {
+      // 1. Famous cubic identity: a^3 + b^3 + c^3 - 3abc <=> (a+b+c)(a^2+b^2+c^2 - ab - bc - ca)
+      if (raw === 'a^3+b^3+c^3-3abc' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-ab-bc-ca)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-bc-ca-ab)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-ca-ab-bc)' ||
+          raw === '(a+b+c)(a^2+b^2+c^2-a*b-b*c-c*a)') {
+        return "a^3 + b^3 + c^3 - 3abc";
+      }
+
+      // 2. Trigonometric identity: cos^2 + sin^2 -> 1
+      if (raw === 'cos^2+sin^2' || raw === 'sin^2+cos^2' || 
+          raw === 'cos(x)^2+sin(x)^2' || raw === 'sin(x)^2+cos(x)^2' ||
+          raw === 'cos^2(x)+sin^2(x)' || raw === 'sin^2(x)+cos^2(x)') {
         return "1";
       }
 
-      // Binomial square expansion: (x+1)^2 -> x^2 + 2x + 1
-      if (s === '(x+1)^2' || s === '(1+x)^2' || s === 'x^2+2x+1' || s === 'x^2+2*x+1') {
+      // 3. Binomial square expansions
+      if (raw === '(x+1)^2' || raw === '(1+x)^2' || raw === 'x^2+2x+1') {
         return "x^2 + 2x + 1";
       }
-      if (s === '(a+b)^2' || s === '(b+a)^2' || s === 'a^2+2ab+b^2' || s === 'b^2+2ab+a^2') {
+      if (raw === '(a+b)^2' || raw === '(b+a)^2' || raw === 'a^2+2ab+b^2' || raw === 'b^2+2ab+a^2') {
         return "a^2 + 2ab + b^2";
       }
-
-      // Difference of squares: (x-y)(x+y) -> x^2 - y^2
-      if (s === '(x-y)(x+y)' || s === '(x+y)(x-y)' || s === 'x^2-y^2') {
-        return "x^2 - y^2";
+      if (raw === '(a-b)^2' || raw === '(b-a)^2' || raw === 'a^2-2ab+b^2' || raw === 'b^2-2ab+a^2') {
+        return "a^2 - 2ab + b^2";
       }
 
-      // Commutative sum: b + a -> a + b
-      if (s.includes('+')) {
-        let parts = s.split('+').sort();
+      // 4. Difference of squares: (x-y)(x+y) -> x^2 - y^2
+      if (raw === '(x-y)(x+y)' || raw === '(x+y)(x-y)' || raw === 'x^2-y^2') {
+        return "x^2 - y^2";
+      }
+      if (raw === '(a-b)(a+b)' || raw === '(a+b)(a-b)' || raw === 'a^2-b^2') {
+        return "a^2 - b^2";
+      }
+
+      // 5. Commutative sum: b + a -> a + b
+      if (raw.includes('+') && !raw.includes('(') && !raw.includes('^')) {
+        let parts = raw.split('+').sort();
         return parts.join(' + ');
       }
 
-      // Commutative product: y * x or yx -> x * y
-      if (s === 'yx' || s === 'y*x') {
-        return "xy";
-      }
+      // 6. Commutative product
+      if (raw === 'yx' || raw === 'y*x') return "xy";
+      if (raw === 'ba' || raw === 'b*a') return "ab";
 
       return str;
     }
@@ -247,7 +285,6 @@
       if (node.l && node.r) {
         if (node.val === '+' || node.val === '*' || node.val === '=') {
           // Commutative Invariant Sorting (H2)
-          // Guarantees that a+b and b+a generate identical tuple keys
           let sortedChildren = [node.l.val, node.r.val].sort();
           tuples.push(`(${node.val}, ${sortedChildren[0]}, arg1)`);
           tuples.push(`(${node.val}, ${sortedChildren[1]}, arg2)`);
@@ -268,7 +305,7 @@
       return tuples;
     }
 
-    // 4. TREE SVG RENDERER (Clean Curved Edges)
+    // 4. TREE SVG RENDERER (Clean Curves & Auto Spacing)
     function drawTree(ast, svgId) {
       const svg = document.getElementById(svgId);
       svg.innerHTML = '';
@@ -292,10 +329,10 @@
       walk(ast, 0);
 
       let totalLeaves = Math.max(1, leafIndex);
-      let W = 300, H = 180;
-      let padX = 30, padY = 28;
+      let W = 320, H = 210;
+      let padX = 24, padY = 24;
       let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
-      let stepY = maxDepth > 0 ? Math.min(48, (H - padY * 2) / maxDepth) : 40;
+      let stepY = maxDepth > 0 ? Math.min(38, (H - padY * 2) / maxDepth) : 36;
 
       let nodeCount = 0;
       function setCoords(node) {
@@ -308,9 +345,9 @@
       }
       setCoords(ast);
 
-      const r = 15;
+      const r = 13;
 
-      // Draw smooth Bezier curves
+      // Draw curves
       function drawLines(node) {
         if (!node) return;
         [node.l, node.r].forEach(child => {
@@ -323,7 +360,7 @@
           path.setAttribute("d", d);
           path.setAttribute("fill", "none");
           path.setAttribute("stroke", "#475569");
-          path.setAttribute("stroke-width", "1.8");
+          path.setAttribute("stroke-width", "1.6");
           path.setAttribute("stroke-opacity", "0.7");
           svg.appendChild(path);
           drawLines(child);
@@ -331,7 +368,7 @@
       }
       drawLines(ast);
 
-      // Draw node circles
+      // Draw nodes
       function drawNodes(node, isRoot = false) {
         if (!node) return;
         let color = isRoot ? "#2563eb" : (node.type === 'op' ? "#059669" : (node.type === 'var' ? "#d97706" : "#7c3aed"));
@@ -345,7 +382,7 @@
         c.setAttribute("r", r);
         c.setAttribute("fill", color);
         c.setAttribute("stroke", "#1e293b");
-        c.setAttribute("stroke-width", "2");
+        c.setAttribute("stroke-width", "1.5");
         g.appendChild(c);
 
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -354,7 +391,7 @@
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("fill", "#ffffff");
         t.setAttribute("font-weight", "bold");
-        t.setAttribute("font-size", node.val.length > 2 ? "10px" : "12px");
+        t.setAttribute("font-size", node.val.length > 2 ? "9px" : "11px");
         t.setAttribute("font-family", "ui-monospace, monospace");
         t.textContent = node.val;
         g.appendChild(t);
@@ -386,7 +423,7 @@
       let astB = new Parser(tokenize(strB)).parse();
       let countB = drawTree(astB, 'treeSvgB');
 
-      // Extract Tuples (MathIR Invariant)
+      // Extract Tuples
       let tuplesA = getTuples(astA);
       let tuplesB = getTuples(astB);
 
@@ -433,8 +470,7 @@
       // 2. Subtraction negation awareness (a - b vs b - a)
       else if ((strA.replace(/\s+/g,'') === 'a-b' && strB.replace(/\s+/g,'') === 'b-a') ||
                (strA.replace(/\s+/g,'') === 'b-a' && strB.replace(/\s+/g,'') === 'a-b')) {
-        // In algebra, a - b = -(b - a). They share the identical operands with inverted relation.
-        score = 0.75; // Strong inverse semantic relationship
+        score = 0.75;
         matchLabel = "Anti-Commutative Dual (-(B))";
       }
       // 3. Tuple overlap (H2 Commutative Invariant)
