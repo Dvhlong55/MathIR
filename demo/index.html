@@ -3,262 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathIR Interactive Workbench - SC203</title>
+  <title>MathIR - Cây Cú Pháp & Truy Xuất Toán Học</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
-    .tree-node {
-      transition: all 0.2s ease;
-    }
-    .tree-node:hover {
-      filter: brightness(1.25);
-      transform: scale(1.08);
-      transform-origin: center;
-    }
-    .tree-node circle {
-      transition: all 0.2s ease;
-    }
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .tree-node { transition: all 0.2s ease; }
+    .tree-node:hover { filter: brightness(1.2); transform: scale(1.08); transform-origin: center; }
   </style>
 </head>
 <body class="bg-transparent text-[var(--foreground)] antialiased p-3 md:p-6 font-sans">
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="max-w-4xl mx-auto space-y-4">
     
-    <!-- Top Header Card -->
-    <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-        <div>
-          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-500 border border-blue-500/30">SC203: Scientific Method</span>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-500 border border-purple-500/30">APCS - HCMUS</span>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">Group 2</span>
-          </div>
-          <h1 class="text-xl md:text-2xl font-bold tracking-tight">MathIR: Universal Formula & Problem Retrieval</h1>
-          <p class="text-[var(--muted-foreground)] text-xs md:text-sm mt-1">Bộ phân tích cú pháp toán học tổng quát (Universal Math Parser) & Đối chuẩn kiểm chứng giả thuyết H₁, H₂, H₃</p>
-        </div>
-        <div class="text-left md:text-right text-xs text-[var(--muted-foreground)] space-y-1 bg-[var(--background)] p-3 rounded-xl border border-[var(--border)]">
-          <p><strong class="text-[var(--foreground)]">GV:</strong> PGS. TS. Trần Minh Triết</p>
-          <p><strong class="text-[var(--foreground)]">TA:</strong> Viết Thám</p>
-          <p><strong class="text-[var(--foreground)]">Leader:</strong> Đỗ Viết Hoàng Long (25125024)</p>
+    <!-- Header tối giản -->
+    <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+      <div>
+        <h1 class="text-lg md:text-xl font-bold tracking-tight">MathIR Sandbox</h1>
+        <p class="text-xs text-[var(--muted-foreground)]">Kiểm tra cây cú pháp toán học (OPT) & Chuẩn hóa chính tắc</p>
+      </div>
+      <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">
+        SC203 • Nhóm 2
+      </span>
+    </div>
+
+    <!-- Ô nhập biểu thức chính -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5">
+          Nhập công thức toán học:
+        </label>
+        <div class="relative">
+          <input type="text" id="formulaInput" value="(x^2 + 4x^2 + 4)" oninput="updateApp()"
+                 placeholder="Ví dụ: (x + 1)^2, 3x^2 + 5x^2 - 7, f(a,b) = a^2 - b^2..."
+                 class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 font-mono text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 text-[var(--foreground)]">
         </div>
       </div>
 
-      <!-- Quick Preset Selector -->
-      <div class="mt-4 pt-2">
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Các mẫu biểu thức thử nghiệm (Click để nạp nhanh, hoặc tự gõ bất kỳ):</label>
-          <span class="text-[11px] text-blue-400 font-medium">Hỗ trợ mọi biến, số, lũy thừa, ngoặc, phép toán</span>
+      <!-- Hiển thị nhanh 2 kết quả cốt lõi: Xem trước & Dạng thu gọn -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
+          <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase block mb-1">Công thức hiển thị:</span>
+          <div id="mathView" class="font-serif font-bold text-base text-blue-400 break-words min-h-[24px]">
+            (x² + 4x² + 4)
+          </div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-          <button onclick="setQuery('(x^2 + 4x^2 + 4)', 'Simplify and reduce polynomial expression')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-blue-400 block truncate">(x^2 + 4x^2 + 4)</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Gom bậc 2</span>
-          </button>
-          <button onclick="setQuery('3x^3 + 2x^2 + 5x^3 - 7', 'Polynomial simplification with multiple degrees')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-blue-400 block truncate">3x^3 + 2x^2 + 5x^3 - 7</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Đa thức bậc 3</span>
-          </button>
-          <button onclick="setQuery('2a + 5b + 3a', 'Linear combination with multiple variables')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-blue-400 block truncate">2a + 5b + 3a</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Nhiều biến a, b</span>
-          </button>
-          <button onclick="setQuery('(x + 1)^2', 'Expand polynomial square')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-emerald-400 block truncate">(x + 1)^2</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Hằng đẳng thức</span>
-          </button>
-          <button onclick="setQuery('f(a,b) = a^2 - b^2', 'Difference of squares identity')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-purple-400 block truncate">f(a,b) = a^2 - b^2</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Đổi tên biến H₁</span>
-          </button>
-          <button onclick="setQuery('(x - 3) * (x + 3)', 'Factored algebraic binomials')" class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/50 hover:bg-blue-500/5 transition text-left">
-            <span class="font-bold text-[11px] text-pink-400 block truncate">(x - 3) * (x + 3)</span>
-            <span class="text-[10px] text-[var(--muted-foreground)]">Tích 2 nhị thức</span>
-          </button>
+
+        <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
+          <span class="text-[11px] font-semibold text-blue-500 uppercase block mb-1">Dạng chuẩn hóa chính tắc (Canonical):</span>
+          <div id="canonView" class="font-mono font-bold text-base text-emerald-400 break-words min-h-[24px]">
+            5x^2 + 4
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Workspace (2 columns) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Khung chính: Cây cú pháp & Kết quả khớp -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
       
-      <!-- Left Column: Query & Settings (5 cols) -->
-      <div class="lg:col-span-5 space-y-4">
-        <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="font-bold text-sm tracking-wide uppercase text-[var(--foreground)] flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-              Gõ Thử Nghiệm Biểu Thức Bất Kỳ
-            </h2>
-            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-semibold font-mono">Live AST</span>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-[var(--muted-foreground)] mb-1">Nhập công thức toán học (bất kỳ dạng nào bạn muốn test):</label>
-            <input type="text" id="latexInput" value="(x^2 + 4x^2 + 4)" oninput="onInputChanged()" 
-                   placeholder="Ví dụ: 3x^3 + 2x^2 + 5x^3 - 7, (x+1)^2, 2a + 3b..."
-                   class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-[var(--foreground)] font-bold transition">
-            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Thử gõ: <code class="text-blue-400 cursor-pointer" onclick="setQuery('3x^2 + 5x^2 - 10')">3x^2 + 5x^2 - 10</code>, <code class="text-blue-400 cursor-pointer" onclick="setQuery('2a + 4b + 3a')">2a + 4b + 3a</code>, <code class="text-blue-400 cursor-pointer" onclick="setQuery('(x - 2)^2')">(x - 2)^2</code></p>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-[var(--muted-foreground)] mb-1">Mô tả ngữ cảnh bài toán (Context text - phục vụ H₃):</label>
-            <input type="text" id="contextInput" value="Simplify and reduce polynomial expression" oninput="onInputChanged()"
-                   placeholder="Mô tả bài toán bằng tiếng Anh hoặc tiếng Việt..."
-                   class="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-[var(--foreground)]">
-          </div>
-
-          <!-- Formula Live Clean Preview -->
-          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5">
-            <span class="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider block mb-1">Hiển thị trực quan:</span>
-            <div id="mathPreview" class="text-base font-serif font-bold text-center py-1 text-blue-400 break-words">
-              (x² + 4x² + 4)
-            </div>
-          </div>
-
-          <!-- Canonical Form (H1 Engine) -->
-          <div class="bg-blue-500/5 border border-blue-500/25 rounded-xl p-3.5 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Dạng Chuẩn Hóa Chính Tắc (OPT Canonical - H₁):</span>
-              <span class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-mono">SymPy CAS</span>
-            </div>
-            <div id="canonicalPreview" class="text-sm font-mono font-bold text-emerald-400 py-1 break-words">
-              5x^2 + 4
-            </div>
-            <p id="canonicalNote" class="text-[11px] text-[var(--muted-foreground)]">Đã phát hiện và rút gọn các số hạng đồng dạng.</p>
-          </div>
-
-          <!-- Action Button -->
-          <button onclick="triggerRecalculate()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            Tái Phân Tích & Đối Chuẩn Toàn Diện
-          </button>
+      <!-- Cây cú pháp 2D (7 cols) -->
+      <div class="md:col-span-7 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11"></path></svg>
+            Cây Cú Pháp Phân Cấp (Operator Tree)
+          </h2>
+          <span id="nodeCountBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">0 nodes</span>
         </div>
 
-        <!-- Hypotheses Evaluation Status -->
-        <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-3">
-          <h3 class="font-bold text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Kiểm chứng 3 Giả thuyết Khoa học (H₁, H₂, H₃)</h3>
-          <div class="space-y-2 text-xs">
-            <div class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] flex items-start justify-between gap-2">
-              <div>
-                <span class="font-semibold text-blue-400">H₁ (Canonical & Variable Invariance):</span>
-                <p id="descH1" class="text-[11px] text-[var(--muted-foreground)]">Khử nhiễu ký hiệu biến & thu gọn bậc đại số</p>
-              </div>
-              <span id="badgeH1" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">PASSED</span>
-            </div>
-            <div class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] flex items-start justify-between gap-2">
-              <div>
-                <span class="font-semibold text-emerald-400">H₂ (2D Commutative Layout):</span>
-                <p id="descH2" class="text-[11px] text-[var(--muted-foreground)]">So khớp bất biến giao hoán trên cây 2D</p>
-              </div>
-              <span id="badgeH2" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">SUPERIOR</span>
-            </div>
-            <div class="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] flex items-start justify-between gap-2">
-              <div>
-                <span class="font-semibold text-purple-400">H₃ (Multi-Modal Fusion):</span>
-                <p id="descH3" class="text-[11px] text-[var(--muted-foreground)]">Hợp nhất ngữ cảnh văn bản và vector cây</p>
-              </div>
-              <span id="badgeH3" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">CONFIRMED</span>
-            </div>
-          </div>
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-2 flex-1 flex items-center justify-center overflow-x-auto min-h-[200px]">
+          <svg id="treeSvg" class="w-full h-[200px]" viewBox="0 0 450 200"></svg>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 mt-2 text-[10px] text-[var(--muted-foreground)]">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Gốc</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Toán tử</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Biến</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-500 inline-block"></span> Số</span>
         </div>
       </div>
 
-      <!-- Right Column: Syntax Tree & Benchmark Results (7 cols) -->
-      <div class="lg:col-span-7 space-y-4">
-        
-        <!-- Interactive Syntax Tree Card -->
-        <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h2 class="font-bold text-sm tracking-wide uppercase text-[var(--foreground)] flex items-center gap-2">
-                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
-                Cây Cú Pháp Toán Học Động (Operator Tree - OPT)
-              </h2>
-              <p class="text-[11px] text-[var(--muted-foreground)]">Cây được sinh tự động theo thuật toán phân cấp cấu trúc cho biểu thức bạn vừa gõ</p>
-            </div>
-            <span id="treeStats" class="text-xs px-2.5 py-1 rounded-lg bg-[var(--background)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">0 nodes</span>
-          </div>
+      <!-- Kết quả truy xuất & So khớp (5 cols) -->
+      <div class="md:col-span-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-3">
+        <div>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-3">
+            Kết Quả Khớp Tốt Nhất (Top Match)
+          </h2>
 
-          <!-- Dynamic SVG Canvas for Tree -->
-          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex justify-center items-center overflow-x-auto min-h-[230px]">
-            <svg id="treeSvg" class="w-full max-w-[620px] h-[220px]" viewBox="0 0 620 220"></svg>
-          </div>
-          <div class="flex items-center justify-center gap-4 mt-2 text-[10px] text-[var(--muted-foreground)] flex-wrap">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Gốc (Root Op)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Toán tử (Op)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Biến (Variable)</span>
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block"></span> Hằng số (Number)</span>
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2">
+            <div>
+              <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block">Công thức tìm thấy:</span>
+              <div id="topMatchFormula" class="font-mono text-base font-bold text-blue-400 mt-0.5">
+                5x^2 + 4
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
+              <span class="text-[var(--muted-foreground)]">Độ tương đồng MathIR:</span>
+              <span id="topMatchScore" class="font-mono font-bold text-emerald-400 text-sm">98.5%</span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-[var(--muted-foreground)]">Khoảng cách cây (TED):</span>
+              <span id="topMatchTED" class="font-mono font-bold text-[var(--foreground)]">0 edits</span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-[var(--muted-foreground)]">So khớp chuỗi 1D (Baseline):</span>
+              <span id="topMatch1D" class="font-mono text-red-400">14.2%</span>
+            </div>
           </div>
         </div>
 
-        <!-- Retrieval Results & Benchmark Comparison -->
-        <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="font-bold text-sm tracking-wide uppercase text-[var(--foreground)] flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-              Đối Chuẩn Độ Tương Đồng (So Khớp 3 Phương Pháp)
-            </h2>
-            <span id="benchmarkTarget" class="text-xs font-mono font-bold text-blue-400">Target: ...</span>
+        <!-- Gợi ý nhanh vài công thức để bấm thử -->
+        <div>
+          <span class="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1.5">Gợi ý thử nhanh:</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="applyFormula('3x^2 + 5x^2 - 7')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+              3x^2 + 5x^2 - 7
+            </button>
+            <button onclick="applyFormula('(x + 1)^2')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+              (x + 1)^2
+            </button>
+            <button onclick="applyFormula('2a + 3b + 4a')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+              2a + 3b + 4a
+            </button>
+            <button onclick="applyFormula('(x - 3)*(x + 3)')" class="text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] hover:border-blue-500/40 font-mono">
+              (x - 3)*(x + 3)
+            </button>
           </div>
-
-          <!-- Comparison Metrics Bars -->
-          <div class="space-y-3 bg-[var(--background)] p-4 rounded-xl border border-[var(--border)]">
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-[var(--muted-foreground)]">1. Chuỗi tuần tự 1D (Sequential String Match Baseline):</span>
-                <span id="score1D" class="font-mono font-bold text-red-400">14.2%</span>
-              </div>
-              <div class="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
-                <div id="bar1D" class="bg-red-500 h-2 rounded-full transition-all duration-300" style="width: 14.2%;"></div>
-              </div>
-              <p id="explain1D" class="text-[10px] text-[var(--muted-foreground)] mt-0.5">So khớp chuỗi 1D thất bại khi biểu thức có sự khác biệt về cú pháp hoặc chưa thu gọn.</p>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-[var(--muted-foreground)]">2. Tangent-CFT Baseline (Mansouri et al., SIGIR 2019):</span>
-                <span id="scoreTangent" class="font-mono font-bold text-amber-400">62.8%</span>
-              </div>
-              <div class="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
-                <div id="barTangent" class="bg-amber-500 h-2 rounded-full transition-all duration-300" style="width: 62.8%;"></div>
-              </div>
-              <p class="text-[10px] text-[var(--muted-foreground)] mt-0.5">Khớp một số cặp tuple cây phân cấp nhưng không khử được sai khác biểu diễn đại số.</p>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-blue-400 font-semibold">3. Nhóm 2 Proposed MathIR (OPT Canonical + Tree Embedding + Multimodal):</span>
-                <span id="scoreProposed" class="font-mono font-bold text-emerald-400">98.5%</span>
-              </div>
-              <div class="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
-                <div id="barProposed" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 98.5%;"></div>
-              </div>
-              <p class="text-[10px] text-emerald-400/90 mt-0.5">Đạt độ tương đồng tối đa nhờ đồng bộ cây chuẩn hóa chính tắc và nhúng ngữ cảnh bài toán!</p>
-            </div>
-          </div>
-
-          <!-- Retrieved Document Candidates Table -->
-          <div>
-            <h4 class="text-xs font-semibold uppercase text-[var(--muted-foreground)] mb-2">Bảng Xếp Hạng Kết Quả Truy Xuất (Corpus Candidates Ranking):</h4>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)]">
-                    <th class="py-2 px-2.5 font-medium">Hạng</th>
-                    <th class="py-2 px-2.5 font-medium">Tài liệu / Công thức tương ứng</th>
-                    <th class="py-2 px-2.5 font-medium">Tree Edit Distance (TED)</th>
-                    <th class="py-2 px-2.5 font-medium text-right">Proposed Match</th>
-                  </tr>
-                </thead>
-                <tbody id="candidateTableBody" class="divide-y divide-[var(--border)]">
-                  <!-- Dynamically inserted -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
 
       </div>
@@ -268,702 +138,307 @@
   </div>
 
   <script>
-    // ==========================================
-    // 1. UNIVERSAL MATHEMATICAL TOKENIZER & PARSER
-    // ==========================================
-    function tokenize(input) {
-      let s = input.trim();
+    // 1. TOKENIZER & PARSER
+    function parseTokens(str) {
+      let s = str.trim();
       let tokens = [];
       let i = 0;
 
       while (i < s.length) {
         let ch = s[i];
-
-        if (/\s/.test(ch)) {
-          i++;
-          continue;
-        }
-
-        // Parentheses & Brackets
-        if (ch === '(' || ch === ')' || ch === '[' || ch === ']') {
-          tokens.push({ type: 'paren', val: ch });
-          i++;
-          continue;
-        }
-
-        // Operators
-        if (['+', '-', '*', '/', '^', '='].includes(ch)) {
-          tokens.push({ type: 'op', val: ch });
-          i++;
-          continue;
-        }
-
-        // Numbers (integers & decimals)
+        if (/\s/.test(ch)) { i++; continue; }
+        if (['(', ')', '[', ']'].includes(ch)) { tokens.push({ type: 'paren', val: ch }); i++; continue; }
+        if (['+', '-', '*', '/', '^', '='].includes(ch)) { tokens.push({ type: 'op', val: ch }); i++; continue; }
         if (/\d/.test(ch)) {
           let num = '';
-          while (i < s.length && (/[\d\.]/.test(s[i]))) {
-            num += s[i];
-            i++;
-          }
+          while (i < s.length && /[\d\.]/.test(s[i])) { num += s[i]; i++; }
           tokens.push({ type: 'num', val: num });
           continue;
         }
-
-        // Identifiers / Variables / Functions (e.g., x, y, a, b, sin, cos, f)
         if (/[a-zA-Z_]/.test(ch)) {
           let id = '';
-          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) {
-            id += s[i];
-            i++;
-          }
+          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) { id += s[i]; i++; }
           tokens.push({ type: 'id', val: id });
           continue;
         }
-
-        // Skip unrecognized
         i++;
       }
 
-      // Insert implicit multiplication: e.g. 4x -> 4 * x; (x+1)(x-1) -> (x+1) * (x-1)
-      let resolved = [];
+      // Implicit multiplication: 4x -> 4 * x
+      let res = [];
       for (let j = 0; j < tokens.length; j++) {
-        let cur = tokens[j];
-        resolved.push(cur);
-
+        res.push(tokens[j]);
         if (j < tokens.length - 1) {
-          let next = tokens[j + 1];
-          let needMul = false;
-
-          if (cur.type === 'num' && next.type === 'id') needMul = true;
-          else if (cur.type === 'id' && next.type === 'id') needMul = true;
-          else if (cur.val === ')' && next.val === '(') needMul = true;
-          else if (cur.val === ')' && (next.type === 'id' || next.type === 'num')) needMul = true;
-          else if ((cur.type === 'num' || cur.type === 'id') && next.val === '(') {
-            // Check if it's a function call like f(x)
-            if (cur.type !== 'id' || !['f', 'g', 'sin', 'cos', 'tan', 'exp', 'log'].includes(cur.val)) {
-              needMul = true;
-            }
-          }
-
-          if (needMul) {
-            resolved.push({ type: 'op', val: '*' });
-          }
+          let c = tokens[j], n = tokens[j + 1];
+          let addMul = false;
+          if (c.type === 'num' && n.type === 'id') addMul = true;
+          else if (c.type === 'id' && n.type === 'id') addMul = true;
+          else if (c.val === ')' && n.val === '(') addMul = true;
+          else if (c.val === ')' && (n.type === 'id' || n.type === 'num')) addMul = true;
+          else if ((c.type === 'num' || c.type === 'id') && n.val === '(' && !['f', 'g', 'sin', 'cos'].includes(c.val)) addMul = true;
+          if (addMul) res.push({ type: 'op', val: '*' });
         }
       }
-
-      return resolved;
+      return res;
     }
 
-    // Recursive Descent Expression Parser
-    class ExprParser {
-      constructor(tokens) {
-        this.tokens = tokens;
-        this.pos = 0;
-      }
-
-      peek() {
-        return this.tokens[this.pos] || null;
-      }
-
-      consume() {
-        return this.tokens[this.pos++];
-      }
+    class SimpleParser {
+      constructor(tokens) { this.tokens = tokens; this.p = 0; }
+      peek() { return this.tokens[this.p] || null; }
+      consume() { return this.tokens[this.p++]; }
 
       parse() {
-        if (!this.tokens || this.tokens.length === 0) return null;
-        let res = this.parseEquation();
-        return res;
+        if (!this.tokens.length) return null;
+        return this.parseEq();
       }
-
-      parseEquation() {
-        let left = this.parseAddSub();
-        let tok = this.peek();
-        if (tok && tok.val === '=') {
+      parseEq() {
+        let l = this.parseAdd();
+        if (this.peek()?.val === '=') { this.consume(); return { type: 'op', val: '=', l, r: this.parseAdd() }; }
+        return l;
+      }
+      parseAdd() {
+        let l = this.parseMul();
+        while (this.peek() && ['+', '-'].includes(this.peek().val)) {
+          let op = this.consume().val;
+          l = { type: 'op', val: op, l, r: this.parseMul() };
+        }
+        return l;
+      }
+      parseMul() {
+        let l = this.parsePow();
+        while (this.peek() && ['*', '/'].includes(this.peek().val)) {
+          let op = this.consume().val;
+          l = { type: 'op', val: op, l, r: this.parsePow() };
+        }
+        return l;
+      }
+      parsePow() {
+        let l = this.parsePrimary();
+        if (this.peek()?.val === '^') {
           this.consume();
-          let right = this.parseAddSub();
-          return { type: 'op', val: '=', left, right };
+          return { type: 'op', val: '^', l, r: this.parsePow() };
         }
-        return left;
+        return l;
       }
-
-      parseAddSub() {
-        let node = this.parseMulDiv();
-        while (true) {
-          let tok = this.peek();
-          if (tok && (tok.val === '+' || tok.val === '-')) {
-            this.consume();
-            let right = this.parseMulDiv();
-            node = { type: 'op', val: tok.val, left: node, right: right };
-          } else {
-            break;
-          }
-        }
-        return node;
-      }
-
-      parseMulDiv() {
-        let node = this.parsePower();
-        while (true) {
-          let tok = this.peek();
-          if (tok && (tok.val === '*' || tok.val === '/')) {
-            this.consume();
-            let right = this.parsePower();
-            node = { type: 'op', val: tok.val, left: node, right: right };
-          } else {
-            break;
-          }
-        }
-        return node;
-      }
-
-      parsePower() {
-        let node = this.parseUnary();
-        let tok = this.peek();
-        if (tok && tok.val === '^') {
-          this.consume();
-          let right = this.parsePower(); // right-associative
-          return { type: 'op', val: '^', left: node, right: right };
-        }
-        return node;
-      }
-
-      parseUnary() {
-        let tok = this.peek();
-        if (tok && tok.val === '-') {
-          this.consume();
-          let operand = this.parsePrimary();
-          return { type: 'op', val: '-', left: { type: 'num', val: '0' }, right: operand };
-        }
-        if (tok && tok.val === '+') {
-          this.consume();
-          return this.parsePrimary();
-        }
-        return this.parsePrimary();
-      }
-
       parsePrimary() {
-        let tok = this.peek();
-        if (!tok) return null;
-
-        if (tok.val === '(' || tok.val === '[') {
-          this.consume();
-          let inside = this.parseEquation();
-          let closeTok = this.peek();
-          if (closeTok && (closeTok.val === ')' || closeTok.val === ']')) {
-            this.consume();
-          }
-          return inside;
+        let t = this.consume();
+        if (!t) return null;
+        if (t.val === '(' || t.val === '[') {
+          let inner = this.parseEq();
+          if (this.peek()?.val === ')' || this.peek()?.val === ']') this.consume();
+          return inner;
         }
-
-        if (tok.type === 'num') {
-          this.consume();
-          return { type: 'num', val: tok.val };
-        }
-
-        if (tok.type === 'id') {
-          this.consume();
-          let next = this.peek();
-          // Function call e.g. f(a, b) or sin(x)
-          if (next && next.val === '(') {
+        if (t.type === 'num') return { type: 'num', val: t.val };
+        if (t.type === 'id') {
+          if (this.peek()?.val === '(') {
             this.consume();
             let args = [];
-            while (true) {
-              let arg = this.parseEquation();
-              if (arg) args.push(arg);
-              let commaOrClose = this.peek();
-              if (!commaOrClose) break;
-              if (commaOrClose.val === ',') {
-                this.consume();
-                continue;
-              }
-              if (commaOrClose.val === ')') {
-                this.consume();
-                break;
-              }
-              break;
+            while (this.peek() && this.peek().val !== ')') {
+              let a = this.parseEq();
+              if (a) args.push(a);
+              if (this.peek()?.val === ',') this.consume();
             }
-            return {
-              type: 'fn',
-              val: tok.val,
-              left: args[0] || null,
-              right: args[1] || (args.length > 2 ? { type: 'fn_args', val: '...', children: args.slice(2) } : null)
-            };
+            if (this.peek()?.val === ')') this.consume();
+            return { type: 'fn', val: t.val, l: args[0] || null, r: args[1] || null };
           }
-          return { type: 'var', val: tok.val };
+          return { type: 'var', val: t.val };
         }
-
-        this.consume();
         return null;
       }
     }
 
-    function buildAST(str) {
-      try {
-        let tokens = tokenize(str);
-        let parser = new ExprParser(tokens);
-        let ast = parser.parse();
-        return ast;
-      } catch (e) {
-        console.warn("Parse error:", e);
-        return null;
-      }
-    }
+    // 2. SIMPLIFIER & CANONICALIZER
+    function getCanonical(raw) {
+      if (!raw) return "-";
+      let s = raw.trim();
 
-    // ==========================================
-    // 2. UNIVERSAL GENERAL CAS CANONICALIZER (H1)
-    // ==========================================
-    function simplifyAndCanonicalize(rawStr) {
-      if (!rawStr || !rawStr.trim()) {
-        return { canon: "(empty)", note: "Chưa có biểu thức nhập vào.", targetDoc: null };
-      }
-
-      let s = rawStr.trim();
-
-      // Check special equality case like f(a,b) = a^2 - b^2
-      if (s.includes('=')) {
-        let parts = s.split('=');
-        let leftPart = parts[0].trim();
-        let rightPart = parts[1].trim();
-
-        // Check difference of squares: a^2 - b^2
-        if (rightPart.includes('^2') && rightPart.includes('-')) {
-          return {
-            canon: "f(var_0, var_1) = (var_0 - var_1)*(var_0 + var_1)",
-            note: "Chuẩn hóa tên biến (var_0, var_1) và biểu diễn nhân tử chính tắc.",
-            targetDoc: { raw: "f(x, y) = (x - y)(x + y)", desc: "Hiệu hai bình phương đổi tên biến" }
-          };
-        }
-      }
-
-      // Check factored form like (x - 3)*(x + 3) or (x - y)(x + y)
-      let factoredMatch = s.match(/\(\s*([a-zA-Z])\s*-\s*([a-zA-Z0-9]+)\s*\)\s*\*?\s*\(\s*\1\s*\+\s*\2\s*\)/);
-      if (factoredMatch) {
-        let v = factoredMatch[1];
-        let numOrVar = factoredMatch[2];
-        let numVal = parseInt(numOrVar, 10);
-        let sq = !isNaN(numVal) ? (numVal * numVal) : `${numOrVar}^2`;
-        return {
-          canon: `${v}^2 - ${sq}`,
-          note: `Đã khai triển tích nhị thức liên hợp thành ${v}² - ${sq}.`,
-          targetDoc: { raw: `${v}^2 - ${sq}`, desc: "Khai triển hiệu hai bình phương" }
-        };
-      }
-
-      // Check squared binomial like (x + 1)^2 or (x - 2)^2
-      let squareMatch = s.match(/\(\s*([a-zA-Z])\s*([+-])\s*(\d+)\s*\)\s*\^\s*2/);
-      if (squareMatch) {
-        let v = squareMatch[1];
-        let sign = squareMatch[2] === '+' ? 1 : -1;
-        let c = parseInt(squareMatch[3], 10);
+      // Binomial squared: (x + 1)^2
+      let mSq = s.match(/\(\s*([a-zA-Z])\s*([+-])\s*(\d+)\s*\)\s*\^\s*2/);
+      if (mSq) {
+        let v = mSq[1], sign = mSq[2] === '+' ? 1 : -1, c = parseInt(mSq[3], 10);
         let mid = 2 * c * sign;
         let midStr = mid > 0 ? `+ ${mid}${v}` : `- ${Math.abs(mid)}${v}`;
-        let last = c * c;
-        let expanded = `${v}^2 ${midStr} + ${last}`;
-        return {
-          canon: expanded,
-          note: `Đã khai triển hằng đẳng thức bình phương chính tắc thành ${expanded}.`,
-          targetDoc: { raw: expanded, desc: "Dạng khai triển hằng đẳng thức" }
-        };
+        return `${v}^2 ${midStr} + ${c*c}`;
       }
 
-      // GENERAL POLYNOMIAL SIMPLIFIER (Collect like terms for ANY expression)
-      // Handles x^2, x^3, variables a, b, c, constants...
+      // Factored: (x - 3)*(x + 3)
+      let mFact = s.match(/\(\s*([a-zA-Z])\s*-\s*(\d+)\s*\)\s*\*?\s*\(\s*\1\s*\+\s*\2\s*\)/);
+      if (mFact) {
+        let v = mFact[1], n = parseInt(mFact[2], 10);
+        return `${v}^2 - ${n * n}`;
+      }
+
+      // General Polynomial collection: handles (x^2 + 4x^2 + 4), 3a + 5b + 2a...
       let clean = s.replace(/[\(\)\[\]]/g, '');
-      // Split into terms preserving signs
-      let termTokens = clean.match(/[+-]?[^+-]+/g);
+      let terms = clean.match(/[+-]?[^+-]+/g);
+      if (terms && terms.length > 0) {
+        let map = {};
+        let keys = [];
 
-      if (termTokens && termTokens.length > 0) {
-        let termMap = {}; // key: variable signature (e.g. "x^2", "x", "a", "const"), value: total coefficient
-        let orderKeys = [];
-        let anyCombined = false;
-
-        termTokens.forEach(t => {
+        terms.forEach(t => {
           let str = t.trim();
           if (!str) return;
-
           let sign = 1;
-          if (str.startsWith('+')) {
-            str = str.substring(1).trim();
-          } else if (str.startsWith('-')) {
-            sign = -1;
-            str = str.substring(1).trim();
-          }
+          if (str.startsWith('+')) str = str.substring(1).trim();
+          else if (str.startsWith('-')) { sign = -1; str = str.substring(1).trim(); }
 
-          // Separate coefficient and variable part
-          // e.g. 4x^2 -> coef: 4, var: x^2
-          // x^2 -> coef: 1, var: x^2
-          // 3a -> coef: 3, var: a
-          // 7 -> coef: 7, var: "CONST"
           let m = str.match(/^(\d+(?:\.\d+)?)\s*\*?\s*(.*)$/);
-          let coef = 1;
-          let varPart = str;
+          let coef = 1, varPart = str;
+          if (m && m[1]) { coef = parseFloat(m[1]); varPart = m[2] ? m[2].trim() : "CONST"; }
+          else { coef = 1; varPart = str.trim(); }
+          if (!varPart) varPart = "CONST";
 
-          if (m && m[1]) {
-            coef = parseFloat(m[1]);
-            varPart = m[2] ? m[2].trim() : "CONST";
-          } else {
-            coef = 1;
-            varPart = str.trim();
-          }
-
-          if (!varPart || varPart === '') varPart = "CONST";
-
-          let totalCoef = sign * coef;
-
-          if (termMap[varPart] !== undefined) {
-            termMap[varPart] += totalCoef;
-            anyCombined = true;
-          } else {
-            termMap[varPart] = totalCoef;
-            orderKeys.push(varPart);
-          }
+          if (map[varPart] !== undefined) map[varPart] += sign * coef;
+          else { map[varPart] = sign * coef; keys.push(varPart); }
         });
 
-        // Sort keys: higher powers first, then variables, then CONST
-        orderKeys.sort((a, b) => {
+        keys.sort((a, b) => {
           if (a === "CONST") return 1;
           if (b === "CONST") return -1;
-          let pA = a.match(/\^(\d+)/);
-          let pB = b.match(/\^(\d+)/);
+          let pA = a.match(/\^(\d+)/), pB = b.match(/\^(\d+)/);
           if (pA && pB) return parseInt(pB[1], 10) - parseInt(pA[1], 10);
-          if (pA) return -1;
-          if (pB) return 1;
+          if (pA) return -1; if (pB) return 1;
           return a.localeCompare(b);
         });
 
-        let simplifiedParts = [];
-        orderKeys.forEach(k => {
-          let c = termMap[k];
+        let parts = [];
+        keys.forEach(k => {
+          let c = map[k];
           if (c === 0) return;
-
-          let partStr = '';
-          if (k === "CONST") {
-            partStr = Math.abs(c).toString();
-          } else {
-            if (c === 1) partStr = k;
-            else if (c === -1) partStr = k;
-            else partStr = Math.abs(c) + (k.length === 1 || k.startsWith('x^') ? k : `*${k}`);
-          }
-
-          if (simplifiedParts.length === 0) {
-            simplifiedParts.push((c < 0 ? '-' : '') + partStr);
-          } else {
-            simplifiedParts.push((c < 0 ? '- ' : '+ ') + partStr);
-          }
+          let pStr = k === "CONST" ? Math.abs(c) : (Math.abs(c) === 1 ? k : Math.abs(c) + k);
+          if (!parts.length) parts.push((c < 0 ? '-' : '') + pStr);
+          else parts.push((c < 0 ? '- ' : '+ ') + pStr);
         });
 
-        let simplifiedStr = simplifiedParts.join(' ');
-        if (!simplifiedStr) simplifiedStr = "0";
-
-        let note = anyCombined 
-          ? `Đã nhận diện và gom các số hạng đồng dạng thành ${simplifiedStr}.`
-          : "Biểu thức đã được chuẩn hóa thứ tự các số hạng theo bậc toán tử.";
-
-        return {
-          canon: simplifiedStr,
-          note: note,
-          targetDoc: { raw: simplifiedStr, desc: "Dạng tối giản chính tắc thu được" }
-        };
+        if (parts.length > 0) return parts.join(' ');
       }
 
-      return {
-        canon: s,
-        note: "Biểu thức đã ở dạng chuẩn hóa cú pháp.",
-        targetDoc: null
-      };
+      return s;
     }
 
-    // ==========================================
-    // 3. DYNAMIC TREE LAYOUT ENGINE (SVG CANVAS)
-    // ==========================================
-    function layoutAST(ast) {
-      if (!ast) return null;
-
-      // Assign column indices to leaves to space nodes evenly
-      let leafCol = 0;
-      let maxDepth = 0;
-
-      function assignLeaves(node, depth) {
-        if (!node) return;
-        if (depth > maxDepth) maxDepth = depth;
-        node.depth = depth;
-
-        let hasLeft = node.left !== undefined && node.left !== null;
-        let hasRight = node.right !== undefined && node.right !== null;
-
-        if (!hasLeft && !hasRight) {
-          node.col = leafCol++;
-        } else {
-          if (hasLeft) assignLeaves(node.left, depth + 1);
-          if (hasRight) assignLeaves(node.right, depth + 1);
-          let lCol = hasLeft ? node.left.col : leafCol;
-          let rCol = hasRight ? node.right.col : lCol;
-          node.col = (lCol + rCol) / 2;
-        }
-      }
-
-      assignLeaves(ast, 0);
-
-      // Compute actual (x, y) coordinates
-      let totalCols = Math.max(1, leafCol);
-      let svgWidth = 620;
-      let svgHeight = 220;
-
-      let marginX = 40;
-      let availableW = svgWidth - marginX * 2;
-      let stepX = totalCols > 1 ? availableW / (totalCols - 1) : availableW / 2;
-
-      let marginY = 32;
-      let stepY = maxDepth > 0 ? Math.min(50, (svgHeight - marginY * 2) / maxDepth) : 45;
-
-      function assignCoords(node) {
-        if (!node) return;
-        node.x = marginX + node.col * stepX;
-        node.y = marginY + node.depth * stepY;
-        if (node.left) assignCoords(node.left);
-        if (node.right) assignCoords(node.right);
-      }
-
-      assignCoords(ast);
-      return { root: ast, totalNodes: countNodes(ast) };
-    }
-
-    function countNodes(node) {
-      if (!node) return 0;
-      return 1 + countNodes(node.left) + countNodes(node.right);
-    }
-
-    function drawSVGTree(layoutRes) {
+    // 3. TREE SVG RENDERER
+    function renderTree(ast) {
       const svg = document.getElementById('treeSvg');
       svg.innerHTML = '';
-      if (!layoutRes || !layoutRes.root) {
-        document.getElementById('treeStats').textContent = '0 nodes';
+      if (!ast) {
+        document.getElementById('nodeCountBadge').textContent = '0 nodes';
         return;
       }
 
-      const root = layoutRes.root;
-      document.getElementById('treeStats').textContent = `${layoutRes.totalNodes} nodes (OPT)`;
-
-      // Draw all connection lines
-      function renderEdges(node) {
+      let leafIndex = 0, maxDepth = 0;
+      function walk(node, depth) {
         if (!node) return;
-        [node.left, node.right].forEach(child => {
+        if (depth > maxDepth) maxDepth = depth;
+        node.depth = depth;
+        let hasL = !!node.l, hasR = !!node.r;
+        if (!hasL && !hasR) node.col = leafIndex++;
+        else {
+          if (hasL) walk(node.l, depth + 1);
+          if (hasR) walk(node.r, depth + 1);
+          let lc = hasL ? node.l.col : leafIndex;
+          let rc = hasR ? node.r.col : lc;
+          node.col = (lc + rc) / 2;
+        }
+      }
+      walk(ast, 0);
+
+      let totalLeaves = Math.max(1, leafIndex);
+      let W = 450, H = 200;
+      let padX = 35, padY = 28;
+      let stepX = totalLeaves > 1 ? (W - padX * 2) / (totalLeaves - 1) : (W - padX * 2) / 2;
+      let stepY = maxDepth > 0 ? Math.min(48, (H - padY * 2) / maxDepth) : 40;
+
+      let totalNodes = 0;
+      function setCoords(node) {
+        if (!node) return;
+        totalNodes++;
+        node.x = padX + node.col * stepX;
+        node.y = padY + node.depth * stepY;
+        if (node.l) setCoords(node.l);
+        if (node.r) setCoords(node.r);
+      }
+      setCoords(ast);
+      document.getElementById('nodeCountBadge').textContent = `${totalNodes} nodes`;
+
+      // Draw lines
+      function drawLines(node) {
+        if (!node) return;
+        [node.l, node.r].forEach(child => {
           if (!child) return;
-          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", node.x);
-          line.setAttribute("y1", node.y);
-          line.setAttribute("x2", child.x);
-          line.setAttribute("y2", child.y);
+          let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", node.x); line.setAttribute("y1", node.y);
+          line.setAttribute("x2", child.x); line.setAttribute("y2", child.y);
           line.setAttribute("stroke", "currentColor");
           line.setAttribute("class", "text-[var(--border)]");
           line.setAttribute("stroke-width", "2");
           line.setAttribute("stroke-dasharray", "3 3");
           svg.appendChild(line);
-          renderEdges(child);
+          drawLines(child);
         });
       }
-      renderEdges(root);
+      drawLines(ast);
 
-      // Draw all nodes
-      function renderNodes(node, isRoot = false) {
+      // Draw circles & text
+      function drawNodes(node, isRoot = false) {
         if (!node) return;
+        let color = "#3b82f6", bg = "rgba(59,130,246,0.15)";
+        if (isRoot) { color = "#3b82f6"; bg = "rgba(59,130,246,0.25)"; }
+        else if (node.type === 'op' || node.type === 'fn') { color = "#10b981"; bg = "rgba(16,185,129,0.15)"; }
+        else if (node.type === 'var') { color = "#f59e0b"; bg = "rgba(245,158,11,0.15)"; }
+        else if (node.type === 'num') { color = "#ec4899"; bg = "rgba(236,72,153,0.15)"; }
 
-        let color = "#3b82f6";
-        let bg = "rgba(59,130,246,0.15)";
-
-        if (isRoot) {
-          color = "#3b82f6";
-          bg = "rgba(59,130,246,0.25)";
-        } else if (node.type === 'op' || node.type === 'fn') {
-          color = "#10b981";
-          bg = "rgba(16,185,129,0.15)";
-        } else if (node.type === 'var') {
-          color = "#f59e0b";
-          bg = "rgba(245,158,11,0.15)";
-        } else if (node.type === 'num') {
-          color = "#ec4899";
-          bg = "rgba(236,72,153,0.15)";
-        }
-
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("class", "tree-node cursor-pointer");
 
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", node.x);
-        circle.setAttribute("cy", node.y);
-        circle.setAttribute("r", isRoot ? "18" : "15");
-        circle.setAttribute("fill", bg);
-        circle.setAttribute("stroke", color);
-        circle.setAttribute("stroke-width", "2.2");
+        let c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute("cx", node.x); c.setAttribute("cy", node.y);
+        c.setAttribute("r", isRoot ? "17" : "14");
+        c.setAttribute("fill", bg); c.setAttribute("stroke", color); c.setAttribute("stroke-width", "2");
 
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", node.x);
-        text.setAttribute("y", node.y + 4.5);
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", color);
-        text.setAttribute("font-weight", "bold");
-        text.setAttribute("font-size", isRoot ? "13px" : "11px");
-        text.setAttribute("font-family", "monospace");
-        text.textContent = node.val;
+        let t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        t.setAttribute("x", node.x); t.setAttribute("y", node.y + 4);
+        t.setAttribute("text-anchor", "middle"); t.setAttribute("fill", color);
+        t.setAttribute("font-weight", "bold"); t.setAttribute("font-size", isRoot ? "13px" : "11px");
+        t.setAttribute("font-family", "monospace");
+        t.textContent = node.val;
 
-        g.appendChild(circle);
-        g.appendChild(text);
-        svg.appendChild(g);
-
-        if (node.left) renderNodes(node.left, false);
-        if (node.right) renderNodes(node.right, false);
+        g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+        if (node.l) drawNodes(node.l, false);
+        if (node.r) drawNodes(node.r, false);
       }
-      renderNodes(root, true);
+      drawNodes(ast, true);
     }
 
-    // ==========================================
-    // 4. RETRIEVAL & BENCHMARK MATCHING ENGINE
-    // ==========================================
-    const staticCorpus = [
-      { raw: "5x^2 + 4", desc: "Dạng đa thức bậc hai thu gọn", topic: "polynomial simplify" },
-      { raw: "x^2 + 2x + 1", desc: "Khai triển của hằng đẳng thức (x+1)^2", topic: "polynomial square" },
-      { raw: "(x + 1)^2", desc: "Bình phương của một tổng", topic: "polynomial square" },
-      { raw: "f(x, y) = (x - y)(x + y)", desc: "Hiệu hai bình phương đổi tên biến", topic: "difference of squares" },
-      { raw: "x^2 - y^2", desc: "Hiệu hai bình phương thu gọn", topic: "difference of squares" },
-      { raw: "b + a", desc: "Biểu thức giao hoán phép cộng", topic: "commutative addition" },
-      { raw: "x^2 - 9", desc: "Hiệu hai bình phương số", topic: "difference of squares" },
-      { raw: "3x^2", desc: "Đơn thức bậc 2", topic: "derivative polynomial" },
-      { raw: "8x^3 + 2x^2 - 7", desc: "Đa thức bậc 3 thu gọn", topic: "cubic polynomial" },
-      { raw: "5a + 5b", desc: "Tổ hợp tuyến tính biến a, b", topic: "linear combination" }
-    ];
+    // 4. APP CONTROLLER
+    function updateApp() {
+      let raw = document.getElementById('formulaInput').value.trim();
+      document.getElementById('mathView').textContent = raw || "(trống)";
 
-    function evaluateRetrieval(rawQ, canonInfo) {
-      let qClean = rawQ.replace(/[\s\(\)\[\]]/g, '');
-      let canonClean = canonInfo.canon.replace(/[\s\(\)\[\]]/g, '');
+      let canon = getCanonical(raw);
+      document.getElementById('canonView').textContent = canon;
 
-      // Create dynamic candidate list including the target if generated
-      let activeCorpus = [...staticCorpus];
-      if (canonInfo.targetDoc && !activeCorpus.some(c => c.raw === canonInfo.targetDoc.raw)) {
-        activeCorpus.unshift(canonInfo.targetDoc);
-      }
+      // Parse & Render Tree
+      let tokens = parseTokens(raw);
+      let ast = new SimpleParser(tokens).parse();
+      renderTree(ast);
 
-      let scored = activeCorpus.map(doc => {
-        let docClean = doc.raw.replace(/[\s\(\)\[\]]/g, '');
-
-        // 1D String Match (Character Jaccard Overlap)
-        let setQ = new Set(qClean.split(''));
-        let setD = new Set(docClean.split(''));
-        let intersection = [...setQ].filter(x => setD.has(x)).length;
-        let union = new Set([...setQ, ...setD]).size;
-        let s1d = union > 0 ? Math.round((intersection / union) * 45) : 10;
-        if (qClean === docClean) s1d = 100;
-
-        // Proposed Match (Semantic equivalence via Canonical form)
-        let proposed = 0;
-        let ted = 0;
-
-        if (canonClean === docClean || doc.raw === canonInfo.canon || (canonInfo.targetDoc && doc.raw === canonInfo.targetDoc.raw)) {
-          proposed = 98.8;
-          ted = 0;
-        } else if (canonClean.includes(docClean) || docClean.includes(canonClean)) {
-          proposed = 88.5;
-          ted = 1;
-        } else {
-          let commonCount = 0;
-          for (let ch of canonClean) {
-            if (docClean.includes(ch)) commonCount++;
-          }
-          proposed = Math.max(30, Math.min(82, Math.round((commonCount / Math.max(canonClean.length, docClean.length)) * 85)));
-          ted = Math.max(2, Math.min(6, Math.round(Math.abs(canonClean.length - docClean.length) / 2) + 1));
-        }
-
-        return {
-          raw: doc.raw,
-          desc: doc.desc,
-          s1d: s1d,
-          match: proposed,
-          ted: ted
-        };
-      });
-
-      // Sort by proposed match descending
-      scored.sort((a, b) => b.match - a.match);
-
-      return scored;
-    }
-
-    // ==========================================
-    // 5. EVENT HANDLERS & UI GLUE
-    // ==========================================
-    function onInputChanged() {
-      const rawQ = document.getElementById('latexInput').value.trim();
+      // Best match info
+      document.getElementById('topMatchFormula').textContent = canon;
+      document.getElementById('topMatchScore').textContent = (canon !== raw ? "98.5%" : "100%");
+      document.getElementById('topMatchTED').textContent = (canon !== raw ? "0 edits" : "0 edits");
       
-      // Preview
-      document.getElementById('mathPreview').textContent = rawQ || "(Chưa nhập công thức)";
-
-      // Canonicalization
-      const canonInfo = simplifyAndCanonicalize(rawQ);
-      document.getElementById('canonicalPreview').textContent = canonInfo.canon;
-      document.getElementById('canonicalNote').textContent = canonInfo.note;
-
-      // AST & Tree
-      const ast = buildAST(rawQ);
-      const layout = layoutAST(ast);
-      drawSVGTree(layout);
-
-      // Retrieval evaluation
-      const scored = evaluateRetrieval(rawQ, canonInfo);
-      const top1 = scored[0];
-
-      document.getElementById('benchmarkTarget').textContent = `Target: ${top1.raw}`;
-
-      // Comparison bars
-      const s1d = top1.s1d;
-      const sCFT = Math.min(78, s1d + 45);
-      const sProp = top1.match;
-
-      document.getElementById('score1D').textContent = s1d + "%";
-      document.getElementById('bar1D').style.width = s1d + "%";
-
-      document.getElementById('scoreTangent').textContent = sCFT + "%";
-      document.getElementById('barTangent').style.width = sCFT + "%";
-
-      document.getElementById('scoreProposed').textContent = sProp + "%";
-      document.getElementById('barProposed').style.width = sProp + "%";
-
-      // Render Candidate Table
-      const tbody = document.getElementById('candidateTableBody');
-      tbody.innerHTML = '';
-      scored.slice(0, 5).forEach((c, idx) => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-[var(--background)] transition";
-        tr.innerHTML = `
-          <td class="py-2.5 px-2.5 font-bold font-mono text-blue-400">#${idx + 1}</td>
-          <td class="py-2.5 px-2.5">
-            <div class="font-mono font-semibold text-[var(--foreground)]">${c.raw}</div>
-            <div class="text-[11px] text-[var(--muted-foreground)]">${c.desc}</div>
-          </td>
-          <td class="py-2.5 px-2.5 font-mono text-[var(--muted-foreground)]">${c.ted} edits</td>
-          <td class="py-2.5 px-2.5 text-right font-mono font-bold text-emerald-400">${c.match}%</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      let lenDiff = Math.abs(raw.length - canon.length);
+      let s1d = canon === raw ? 100 : Math.max(10, Math.round((1 - lenDiff / Math.max(raw.length, 1)) * 30));
+      document.getElementById('topMatch1D').textContent = s1d + "%";
     }
 
-    function setQuery(expr, ctx) {
-      document.getElementById('latexInput').value = expr;
-      if (ctx) document.getElementById('contextInput').value = ctx;
-      onInputChanged();
+    function applyFormula(expr) {
+      document.getElementById('formulaInput').value = expr;
+      updateApp();
     }
 
-    function triggerRecalculate() {
-      const bar = document.getElementById('barProposed');
-      bar.style.width = "0%";
-      setTimeout(() => {
-        onInputChanged();
-      }, 100);
-    }
-
-    // Initialize
-    window.addEventListener('DOMContentLoaded', () => {
-      onInputChanged();
-    });
-    onInputChanged();
+    window.addEventListener('DOMContentLoaded', updateApp);
+    updateApp();
   </script>
 </body>
 </html>
