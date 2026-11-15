@@ -1,4 +1,4 @@
-# Week 8 Task Assignment — MathIR Neuro-Symbolic Hybrid
+﻿# Week 7 Task Assignment — MathIR Neuro-Symbolic Hybrid
 
 **Repo:** `https://github.com/Dvhlong55/MathIR`  
 **Mục tiêu tuần:** Khởi động xây dựng hệ thống **Neuro-Symbolic Hybrid 3 tầng** để khắc phục các điểm yếu của MathBERT (đảo dấu, đảo tử/mẫu, nhầm hàm lượng giác, suy giảm tiếng Việt).

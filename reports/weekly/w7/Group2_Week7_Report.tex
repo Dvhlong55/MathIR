@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+﻿\documentclass[11pt,a4paper]{article}
 
 % --- Core Geometry and Encoding (pdfLaTeX & Vietnamese Support) ---
 \usepackage[utf8]{inputenc}
@@ -42,7 +42,7 @@
 	
 	% ==================== TITLE ====================
 	\begin{center}
-		{\Large \textbf{Week 8 Progress Report: Neuro-Symbolic Hybrid Plan for MathIR}} \\[0.4em]
+		{\Large \textbf{Week 7 Progress Report: Neuro-Symbolic Hybrid Plan for MathIR}} \\[0.4em]
 		{\normalsize \textit{Consolidating Baselines, Standardized MathIR Benchmark Suites, and Hybrid Architecture Design}}
 	\end{center}
 	
@@ -73,7 +73,7 @@
 	
 	% ==================== ABSTRACT ====================
 	\begin{abstract}
-		Following our consultation with TA \foreignlanguage{vietnamese}{Viết Thám}, this Week 8 report formalizes the concrete execution plan for the remainder of the Mathematical Information Retrieval (MathIR) project. First, we consolidate the three core baseline paradigms—Neural (\textbf{MathBERT} by Shen et al.), Structural Tree-based (\textbf{Tangent-CFT}), and Symbolic Computer Algebra (\textbf{SymPy CAS})—alongside their foundational research papers and official open-source repositories. Second, we specify the standardized MathIR competition benchmarks (\textbf{ARQMath}, \textbf{NTCIR-12 MathIR}, and \textbf{MIRB}) together with our adversarial diagnostic suite (\texttt{test\_bottlenecks.py}) and all associated dataset links. Finally, we detail our engineering and experimental plan to construct a \textbf{Multi-Stage Neuro-Symbolic Hybrid System} designed to overcome the semantic blindness, structural inversion errors, and cross-lingual degradation observed in pure text-based neural retrieval models, while explicitly addressing calibration, parser reliability, and partial-match risks.
+		Following our consultation with TA \foreignlanguage{vietnamese}{Viết Thám}, this Week 7 report formalizes the concrete execution plan for the remainder of the Mathematical Information Retrieval (MathIR) project. First, we consolidate the three core baseline paradigms—Neural (\textbf{MathBERT} by Shen et al.), Structural Tree-based (\textbf{Tangent-CFT}), and Symbolic Computer Algebra (\textbf{SymPy CAS})—alongside their foundational research papers and official open-source repositories. Second, we specify the standardized MathIR competition benchmarks (\textbf{ARQMath}, \textbf{NTCIR-12 MathIR}, and \textbf{MIRB}) together with our adversarial diagnostic suite (\texttt{test\_bottlenecks.py}) and all associated dataset links. Finally, we detail our engineering and experimental plan to construct a \textbf{Multi-Stage Neuro-Symbolic Hybrid System} designed to overcome the semantic blindness, structural inversion errors, and cross-lingual degradation observed in pure text-based neural retrieval models, while explicitly addressing calibration, parser reliability, and partial-match risks.
 	\end{abstract}
 	
 	% ==================== SECTION 1: THREE CORE BASELINES ====================
@@ -157,7 +157,7 @@
 		\item \textbf{Cross-Lingual Collapse:} Vietnamese mathematical queries drop sharply to \textbf{57.6\%} due to English WordPiece out-of-vocabulary fragmentation.
 	\end{itemize}
 
-	\noindent \textbf{Calibration Note:} Because BERT-family embeddings exhibit high anisotropic baseline cosine similarity, our Week 8+ evaluation will report calibrated reference distributions (cosine similarity on random unrelated pairs and truly equivalent pairs) alongside adversarial pairs to rigorously quantify false-positive inflation.
+	\noindent \textbf{Calibration Note:} Because BERT-family embeddings exhibit high anisotropic baseline cosine similarity, our Week 7+ evaluation will report calibrated reference distributions (cosine similarity on random unrelated pairs and truly equivalent pairs) alongside adversarial pairs to rigorously quantify false-positive inflation.
 
 	To systematically address these weaknesses while preserving fast semantic recall, we will implement a \textbf{Three-Stage Neuro-Symbolic Hybrid Pipeline}:
 
