@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Core Geometry and Encoding (pdfLaTeX & Vietnamese Support) ---
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese,english]{babel}
+\usepackage[T5,T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[top=2cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% --- Math, Tables and Technical Packages ---
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue!80!black,
+	citecolor=blue!80!black,
+	urlcolor=blue!70!black
+}
+
+\setlist[itemize]{leftmargin=1.5em, itemsep=2pt, topsep=3pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt, topsep=3pt}
+
+\begin{document}
+	
+	% ==================== HEADER ====================
+	\begin{center}
+		{\fontsize{10}{12}\selectfont \textbf{VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY (VNU-HCM)}} \\
+		{\fontsize{10}{12}\selectfont \textbf{UNIVERSITY OF SCIENCE (HCMUS)}} \\
+		{\fontsize{9.5}{11.5}\selectfont FACULTY OF INFORMATION TECHNOLOGY} \\
+		{\fontsize{9.5}{11.5}\selectfont ADVANCED PROGRAM IN COMPUTER SCIENCE (APCS)} \\[0.4em]
+		{\fontsize{11}{13}\selectfont \textbf{COURSE: SC203 -- SCIENTIFIC METHOD}} \\[0.2em]
+		\rule{\textwidth}{0.8pt}
+	\end{center}
+	
+	\vspace{0.3em}
+	
+	% ==================== TITLE ====================
+	\begin{center}
+		{\Large \textbf{Week 8 Progress Report: Neuro-Symbolic Hybrid Plan for MathIR}} \\[0.4em]
+		{\normalsize \textit{Consolidating Baselines, Standardized MathIR Benchmark Suites, and Hybrid Architecture Design}}
+	\end{center}
+	
+	\vspace{0.4em}
+	
+	% ==================== STUDENT RESEARCH TEAM ====================
+	\begin{center}
+		\textbf{\large Research Team (Group 2)} \\[0.4em]
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Student ID} & \textbf{Full Name} \\
+			\midrule
+			25125024 & \foreignlanguage{vietnamese}{Đỗ Viết Hoàng Long} \\
+			25125091 & \foreignlanguage{vietnamese}{Trần Đức Toàn}    \\
+			25125010 & \foreignlanguage{vietnamese}{Phạm Trung Duy}   \\
+			25125006 & \foreignlanguage{vietnamese}{Nguyễn Nguyễn Gia Bảo} \\
+			\bottomrule
+		\end{tabular}
+		\\[0.5em]
+		\textbf{Lecturer:} Assoc. Prof. Dr. \foreignlanguage{vietnamese}{Trần Minh Triết} \quad | \quad 
+		\textbf{Teaching Assistant (TA):} \foreignlanguage{vietnamese}{Viết Thám} \\[0.2em]
+		\textbf{Project Repository:} \url{https://github.com/Dvhlong55/MathIR}
+	\end{center}
+	
+	\vspace{0.4em}
+	\hrule
+	\vspace{0.8em}
+	
+	% ==================== ABSTRACT ====================
+	\begin{abstract}
+		Following our consultation with TA \foreignlanguage{vietnamese}{Viết Thám}, this Week 8 report formalizes the concrete execution plan for the remainder of the Mathematical Information Retrieval (MathIR) project. First, we consolidate the three core baseline paradigms—Neural (\textbf{MathBERT} by Shen et al.), Structural Tree-based (\textbf{Tangent-CFT}), and Symbolic Computer Algebra (\textbf{SymPy CAS})—alongside their foundational research papers and official open-source repositories. Second, we specify the standardized MathIR competition benchmarks (\textbf{ARQMath}, \textbf{NTCIR-12 MathIR}, and \textbf{MIRB}) together with our adversarial diagnostic suite (\texttt{test\_bottlenecks.py}) and all associated dataset links. Finally, we detail our engineering and experimental plan to construct a \textbf{Multi-Stage Neuro-Symbolic Hybrid System} designed to overcome the semantic blindness, structural inversion errors, and cross-lingual degradation observed in pure text-based neural retrieval models, while explicitly addressing calibration, parser reliability, and partial-match risks.
+	\end{abstract}
+	
+	% ==================== SECTION 1: THREE CORE BASELINES ====================
+	\section{Consolidated Baselines, Papers, and Repositories}
+	To ensure rigorous, reproducible comparison against prior literature, we anchor our experimental framework on three complementary baseline paradigms. Table~\ref{tab:baselines} summarizes each baseline, its foundational publication, and its official source repository.
+
+	\begin{table}[H]
+		\centering
+		\small
+		\caption{Three Core Baselines with Foundational Papers and Official Repositories.}
+		\label{tab:baselines}
+		\begin{tabularx}{\textwidth}{p{2.6cm} p{2.4cm} X p{4.3cm}}
+			\toprule
+			\textbf{Paradigm} & \textbf{Baseline Model} & \textbf{Foundational Paper} & \textbf{Official Repository} \\
+			\midrule
+			Neural (Text BERT) & \textbf{MathBERT} (Shen et al.) & Shen et al. (2021), \textit{MathBERT: A Pre-trained Language Model for General NLP Tasks in Mathematics Education} (arXiv:2106.07340) & \href{https://github.com/tbs17/MathBERT}{\small github.com/tbs17/MathBERT} \\
+			\addlinespace[4pt]
+			Structural (Tree/OPT) & \textbf{Tangent-CFT} & Mansouri et al. (2019), \textit{Tangent-CFT: An Embedding Model for Mathematical Formulas} (ACM SIGIR ICTIR '19); extended with TED in \textit{DPRL Systems in the CLEF 2020 ARQMath Lab} (CEUR Vol-2696) & \href{https://gitlab.com/dprl/TangentCFT}{\small gitlab.com/dprl/TangentCFT} \newline \href{https://github.com/BehroozMansouri/TangentCFT}{\small (legacy GitHub mirror)} \\
+			\addlinespace[4pt]
+			Symbolic (CAS) & \textbf{SymPy CAS} & Meurer et al. (2017), \textit{SymPy: Symbolic Computing in Python} (PeerJ Computer Science 3:e103) & \href{https://github.com/sympy/sympy}{\small github.com/sympy/sympy} \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
+	\subsection{Baseline Details and Auxiliary References}
+	\begin{enumerate}
+		\item \textbf{Neural Baseline -- MathBERT (Shen et al., 2021):} The model deployed in our experiments (\texttt{tbs17/MathBERT}) is a 110M-parameter BERT-base architecture (12 Transformer layers, 768 hidden dimensions) further pre-trained on mathematical curricula spanning pre-kindergarten through graduate level. Because it processes formulas purely as 1D text/WordPiece sequences without explicit tree attention, it serves as a clean representative of text-based neural retrievers.
+		\begin{itemize}
+			\item \textit{Repository \& Weights:} \url{https://github.com/tbs17/MathBERT} and HuggingFace (\url{https://huggingface.co/tbs17/MathBERT}).
+			\item \textit{Distinction from Peng et al. (2021):} We note that a separate model also named \textbf{MathBERT} by Peng et al. (2021, \textit{MathBERT: A Pre-Trained Model for Mathematical Formula Understanding}, arXiv:2105.00377) pre-trains on $>8.7$M formula--context pairs from arXiv and injects Operator Tree (OPT) structure into self-attention. Our baseline uses Shen et al.'s pure-text checkpoint.
+		\end{itemize}
+		\item \textbf{Structural Baseline -- Tangent-CFT:} An embedding encoder that operates on Symbol Layout Trees (SLT, capturing visual appearance) and Operator Trees (OPT, capturing mathematical semantics)~\cite{mir_book2024} extracted via \textbf{LaTeXML} and \textbf{Tangent-S}. Depth-first symbol-pair path tuples from Tangent-S are embedded using FastText. Its ARQMath 2020 extension, \texttt{Tangent-CFTED}~\cite{tangentcfted2020} (CEUR Vol-2696, Paper 223), re-ranks top candidates using Tree Edit Distance (TED).
+		\begin{itemize}
+			\item \textit{Repositories:} Active DPRL repository at \url{https://gitlab.com/dprl/TangentCFT} (legacy GitHub mirror at \url{https://github.com/BehroozMansouri/TangentCFT}).
+			\item \textit{Related Structural Frameworks in Workspace:} \textbf{MathAMR} (Mansouri et al., CIKM 2022, \url{https://github.com/BehroozMansouri/MathAMR}) and \textbf{MathFIRE} (Mansouri et al., 2022, \url{https://gitlab.com/dprl/MathFIRE}).
+		\end{itemize}
+		\item \textbf{Symbolic Baseline -- SymPy CAS:} A deterministic Computer Algebra System that parses \LaTeX{} expressions into symbolic expression trees, performs canonical polynomial expansion/simplification, and checks exact algebraic equivalence ($\Delta = f_A - f_B = 0$).
+		\begin{itemize}
+			\item \textit{Repository:} \url{https://github.com/sympy/sympy}.
+			\item \textit{Additional Dense Retrieval Reference:} \textbf{Math Dense Retrievers} (Zhong, Yang, Xie, \& Lin, Findings of EMNLP 2022, \textit{Evaluating Token-Level and Passage-Level Dense Retrieval Models for Math Information Retrieval}, arXiv:2203.11163, \url{https://github.com/approach0/math-dense-retrievers}).
+		\end{itemize}
+	\end{enumerate}
+
+	% ==================== SECTION 2: BENCHMARK TEST SUITES ====================
+	\section{Standardized MathIR Test Suites and Competition Benchmarks}
+	In accordance with the discussion with TA \foreignlanguage{vietnamese}{Viết Thám}, evaluation is structured around established MathIR shared-task competitions (``\textit{bài thi MathIR}'') supplemented by our targeted adversarial test suite.
+
+	\begin{table}[H]
+		\centering
+		\small
+		\caption{MathIR Competition Test Suites and Diagnostic Benchmarks.}
+		\label{tab:benchmarks}
+		\begin{tabularx}{\textwidth}{p{2.9cm} X p{3.5cm} p{3.8cm}}
+			\toprule
+			\textbf{Benchmark / Task} & \textbf{Scope \& Scale} & \textbf{Evaluation Metrics} & \textbf{Official Link} \\
+			\midrule
+			\textbf{ARQMath (CLEF Lab)} & Math Stack Exchange (2010--2018 snapshot, 28.3M formulas); Task 1 (Answer Retrieval) \& Task 2 (Formula Retrieval) & $\text{nDCG}'$, $\text{mAP}'$, $\text{P}@10$ & \href{https://www.cs.rit.edu/~dprl/ARQMath/}{\small cs.rit.edu/\textasciitilde dprl/ARQMath} \\
+			\addlinespace[4pt]
+			\textbf{NTCIR-12 MathIR Task} & Wikipedia Math Corpus (319,689 articles, $\sim$580K--590K formulas, 20 formula queries) & $\text{bpref}$ (via \texttt{trec\_eval}) & \href{http://ntcir-math.nii.ac.jp/}{\small ntcir-math.nii.ac.jp} \\
+			\addlinespace[4pt]
+			\textbf{MIRB Benchmark} & Ju \& Dong (2025): 4 tasks, 12 datasets, evaluating 13 models & $\text{nDCG}@10$, $\text{mAP}$, MRR, Recall & \href{https://arxiv.org/abs/2505.15585}{\small arXiv:2505.15585} \newline \href{https://github.com/j991222/mirb}{\small github.com/j991222/mirb} \\
+			\addlinespace[4pt]
+			\textbf{MathIR Adversarial Suite} & Targeted stress-test (\texttt{test\_bottlenecks.py}) on polarity, inversion, EN-VI gap, and CAS crashes & Cosine Sim, AST Overlap, CAS $\Delta$ & \href{https://github.com/Dvhlong55/MathIR/blob/main/tests/test_bottlenecks.py}{\small GitHub: test\_bottlenecks.py} \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+
+	\noindent \textbf{Related Dataset \& Tooling Links:}
+	\begin{itemize}
+		\item \textbf{ARQMath Official Code \& Reader:} \url{https://github.com/ARQMath/ARQMathCode} (Zanibbi et al., 2020, \textit{Overview of ARQMath 2020: CLEF Lab on Answer Retrieval for Questions with Math}, CLEF 2020, LNCS 12260, Springer).
+		\item \textbf{NTCIR-12 Wikipedia Formula Corpus:} \url{https://www.cs.rit.edu/~rlaz/NTCIR-12_MathIR_Wikipedia_Corpus.zip}.
+		\item \textbf{Math Stack Exchange Raw Data Dump:} \url{https://archive.org/download/stackexchange/math.stackexchange.com.7z}.
+	\end{itemize}
+
+	% ==================== SECTION 3: NEURAL WEAKNESSES & HYBRID PLAN ====================
+	\section{Plan to Build the Neuro-Symbolic Hybrid System}
+	Our Week 5 empirical stress-testing on Shen et al.'s MathBERT revealed critical failure patterns under 1D subword tokenization and symmetric self-attention:
+	\begin{itemize}
+		\item \textbf{Polarity \& Structural Inversion:} Opposite inequalities ($x > 0$ vs. $x < 0$) receive \textbf{93.0\%} cosine similarity; reciprocal fractions ($\frac{x}{y}$ vs. $\frac{y}{x}$) score \textbf{99.0\%}; opposite exponents ($e^x$ vs. $e^{-x}$) score \textbf{90.9\%}.
+		\item \textbf{Algebraic \& Functional Confusion:} Fallacies such as $(a+b)^2$ vs. $a^2+b^2$ score \textbf{93.4\%}, and orthogonal trigonometric functions ($\sin(x)$ vs. $\cos(x)$) score \textbf{93.6\%}.
+		\item \textbf{Cross-Lingual Collapse:} Vietnamese mathematical queries drop sharply to \textbf{57.6\%} due to English WordPiece out-of-vocabulary fragmentation.
+	\end{itemize}
+
+	\noindent \textbf{Calibration Note:} Because BERT-family embeddings exhibit high anisotropic baseline cosine similarity, our Week 8+ evaluation will report calibrated reference distributions (cosine similarity on random unrelated pairs and truly equivalent pairs) alongside adversarial pairs to rigorously quantify false-positive inflation.
+
+	To systematically address these weaknesses while preserving fast semantic recall, we will implement a \textbf{Three-Stage Neuro-Symbolic Hybrid Pipeline}:
+
+	\begin{enumerate}
+		\item \textbf{Stage 1 -- Query Normalization \& Coarse Neural Recall:}
+		\begin{itemize}
+			\item \textit{VN$\to$EN Mathematical Normalizer:} To evaluate Vietnamese queries (which ARQMath and NTCIR-12 lack), we will construct a dedicated Vietnamese--English parallel math query set (and inspect MIRB's multilingual coverage). The normalizer combines a domain-specific math terminology dictionary with neural machine translation while preserving inline \LaTeX{} delimiters untouched before neural encoding.
+			\item \textit{Dense Vector Retrieval:} Index MathBERT embeddings in FAISS to retrieve the Top-$K$ ($K=100$) candidate documents/formulas in sub-second latency.
+		\end{itemize}
+		\item \textbf{Stage 2 -- Structural AST/OPT Verification \& Soft Penalty Gate:}
+		\begin{itemize}
+			\item \textit{Parsing \& Encoding Separation:} Convert candidate \LaTeX{} formulas into Presentation/Content MathML using \textbf{LaTeXML}, extract OPT/SLT symbol-pair tuples using \textbf{Tangent-S}, and compute structural similarity / Tree Edit Distance via \textbf{Tangent-CFT} / \texttt{Tangent-CFTED}.
+			\item \textit{Graded Structural Penalty Gate:} Inspect AST root operators, relational operators ($>$ vs. $<$, $\ge$ vs. $\le$), and parent-child argument positions (numerator vs. denominator, base vs. exponent). Rather than applying a rigid hard cutoff that could penalize valid partial matches on ARQMath/NTCIR-12, we apply a \textbf{soft, tunable penalty factor $\lambda$} (calibrated on a held-out validation split) proportional to structural/polarity mismatch.
+		\end{itemize}
+		\item \textbf{Stage 3 -- Timeout-Guarded Symbolic Verification (SymPy CAS):}
+		\begin{itemize}
+			\item \textit{Safe Parsing \& Timeout:} Because \texttt{sympy.simplify()} can be slow on complex expressions and real-world Math Stack Exchange \LaTeX{} contains noisy syntax, we enforce a strict per-candidate timeout and log the CAS parse success rate across ARQMath.
+			\item \textit{Contextual Score Boost:} Since ARQMath judges relevance by problem-solving context rather than purely algebraic identity ($\Delta = 0$), confirmed symbolic equivalences receive a \textbf{bounded validation-tuned score boost} rather than unconditional Rank-1 promotion. Informal queries with ellipsis ($1+2+\dots+n$) that fail CAS parsing fall back cleanly to the Stage 1 + Stage 2 hybrid score.
+		\end{itemize}
+		\item \textbf{Ablation \& Statistical Validation:} We will benchmark Stage 1 (Neural-only), Stage 1+2 (Neural+AST), and Stage 1+2+3 (Full Hybrid) on ARQMath, NTCIR-12, MIRB, and our Vietnamese query set using $\text{nDCG}'$, $\text{mAP}'$, $\text{P}@10$, and paired statistical significance tests ($p < 0.05$).
+	\end{enumerate}
+
+	% ==================== REFERENCES ====================
+	\begin{thebibliography}{9}
+		\bibitem{mathbert_shen} J. T. Shen, M. Yamashita, E. Prihar, N. Heffernan, X. Wu, B. Graff, and D. Lee, ``MathBERT: A Pre-trained Language Model for General NLP Tasks in Mathematics Education,'' \textit{arXiv preprint arXiv:2106.07340}, 2021. GitHub: \url{https://github.com/tbs17/MathBERT}.
+		\bibitem{mathbert_peng} S. Peng, K. Yuan, L. Gao, and Z. Tang, ``MathBERT: A Pre-Trained Model for Mathematical Formula Understanding,'' \textit{arXiv preprint arXiv:2105.00377}, 2021.
+		\bibitem{tangentcft2019} B. Mansouri, S. Rohatgi, D. W. Oard, J. Wu, C. L. Giles, and R. Zanibbi, ``Tangent-CFT: An Embedding Model for Mathematical Formulas,'' in \textit{Proc. ACM SIGIR ICTIR '19}, pp. 11--18, 2019. GitLab: \url{https://gitlab.com/dprl/TangentCFT}.
+		\bibitem{tangentcfted2020} B. Mansouri, D. W. Oard, and R. Zanibbi, ``DPRL Systems in the CLEF 2020 ARQMath Lab,'' in \textit{CLEF 2020 Working Notes (CEUR Vol-2696, Paper 223)}, 2020.
+		\bibitem{mir_book2024} R. Zanibbi, B. Mansouri, and A. Agarwal, ``Mathematical Information Retrieval: Search and Question Answering,'' \textit{arXiv preprint arXiv:2408.11646}, 2024.
+		\bibitem{sympy2017} A. Meurer et al., ``SymPy: Symbolic Computing in Python,'' \textit{PeerJ Computer Science}, 3:e103, 2017. GitHub: \url{https://github.com/sympy/sympy}.
+		\bibitem{arqmath2020} R. Zanibbi et al., ``Overview of ARQMath 2020: CLEF Lab on Answer Retrieval for Questions with Math,'' in \textit{CLEF 2020, LNCS 12260}, Springer, 2020. GitHub: \url{https://github.com/ARQMath/ARQMathCode}.
+		\bibitem{mirb2025} H. Ju and B. Dong, ``MIRB: Mathematical Information Retrieval Benchmark,'' \textit{arXiv preprint arXiv:2505.15585}, 2025. GitHub: \url{https://github.com/j991222/mirb}.
+		\bibitem{dense2022} W. Zhong, J.-H. Yang, Y. Xie, and J. Lin, ``Evaluating Token-Level and Passage-Level Dense Retrieval Models for Math Information Retrieval,'' in \textit{Findings of EMNLP 2022} (\textit{arXiv:2203.11163}), 2022. GitHub: \url{https://github.com/approach0/math-dense-retrievers}.
+	\end{thebibliography}
+
+\end{document}
