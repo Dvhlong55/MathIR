@@ -29,17 +29,34 @@ An empirical research project conducted for the **SC203: Scientific Method** cou
 ## 📁 Repository Structure
 ```text
 MathIR/
+├── baselines/                          # (Git-ignored) Local clones of MathBERT, TangentCFT, SymPy
+├── demo/                               # Interactive local web UI (index.html)
 ├── reports/                            # Academic reports, research proposals & weekly submissions
 │   ├── proposal/                       # Official Research Proposal (LaTeX & PDF)
-│   └── weekly/                         # Weekly progress reports (w1, w3, w4...)
+│   └── weekly/                         # Weekly progress reports (w1, w3, w4, w5, w7...)
 ├── src/                                # Core implementation of MathIR
-│   ├── preprocessing/                  # LaTeX/MathML parsing, SymPy canonicalization
+│   ├── preprocessing/                  # LaTeX/MathML parsing, VN->EN normalization, SymPy CAS
 │   ├── representation/                 # SLT / OPT tree construction & AST parsing
-│   ├── retrieval/                      # Search indexing, tree matching & multimodal fusion
-│   └── evaluation/                     # Metric computations (mAP, Precision@K)
+│   ├── retrieval/                      # FAISS indexing, structural penalty gate & hybrid fusion
+│   └── evaluation/                     # Metric computations (nDCG', mAP', P@10, significance tests)
+├── tasks/                              # Weekly team task assignments (week7.md...)
+├── tests/                              # Adversarial & diagnostic test suite (test_bottlenecks.py)
 ├── requirements.txt                    # Python dependencies
+├── server.py                           # Local Hybrid MathIR benchmark server
 └── README.md
 ```
+
+---
+
+## 📚 Core Baselines & Benchmarks
+
+| Paradigm | Baseline | Paper | Repository |
+| :--- | :--- | :--- | :--- |
+| **Neural (Text BERT)** | MathBERT | Shen et al. (2021), *arXiv:2106.07340* | [tbs17/MathBERT](https://github.com/tbs17/MathBERT) |
+| **Structural (OPT/SLT)** | Tangent-CFT / CFTED | Mansouri et al. (ICTIR '19; CEUR Vol-2696) | [dprl/TangentCFT](https://gitlab.com/dprl/TangentCFT) |
+| **Symbolic (CAS)** | SymPy CAS | Meurer et al. (PeerJ CS, 2017) | [sympy/sympy](https://github.com/sympy/sympy) |
+
+**Standard Benchmarks:** ARQMath (CLEF Lab), NTCIR-12 MathIR Task, and MIRB ([arXiv:2505.15585](https://arxiv.org/abs/2505.15585) / [j991222/mirb](https://github.com/j991222/mirb)).
 
 ---
 

@@ -239,3 +239,7 @@ models/weights/*
 *.npy
 *.pt
 *.bin
+
+# Local baselines & datasets (keep heavy weights/corpora out of git)
+baselines/
+data/

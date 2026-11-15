@@ -31,7 +31,8 @@ TRANSFORMATIONS = standard_transformations + (implicit_multiplication_applicatio
 # ---------------------------------------------------------------------------
 # 1. Load Pre-trained MathBERT (110M parameters, 768-dim dense embeddings)
 # ---------------------------------------------------------------------------
-MATHBERT_PATH = r"D:\Dev\APCS\NonCS\SC203\Code\Baselines\MathBERT"
+_LOCAL_MATHBERT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "baselines", "mathbert")
+MATHBERT_PATH = _LOCAL_MATHBERT if os.path.isdir(_LOCAL_MATHBERT) else "tbs17/MathBERT"
 print(f"Loading official pre-trained MathBERT model from: {MATHBERT_PATH}...", flush=True)
 
 try:
