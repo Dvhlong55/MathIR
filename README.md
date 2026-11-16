@@ -79,3 +79,9 @@ python tests/test_bottlenecks.py
 python server.py 8000
 # Open http://127.0.0.1:8000 in your browser
 ```
+
+### 4. Preparing Benchmark Datasets (ARQMath & NTCIR-12 via MIRB)
+```bash
+python scripts/extract_benchmark_samples.py --datasets mseformula,wikiformula --sample_size 50000 --output_dir data/processed
+```
+Streams and parses public benchmark corpora from HuggingFace (`hcju/mseformula`, `hcju/wikiformula`), categorizes formula structures (fractions, inequalities, calculus, ellipsis), and outputs clean evaluation JSONL files to `data/processed/`.
