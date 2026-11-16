@@ -12,7 +12,36 @@ PLACEHOLDER_RESTORE_PATTERN = re.compile(
     r'MATHTOKEN(\d+)X|__\s*MATH_\s*(\d+)\s*__', flags=re.IGNORECASE
 )
 
-# 1. Bảng khử đa nghĩa tiếng Việt trước khi dịch
+# 1. Bảng bung từ viết tắt toán học và mẫu lọc khẩu ngữ
+VI_SHORTHAND_MAP = {
+    r'\bgtnn\b': 'giá trị nhỏ nhất',
+    r'\bgtln\b': 'giá trị lớn nhất',
+    r'\bbđt\b': 'bất đẳng thức',
+    r'\bbpt\b': 'bất phương trình',
+    r'\bhpt\b': 'hệ phương trình',
+    r'\bpt\b': 'phương trình',
+    r'\bcmr\b': 'chứng minh rằng',
+    r'\bc/m\b': 'chứng minh',
+    r'\btxđ\b': 'tập xác định',
+    r'\bđkxđ\b': 'điều kiện xác định',
+    r'\bđk\b': 'điều kiện',
+    r'\bntcn\b': 'nguyên tố cùng nhau',
+    r'\bcsc\b': 'cấp số cộng',
+    r'\bcsn\b': 'cấp số nhân',
+    r'\bvt\b': 'vế trái',
+    r'\bvp\b': 'vế phải',
+    r'\bđpcm\b': 'điều phải chứng minh',
+}
+
+NOISE_PREFIX_PATTERN = re.compile(
+    r'^(?:mọi người ơi|các bạn ơi|cho mình hỏi|cho em hỏi|giúp mình|giúp em|'
+    r'ai giải giúp|làm ơn|hãy giúp|bài toán này làm sao|đề bài là)\s*[,:;.-]*\s*',
+    flags=re.IGNORECASE,
+)
+
+VI_ACCENT_CHARS = r'[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]'
+
+# 2. Bảng khử đa nghĩa tiếng Việt trước khi dịch
 VI_DISAMBIGUATION = [
     (r'\btrên\s+đoạn\b', 'trên khoảng đóng'),
     (r'\btrên\s+nửa\s+khoảng\b', 'trên khoảng nửa đóng'),
@@ -160,6 +189,24 @@ def mask_formulas(text: str) -> Tuple[str, List[str]]:
     return masked_text, formulas
 
 
+def expand_shorthand_and_clean(query: str) -> str:
+    """Làm sạch lời dẫn khẩu ngữ và bung toàn bộ từ viết tắt toán học tiếng Việt."""
+    cleaned = NOISE_PREFIX_PATTERN.sub('', query.strip())
+    for pattern, full_phrase in VI_SHORTHAND_MAP.items():
+        cleaned = re.sub(pattern, full_phrase, cleaned, flags=re.IGNORECASE)
+    return cleaned
+
+
+def strip_untranslated_vi_words(en_masked_text: str) -> str:
+    """Loại bỏ các từ gõ sai chính tả/từ lóng tiếng Việt không dịch được để tránh làm nhiễu MathBERT."""
+    tokens = en_masked_text.split()
+    clean_tokens = [
+        t for t in tokens
+        if not re.search(VI_ACCENT_CHARS, t, flags=re.IGNORECASE)
+    ]
+    return " ".join(clean_tokens)
+
+
 def disambiguate_vi_math(text: str) -> str:
     """Khử đa nghĩa các thuật ngữ toán tiếng Việt trước khi dịch NMT."""
     result = text
@@ -188,31 +235,36 @@ def apply_math_dictionary(text: str) -> str:
 
 
 def translate_text(masked_text: str) -> str:
-    """Dịch câu đã che công thức: Khử đa nghĩa -> NMT tiếng Việt nguyên câu -> Hậu chuẩn hóa tiếng Anh."""
+    """Dịch câu đã che công thức: Khử đa nghĩa -> NMT tiếng Việt nguyên câu -> Hậu chuẩn hóa tiếng Anh -> Lọc từ tiếng Việt sót lại."""
     disambiguated = disambiguate_vi_math(masked_text)
     try:
         translated = GoogleTranslator(source='vi', target='en').translate(disambiguated)
         if translated:
-            return canonicalize_en_math(translated)
+            return strip_untranslated_vi_words(canonicalize_en_math(translated))
     except Exception:
         pass
     # Dự phòng offline hoặc khi bị giới hạn request Google
-    return canonicalize_en_math(apply_math_dictionary(disambiguated))
+    return strip_untranslated_vi_words(canonicalize_en_math(apply_math_dictionary(disambiguated)))
 
 
-def sanitize_math_spacing(text: str) -> str:
-    """Chuẩn hóa khoảng trắng quanh công thức LaTeX để WordPiece không bị dính chữ."""
-    # Tách chữ bị dính liền trước dấu mở công thức (VD: Given$a$ -> Given $a$)
-    text = re.sub(r'([a-zA-Z0-9])(\$|\\\(|\\\[|\\begin\{)', r'\1 \2', text)
-    # Tách chữ bị dính liền sau dấu đóng công thức (VD: $a$for -> $a$ for)
-    text = re.sub(r'(\$|\\\)|\\\]|\\end\{[a-zA-Z0-9*]+\})([a-zA-Z0-9])', r'\1 \2', text)
+def sanitize_placeholder_spacing(text: str) -> str:
+    """Chuẩn hóa khoảng trắng quanh placeholder MATHTOKEN trước khi unmask để tránh dính chữ."""
+    # Tách chữ bị dính liền trước placeholder (VD: GivenMATHTOKEN0X -> Given MATHTOKEN0X)
+    text = re.sub(r'([a-zA-Z0-9])(MATHTOKEN\d+X|__\s*MATH_\s*\d+\s*__)', r'\1 \2', text)
+    # Tách chữ bị dính liền sau placeholder (VD: MATHTOKEN0Xfor -> MATHTOKEN0X for)
+    text = re.sub(r'(MATHTOKEN\d+X|__\s*MATH_\s*\d+\s*__)([a-zA-Z0-9])', r'\1 \2', text)
     # Xóa khoảng trắng thừa trước dấu chấm, phẩy
     text = re.sub(r'\s+([.,;:?!])', r'\1', text)
     return re.sub(r'[ \t]+', ' ', text).strip()
 
 
+sanitize_math_spacing = sanitize_placeholder_spacing
+
+
 def unmask_formulas(text: str, formulas: List[str]) -> str:
     """Phục hồi chính xác 100% các công thức LaTeX vào đúng vị trí và chuẩn hóa khoảng trắng."""
+    text = sanitize_placeholder_spacing(text)
+
     def _restore(match: re.Match) -> str:
         idx_str = match.group(1) if match.group(1) is not None else match.group(2)
         idx = int(idx_str)
@@ -226,14 +278,18 @@ def unmask_formulas(text: str, formulas: List[str]) -> str:
         restored = restored.replace(f"MATHTOKEN{i}X", formula)
         restored = restored.replace(f"__MATH_{i}__", formula)
 
-    return sanitize_math_spacing(restored)
+    # Dọn dẹp khoảng trắng thừa quanh dấu câu cuối cùng
+    restored = re.sub(r'\s+([.,;:?!])', r'\1', restored)
+    return re.sub(r'[ \t]+', ' ', restored).strip()
 
 
 def normalize_vi_to_en(query: str) -> str:
-    """Hàm chính: Chuẩn hóa câu truy vấn toán học Tiếng Việt sang Tiếng Anh (v2)."""
+    """Hàm chính: Chuẩn hóa câu truy vấn toán học Tiếng Việt sang Tiếng Anh (v3)."""
     if not query or not query.strip():
         return query
     masked, formulas = mask_formulas(query)
-    translated = translate_text(masked)
+    cleaned = expand_shorthand_and_clean(masked)
+    translated = translate_text(cleaned)
     result = unmask_formulas(translated, formulas)
     return result
+

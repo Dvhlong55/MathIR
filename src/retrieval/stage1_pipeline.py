@@ -3,7 +3,7 @@ import os
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
-from src.preprocessing.vi_normalizer import normalize_vi_to_en
+from src.preprocessing.vi_normalizer import normalize_vi_to_en, LATEX_PATTERN
 from src.retrieval.faiss_index import MathFAISSIndex
 
 
@@ -41,6 +41,35 @@ class MathBERTEmbedder:
         return vec
 
 
+def encode_resilient_query(
+    embedder: MathBERTEmbedder,
+    normalized_query: str,
+    formulas: Optional[List[str]] = None,
+    alpha: float = 0.70,
+) -> np.ndarray:
+    """Kỹ thuật Neo Vector Công Thức (Formula-Anchored Embedding):
+    Kết hợp vector toàn câu (70% - 75%) và vector thuần công thức LaTeX (25% - 30%).
+    Nếu phần lời văn ngắn (< 2 từ) hoặc gặp từ lạ, phần công thức sẽ neo giữ vector không bị lệch.
+    """
+    vec_full = embedder.encode(normalized_query)
+    if formulas is None:
+        formulas = LATEX_PATTERN.findall(normalized_query)
+    if not formulas:
+        return vec_full
+
+    # Nếu sau khi lọc từ lỗi mà phần chữ còn lại quá ít (< 2 từ), tăng trọng số công thức lên 50%
+    text_only = LATEX_PATTERN.sub("", normalized_query).strip()
+    if len(text_only.split()) < 2:
+        alpha = 0.50
+
+    formulas_joined = " ".join(formulas)
+    vec_math = embedder.encode(formulas_joined)
+
+    combined = alpha * vec_full + (1.0 - alpha) * vec_math
+    norm = np.linalg.norm(combined, axis=1, keepdims=True)
+    return (combined / np.clip(norm, 1e-12, None)).astype("float32")
+
+
 class Stage1RetrievalPipeline:
     """Pipeline Tầng 1 hoàn chỉnh: Câu hỏi tiếng Việt -> Dịch bảo toàn LaTeX -> MathBERT -> Top-100 FAISS."""
 
@@ -49,9 +78,12 @@ class Stage1RetrievalPipeline:
         self.faiss_index = MathFAISSIndex(dim=768)
         self.faiss_index.load(index_path, meta_path)
 
-    def retrieve_top_k(self, raw_vi_query: str, k: int = 100) -> Dict[str, Any]:
+    def retrieve_top_k(self, raw_vi_query: str, k: int = 100, resilient: bool = True) -> Dict[str, Any]:
         normalized_en_query = normalize_vi_to_en(raw_vi_query)
-        query_vec = self.embedder.encode(normalized_en_query)
+        if resilient:
+            query_vec = encode_resilient_query(self.embedder, normalized_en_query)
+        else:
+            query_vec = self.embedder.encode(normalized_en_query)
         candidates = self.faiss_index.search(query_vec, k=k)
         return {
             "raw_query": raw_vi_query,
