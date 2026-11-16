@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
@@ -38,6 +39,7 @@ def main():
         q_en_target = item["query_en"]
 
         q_translated = normalize_vi_to_en(q_vi)
+        time.sleep(0.2)
 
         vec_vi = embedder.encode(q_vi)
         vec_en = embedder.encode(q_en_target)
