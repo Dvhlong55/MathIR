@@ -1,6 +1,10 @@
 """Formula canonicalization and variable renaming invariance (Hypothesis H1)."""
 
-import sympy
+try:
+    import sympy
+except ImportError:
+    sympy = None
+
 from typing import Optional
 
 
@@ -19,6 +23,8 @@ class FormulaCanonicalizer:
         
         Example: (x + 1)**2 -> x**2 + 2*x + 1
         """
+        if sympy is None:
+            return expr_str
         try:
             expr = sympy.sympify(expr_str)
             simplified = sympy.expand(expr)
