@@ -1,0 +1,122 @@
+[
+  {
+    "id": "vi_01",
+    "query_vi": "Cho $a \\ge 2$. Tìm giá trị nhỏ nhất của biểu thức $P = a + \\frac{1}{a}$.",
+    "query_en": "Given $a \\ge 2$. Find the minimum value of the expression $P = a + \\frac{1}{a}$.",
+    "category": "optimization"
+  },
+  {
+    "id": "vi_02",
+    "query_vi": "Giải phương trình $x^2 - 5x + 6 = 0$.",
+    "query_en": "Solve the equation $x^2 - 5x + 6 = 0$.",
+    "category": "algebra"
+  },
+  {
+    "id": "vi_03",
+    "query_vi": "Chứng minh rằng $a^2 + b^2 \\ge 2ab$ với mọi $a, b \\in \\mathbb{R}$.",
+    "query_en": "Prove that $a^2 + b^2 \\ge 2ab$ for all $a, b \\in \\mathbb{R}$.",
+    "category": "inequality"
+  },
+  {
+    "id": "vi_04",
+    "query_vi": "Cho các số thực dương $x, y, z$ thỏa mãn $x + y + z = 3$. Chứng minh bất đẳng thức $\\frac{1}{x} + \\frac{1}{y} + \\frac{1}{z} \\ge 3$.",
+    "query_en": "Given positive real numbers $x, y, z$ satisfying $x + y + z = 3$. Prove the inequality $\\frac{1}{x} + \\frac{1}{y} + \\frac{1}{z} \\ge 3$.",
+    "category": "inequality"
+  },
+  {
+    "id": "vi_05",
+    "query_vi": "Tính tích phân $$I = \\int_{0}^{\\pi/2} \\frac{\\sin x}{\\sin x + \\cos x} dx$$.",
+    "query_en": "Evaluate the integral $$I = \\int_{0}^{\\pi/2} \\frac{\\sin x}{\\sin x + \\cos x} dx$$.",
+    "category": "calculus"
+  },
+  {
+    "id": "vi_06",
+    "query_vi": "Tính giới hạn $\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$.",
+    "query_en": "Find the limit $\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$.",
+    "category": "calculus"
+  },
+  {
+    "id": "vi_07",
+    "query_vi": "Giải hệ phương trình $\\begin{cases} x + y = 5 \\\\ xy = 6 \\end{cases}$.",
+    "query_en": "Solve the system of equations $\\begin{cases} x + y = 5 \\\\ xy = 6 \\end{cases}$.",
+    "category": "algebra"
+  },
+  {
+    "id": "vi_08",
+    "query_vi": "Tìm giá trị lớn nhất của biểu thức \\(Q = \\sqrt{x - 1} + \\sqrt{5 - x}\\) trên đoạn \\([1, 5]\\).",
+    "query_en": "Find the maximum value of the expression \\(Q = \\sqrt{x - 1} + \\sqrt{5 - x}\\) on the interval \\([1, 5]\\).",
+    "category": "optimization"
+  },
+  {
+    "id": "vi_09",
+    "query_vi": "Tìm tất cả các số nguyên dương $n$ sao cho $2^n + 1$ chia hết cho $3$.",
+    "query_en": "Find all positive integers $n$ such that $2^n + 1$ is divisible by $3$.",
+    "category": "number_theory"
+  },
+  {
+    "id": "vi_10",
+    "query_vi": "Tính đạo hàm của hàm số \\[f(x) = x^3 - 3x^2 + 2x - 1\\].",
+    "query_en": "Find the derivative of the function \\[f(x) = x^3 - 3x^2 + 2x - 1\\].",
+    "category": "calculus"
+  },
+  {
+    "id": "vi_11",
+    "query_vi": "Cho hàm số $y = \\dfrac{2x - 1}{x + 1}$. Tính đạo hàm $y'$ tại điểm $x = 1$.",
+    "query_en": "Given the function $y = \\dfrac{2x - 1}{x + 1}$. Calculate the derivative $y'$ at the point $x = 1$.",
+    "category": "calculus"
+  },
+  {
+    "id": "vi_12",
+    "query_vi": "Tính tích phân $I = \\int_{0}^{1} x e^{x} \\, dx$.",
+    "query_en": "Evaluate the integral $I = \\int_{0}^{1} x e^{x} \\, dx$.",
+    "category": "calculus"
+  },
+  {
+    "id": "vi_13",
+    "query_vi": "Giải bất phương trình $\\log_2(3x - 2) > \\log_2(x + 2)$.",
+    "query_en": "Solve the inequality $\\log_2(3x - 2) > \\log_2(x + 2)$.",
+    "category": "algebra"
+  },
+  {
+    "id": "vi_14",
+    "query_vi": "Cho các số thực dương $x, y, z$ thỏa mãn $x + y + z = 3$. Tìm giá trị nhỏ nhất của $P = \\frac{x^2}{x + y} + \\frac{y^2}{y + z} + \\frac{z^2}{z + x}$.",
+    "query_en": "Given positive real numbers $x, y, z$ satisfying $x + y + z = 3$. Find the minimum value of $P = \\frac{x^2}{x + y} + \\frac{y^2}{y + z} + \\frac{z^2}{z + x}$.",
+    "category": "optimization"
+  },
+  {
+    "id": "vi_15",
+    "query_vi": "Giải phương trình $\\sqrt{x + 3} + \\sqrt{1 - x} = x^2 - 2x + 3$.",
+    "query_en": "Solve the equation $\\sqrt{x + 3} + \\sqrt{1 - x} = x^2 - 2x + 3$.",
+    "category": "algebra"
+  },
+  {
+    "id": "vi_16",
+    "query_vi": "Cho hình chóp $S.ABCD$ có đáy $ABCD$ là hình vuông cạnh $a$. Cạnh bên $SA$ vuông góc với mặt phẳng $(ABCD)$ và $SA = a\\sqrt{3}$. Tính khoảng cách từ $A$ đến mặt phẳng $(SBC)$.",
+    "query_en": "Given pyramid $S.ABCD$ with base $ABCD$ being a square with side $a$. Lateral edge $SA$ is perpendicular to plane $(ABCD)$ and $SA = a\\sqrt{3}$. Find the distance from $A$ to plane $(SBC)$.",
+    "category": "geometry"
+  },
+  {
+    "id": "vi_17",
+    "query_vi": "Tìm tọa độ véc-tơ $\\vec{AB}$ biết $A(1; 2; -1)$ và $B(2; -1; 3)$.",
+    "query_en": "Find the coordinates of vector $\\vec{AB}$ given $A(1; 2; -1)$ and $B(2; -1; 3)$.",
+    "category": "geometry"
+  },
+  {
+    "id": "vi_18",
+    "query_vi": "Tính xác suất để khi chọn ngẫu nhiên $4$ học sinh từ $9$ học sinh có đúng $1$ học sinh nữ, biết có $2$ nữ trong $9$ người.",
+    "query_en": "Calculate the probability that when randomly choosing $4$ students from $9$ students there is exactly $1$ female student, given there are $2$ females among $9$ people.",
+    "category": "probability"
+  },
+  {
+    "id": "vi_19",
+    "query_vi": "Cho phương trình bậc hai $ax^2 + bx + c = 0$ có hai nghiệm $x_1, x_2$. Chứng minh rằng $x_1 + x_2 = -\\frac{b}{a}$ và $x_1 \\cdot x_2 = \\frac{c}{a}$.",
+    "query_en": "Given the quadratic equation $ax^2 + bx + c = 0$ has two roots $x_1, x_2$. Prove that $x_1 + x_2 = -\\frac{b}{a}$ and $x_1 \\cdot x_2 = \\frac{c}{a}$.",
+    "category": "algebra"
+  },
+  {
+    "id": "vi_20",
+    "query_vi": "Cho hàm số $f(x) = x^4 - 2x^2 + 1$. Tìm giá trị nhỏ nhất của $f(x)$ trên đoạn $[-2, 2]$.",
+    "query_en": "Given the function $f(x) = x^4 - 2x^2 + 1$. Find the minimum value of $f(x)$ on the interval $[-2, 2]$.",
+    "category": "optimization"
+  }
+]
