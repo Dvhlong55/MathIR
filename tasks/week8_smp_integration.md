@@ -1,7 +1,7 @@
 # Week 8 Task Assignment — Tích hợp MathIR vào `smp-math.com`
 
-**Branch tích hợp:** `feat/hybrid-integration`  
-**Mục tiêu:** Đưa hệ thống Hybrid MathIR 3 tầng vào tìm kiếm thực tế trên kho đề của `smp-math.com`.
+**Branch tích hợp (MÔ HÌNH HOÀN CHỈNH):** `feat/hybrid-integration` *(Cả nhóm lưu ý: `git checkout feat/hybrid-integration` để lấy toàn bộ mô hình 3 tầng hoàn chỉnh + `api_server.py`, **KHÔNG** code hay push trực tiếp lên `main`)*  
+**Mục tiêu:** Đưa hệ thống Hybrid MathIR 3 tầng vào tìm kiếm thực tế trên kho đề của `smp-math.com` và kho sách PDF qua Chrome Extension.
 
 ---
 
