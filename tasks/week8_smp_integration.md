@@ -7,10 +7,9 @@
 
 ## Phân công thành viên
 
-### 1. Trần Đức Toàn (`25125091`) — Trích xuất PDF, Chuẩn hóa Dữ liệu & FAISS Index
-- [ ] Viết script trích xuất nội dung/công thức từ các file **PDF đề thi mẫu** (dùng `pymupdf` / `pdfplumber`) sang `pdf_formulas.jsonl` theo định dạng `{"doc_id": "file.pdf#page=...", "latex": "..."}`.
-- [ ] Lọc bỏ nhiễu HTML/LaTeX hỏng từ file export của `smp-math.com` (do Long gửi) và gộp thành `corpus_formulas.jsonl`.
-- [ ] Chạy tạo `corpus_vecs.npy` + FAISS index cho kho đề mới.
+### 1. Trần Đức Toàn (`25125091`) — Sưu tầm & Trích xuất Kho sách/đề PDF
+- [ ] Sưu tầm các quyển sách/giáo trình toán PDF và viết script trích xuất nội dung + công thức (dùng `pymupdf` / `pdfplumber`) sang `pdf_formulas.jsonl` theo định dạng `{"doc_id": "file.pdf#page=...", "latex": "..."}`.
+- [ ] Chạy tạo `corpus_vecs.npy` + FAISS index và test tìm kiếm trên kho sách PDF đó.
 
 ### 2. Phạm Trung Duy (`25125010`) — Tối ưu Truy vấn Tiếng Việt
 - [ ] Bổ sung thêm các từ khóa/thuật ngữ toán học phổ biến trên `smp-math.com` vào `src/preprocessing/vi_normalizer.py`.
