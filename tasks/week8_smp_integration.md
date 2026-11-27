@@ -7,8 +7,9 @@
 
 ## Phân công thành viên
 
-### 1. Trần Đức Toàn (`25125091`) — Chuẩn hóa Dữ liệu & FAISS Index
-- [ ] Lọc bỏ nhiễu HTML/LaTeX hỏng từ file export của `smp-math.com` và chuẩn hóa về `corpus_formulas.jsonl`.
+### 1. Trần Đức Toàn (`25125091`) — Trích xuất PDF, Chuẩn hóa Dữ liệu & FAISS Index
+- [ ] Viết script trích xuất nội dung/công thức từ các file **PDF đề thi mẫu** (dùng `pymupdf` / `pdfplumber`) sang `pdf_formulas.jsonl` theo định dạng `{"doc_id": "file.pdf#page=...", "latex": "..."}`.
+- [ ] Lọc bỏ nhiễu HTML/LaTeX hỏng từ file export của `smp-math.com` (do Long gửi) và gộp thành `corpus_formulas.jsonl`.
 - [ ] Chạy tạo `corpus_vecs.npy` + FAISS index cho kho đề mới.
 
 ### 2. Phạm Trung Duy (`25125010`) — Tối ưu Truy vấn Tiếng Việt
