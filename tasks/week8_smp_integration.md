@@ -19,7 +19,7 @@
 - [ ] Nối Chrome Extension gọi API `POST /search` của `scripts/api_server.py`, hiển thị Top-$K$ kết quả (số trang PDF / bài toán + điểm số + lý do Stage 2/3).
 - [ ] Đo độ trễ phản hồi API dưới tải thực tế và ghi nhận các ca LaTeX đặc thù bị SymPy CAS parse lỗi.
 
-### 4. Đỗ Viết Hoàng Long (`25125024` — Leader & Admin `smp-math.com`) — Export DB, Deploy API & Nối Web
-- [ ] Export dữ liệu đề thi/bài toán từ database của `smp-math.com` ra JSONL (sử dụng quyền admin).
+### 4. Đỗ Viết Hoàng Long (`25125024` — Leader) — Export DB, Deploy API & Nối Web
+- [ ] Export dữ liệu đề thi/bài toán từ kho git/database của `smp-math.com` ra JSONL.
 - [ ] Deploy `scripts/api_server.py` và nối trực tiếp thanh tìm kiếm trên `smp-math.com` gọi `POST /search`.
 - [ ] Tổng hợp ảnh chụp demo thực tế trên `smp-math.com` và bảng số liệu benchmark vào `Report/Final_Report/` và `Slide/Final_Defense/`.
